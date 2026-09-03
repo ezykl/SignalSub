@@ -12,6 +12,7 @@ export interface NoiseOverlayProps {
   style?: StyleProp<ViewStyle>;
   children?: React.ReactNode;
   borderRadius?: number;
+  testID?: string;
 }
 
 let noiseAsset: any;
@@ -26,9 +27,11 @@ export function NoiseOverlay({
   style,
   children,
   borderRadius,
+  testID,
 }: NoiseOverlayProps) {
   return (
     <LinearGradient
+      testID={testID}
       colors={colors}
       style={[
         styles.container,

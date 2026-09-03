@@ -36,7 +36,7 @@ function getChildren(element: any): any[] {
 
 describe('Shared UI Components', () => {
   describe('index exports', () => {
-    it('exports all 7 components cleanly', () => {
+    it('exports all 10 components cleanly', () => {
       assert.equal(typeof ComponentExports.NoiseOverlay, 'function');
       assert.equal(typeof ComponentExports.InitialAvatar, 'function');
       assert.equal(typeof ComponentExports.CategoryChip, 'function');
@@ -44,6 +44,9 @@ describe('Shared UI Components', () => {
       assert.equal(typeof ComponentExports.FAB, 'function');
       assert.equal(typeof ComponentExports.AlertBanner, 'function');
       assert.equal(typeof ComponentExports.StatCard, 'function');
+      assert.equal(typeof ComponentExports.SpendingCard, 'function');
+      assert.equal(typeof ComponentExports.SubscriptionCard, 'function');
+      assert.equal(typeof ComponentExports.SubscriptionRow, 'function');
     });
   });
 

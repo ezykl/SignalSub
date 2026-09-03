@@ -55,5 +55,23 @@ require.cache[viResolved] = {
   id: viResolved,
   filename: viResolved,
   loaded: true,
-  exports: { MaterialIcons: 'MaterialIcons' },
+  exports: {
+    MaterialIcons: 'MaterialIcons',
+    MaterialCommunityIcons: 'MaterialCommunityIcons',
+  },
 } as unknown as NodeModule;
+
+// Mock react-native-gesture-handler
+try {
+  const rnghResolved = require.resolve('react-native-gesture-handler');
+  require.cache[rnghResolved] = {
+    id: rnghResolved,
+    filename: rnghResolved,
+    loaded: true,
+    exports: {
+      Swipeable: 'Swipeable',
+    },
+  } as unknown as NodeModule;
+} catch {
+  // ignore
+}
