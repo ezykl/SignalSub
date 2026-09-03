@@ -499,9 +499,10 @@ describe('Subscription Display Components', () => {
       const [, centerColTrial] = getChildren(cardWithTrial);
       const [nameRowTrial] = getChildren(centerColTrial);
       const nameChildren = getChildren(nameRowTrial);
+      const nameElements = nameChildren.filter(Boolean);
 
-      assert.equal(nameChildren.length, 2);
-      const badge = nameChildren[1];
+      assert.equal(nameElements.length, 2);
+      const badge = nameElements[1];
       assert.equal(badge.props.testID, 'trial-badge');
       const badgeText = getChildren(badge)[0];
       assert.equal(badgeText.props.children, 'Trial');

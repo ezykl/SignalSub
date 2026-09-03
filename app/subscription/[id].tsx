@@ -39,6 +39,7 @@ export default function EditSubscriptionScreen() {
   const subscriptions = useSubscriptionStore((state) => state.subscriptions);
   const updateSubscription = useSubscriptionStore((state) => state.updateSubscription);
   const deleteSubscription = useSubscriptionStore((state) => state.deleteSubscription);
+  const cancelSubscription = useSubscriptionStore((state) => state.cancelSubscription);
   const getSetting = useSettingsStore((state) => state.getSetting);
 
   const sub = subscriptions.find((s) => s.id === id);
@@ -89,6 +90,7 @@ export default function EditSubscriptionScreen() {
   );
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   // Not found fallback
   if (!sub) {
@@ -196,6 +198,36 @@ export default function EditSubscriptionScreen() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleCancel = () => {
+    Alert.alert(
+      'Cancel Subscription',
+      `Are you sure you want to cancel ${sub.name}? Auto-renewals will be stopped, but your data will be saved.`,
+      [
+        {
+          text: 'Keep Subscription',
+          style: 'cancel',
+        },
+        {
+          text: 'Cancel Subscription',
+          style: 'destructive',
+          onPress: async () => {
+            if (isCancelling) return;
+            setIsCancelling(true);
+            try {
+              await cancelSubscription(sub.id);
+              router.back();
+            } catch (error) {
+              console.error('Failed to cancel subscription:', error);
+              Alert.alert('Error', 'Failed to cancel subscription.');
+            } finally {
+              setIsCancelling(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleDelete = () => {
@@ -434,6 +466,27 @@ export default function EditSubscriptionScreen() {
             </View>
           </View>
 
+          {/* Cancel Subscription Button */}
+          {sub.status !== 'cancelled' && (
+            <TouchableOpacity
+              testID="cancel-subscription-btn"
+              style={styles.cancelButton}
+              onPress={handleCancel}
+              disabled={isCancelling}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={`Cancel ${sub.name}`}
+            >
+              <MaterialCommunityIcons
+                name="close-circle-outline"
+                size={20}
+                color={COLORS.warning}
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.cancelButtonText}>Cancel Subscription</Text>
+            </TouchableOpacity>
+          )}
+
           {/* Delete Subscription Button */}
           <TouchableOpacity
             testID="delete-subscription-btn"
@@ -660,11 +713,27 @@ const styles = StyleSheet.create({
     minWidth: 24,
     textAlign: 'center',
   },
-  deleteButton: {
+  cancelButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 28,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: COLORS.warning,
+    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.warning,
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
     paddingVertical: 14,
     borderRadius: 12,
     borderWidth: 1.5,

@@ -154,6 +154,7 @@ describe('Subscription Modals (New and Edit)', () => {
   let addedSubs: SubscriptionInput[] = [];
   let updatedSubs: { id: string; data: Partial<NewSubscription> }[] = [];
   let deletedIds: string[] = [];
+  let cancelledIds: string[] = [];
 
   beforeEach(() => {
     resetComponentState();
@@ -162,6 +163,7 @@ describe('Subscription Modals (New and Edit)', () => {
     addedSubs = [];
     updatedSubs = [];
     deletedIds = [];
+    cancelledIds = [];
 
     mockRouter.back = () => {
       backCalls++;
@@ -212,6 +214,9 @@ describe('Subscription Modals (New and Edit)', () => {
       },
       deleteSubscription: async (id: string) => {
         deletedIds.push(id);
+      },
+      cancelSubscription: async (id: string) => {
+        cancelledIds.push(id);
       },
     });
   });
@@ -643,6 +648,38 @@ describe('Subscription Modals (New and Edit)', () => {
 
       assert.equal(deletedIds.length, 1);
       assert.equal(deletedIds[0], 'sub-existing-123');
+      assert.equal(backCalls, 1);
+    });
+
+    it('shows cancel confirmation alert and calls cancelSubscription when confirmed', async () => {
+      setMockSearchParams({ id: 'sub-existing-123' });
+      useSubscriptionStore.setState({ subscriptions: [existingSub] });
+
+      startRender();
+      const element = EditSubscriptionScreen();
+
+      const cancelBtn = findByTestId(element, 'cancel-subscription-btn');
+      assert.ok(cancelBtn, 'Cancel subscription button should be present');
+      cancelBtn.props.onPress();
+
+      // Alert confirmation shown
+      assert.equal(alertCalls.length, 1);
+      const alert = alertCalls[0];
+      assert.equal(alert.title, 'Cancel Subscription');
+      assert.ok(alert.message?.includes('Adobe CC'));
+      assert.ok(Array.isArray(alert.buttons));
+
+      const cancelOption = alert.buttons?.find(
+        (b: any) => b.text === 'Cancel Subscription'
+      );
+      assert.ok(cancelOption);
+      assert.equal(cancelOption.style, 'destructive');
+
+      // Execute cancellation
+      await cancelOption.onPress();
+
+      assert.equal(cancelledIds.length, 1);
+      assert.equal(cancelledIds[0], 'sub-existing-123');
       assert.equal(backCalls, 1);
     });
   });

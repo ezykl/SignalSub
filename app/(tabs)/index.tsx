@@ -148,6 +148,20 @@ export default function DashboardScreen({
   const formattedDate = formatDashboardDate(now);
   const isSetupIncomplete = !userAlias.trim() || !defaultPaymentMethod.trim();
 
+  const [dismissedTrials, setDismissedTrials] = useState<Record<string, string>>({});
+  const todayStr = (now instanceof Date ? now : new Date()).toISOString().slice(0, 10);
+
+  const expiringTrials = subscriptions.filter((sub) => {
+    if (sub.isTrial !== 1 || sub.isActive !== 1 || sub.status !== 'active') {
+      return false;
+    }
+    if (!sub.trialEndDate) return false;
+    const days = daysUntil(sub.trialEndDate, now);
+    if (days < 0 || days > 1) return false;
+    if (dismissedTrials[sub.id] === todayStr) return false;
+    return true;
+  });
+
   const alerts = computeDashboardAlerts(subscriptions, currency, now);
   const monthlyTotal = computeMonthlyTotal(subscriptions);
   const yearlyTotal = computeYearlyTotal(subscriptions);
@@ -216,6 +230,61 @@ export default function DashboardScreen({
                 <MaterialIcons name="arrow-forward" size={14} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
+          </View>
+        )}
+
+        {/* Trial Expiry Prompt Cards */}
+        {expiringTrials.length > 0 && (
+          <View style={styles.trialPromptContainer} testID="dashboard-trial-expiry-container">
+            {expiringTrials.map((sub) => {
+              const days = daysUntil(sub.trialEndDate!, now);
+              const endsLabel = days === 0 ? 'today' : 'tomorrow';
+              return (
+                <View
+                  key={`trial-expiry-${sub.id}`}
+                  style={styles.trialPromptCard}
+                  testID={`trial-expiry-card-${sub.id}`}
+                >
+                  <View style={styles.trialPromptHeader}>
+                    <Text style={styles.trialPromptTitle} testID="trial-expiry-title">
+                      ⚠️ Free Trial Ending
+                    </Text>
+                  </View>
+                  <Text style={styles.trialPromptSubtitle} testID="trial-expiry-subtitle">
+                    {`${sub.name} trial ends ${endsLabel}. Auto-charge of ${sub.currency} ${sub.amount} will occur.`}
+                  </Text>
+                  <View style={styles.trialPromptButtons}>
+                    <TouchableOpacity
+                      style={styles.trialPromptCancelButton}
+                      onPress={() =>
+                        useSubscriptionStore.getState().cancelSubscription(sub.id)
+                      }
+                      activeOpacity={0.8}
+                      accessibilityRole="button"
+                      accessibilityLabel={`I Cancelled ${sub.name}`}
+                      testID={`trial-expiry-cancelled-btn-${sub.id}`}
+                    >
+                      <Text style={styles.trialPromptCancelText}>I Cancelled It</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.trialPromptKeepButton}
+                      onPress={() =>
+                        setDismissedTrials((prev) => ({
+                          ...prev,
+                          [sub.id]: todayStr,
+                        }))
+                      }
+                      activeOpacity={0.8}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Keep ${sub.name} Active`}
+                      testID={`trial-expiry-keep-btn-${sub.id}`}
+                    >
+                      <Text style={styles.trialPromptKeepText}>Keep Active</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              );
+            })}
           </View>
         )}
 
@@ -485,6 +554,68 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   emptyButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  trialPromptContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 8,
+  },
+  trialPromptCard: {
+    backgroundColor: COLORS.bgCard,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: COLORS.warning,
+    padding: 16,
+    marginBottom: 12,
+  },
+  trialPromptHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  trialPromptTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.warning,
+  },
+  trialPromptSubtitle: {
+    fontSize: 14,
+    color: COLORS.textPrimary,
+    lineHeight: 20,
+    marginBottom: 14,
+  },
+  trialPromptButtons: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  trialPromptCancelButton: {
+    flex: 1,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderWidth: 1,
+    borderColor: COLORS.danger,
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  trialPromptCancelText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.danger,
+  },
+  trialPromptKeepButton: {
+    flex: 1,
+    backgroundColor: COLORS.bgSurface,
+    borderWidth: 1,
+    borderColor: 'rgba(148, 163, 184, 0.25)',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  trialPromptKeepText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#FFFFFF',

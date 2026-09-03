@@ -13,16 +13,21 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
 import { CATEGORIES } from '@/constants/categories';
 import type { Subscription } from '@/db/schema';
+import { toMonthlyAmount } from '@/services/analyticsService';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { FAB, SubscriptionRow } from '@/components';
 
-export const FILTER_OPTIONS = [
+export const FILTER_TABS = [
   'All',
   'Active',
   'Trials',
   'Paused',
+  'Cancelled',
   ...CATEGORIES.map((c) => c.label),
 ];
+
+export const FILTER_OPTIONS = FILTER_TABS;
 
 export function filterSubscriptions(
   subscriptions: Subscription[],
@@ -33,11 +38,13 @@ export function filterSubscriptions(
 
   const normalizedFilter = (filter || 'All').trim().toLowerCase();
   if (normalizedFilter === 'active') {
-    list = list.filter((s) => s.isActive === 1);
+    list = list.filter((s) => s.isActive === 1 && s.status !== 'cancelled');
   } else if (normalizedFilter === 'trials') {
     list = list.filter((s) => s.isTrial === 1);
   } else if (normalizedFilter === 'paused') {
-    list = list.filter((s) => s.isActive === 0);
+    list = list.filter((s) => s.isActive === 0 && s.status !== 'cancelled');
+  } else if (normalizedFilter === 'cancelled') {
+    list = list.filter((s) => s.status === 'cancelled');
   } else if (normalizedFilter !== 'all') {
     list = list.filter((s) => (s.category || '').toLowerCase() === normalizedFilter);
   }
@@ -62,6 +69,11 @@ export default function SubscriptionsScreen() {
   const pauseSubscription = useSubscriptionStore(
     (state) => state.pauseSubscription
   );
+  const reactivateSubscription = useSubscriptionStore(
+    (state) => state.reactivateSubscription
+  );
+  const getSetting = useSettingsStore((state) => state.getSetting);
+  const currency = getSetting('default_currency', '$');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('All');
@@ -71,6 +83,12 @@ export default function SubscriptionsScreen() {
       loadSubscriptions();
     }, [loadSubscriptions])
   );
+
+  const totalMonthlySaved = useMemo(() => {
+    return subscriptions
+      .filter((s) => s.status === 'cancelled')
+      .reduce((sum, s) => sum + toMonthlyAmount(s.amount, s.billingCycle), 0);
+  }, [subscriptions]);
 
   const filteredSubscriptions = useMemo(() => {
     return filterSubscriptions(subscriptions, searchQuery, selectedFilter);
@@ -156,6 +174,15 @@ export default function SubscriptionsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Savings banner when Cancelled filter is selected */}
+        {selectedFilter === 'Cancelled' && (
+          <View style={styles.savingsBanner} testID="cancelled-savings-banner">
+            <Text style={styles.savingsText} testID="cancelled-savings-text">
+              {`🎉 You're saving ${currency === '$' || !currency ? '$' : `${currency} `}${totalMonthlySaved.toFixed(2)}/mo by cancelling unneeded subs`}
+            </Text>
+          </View>
+        )}
+
         {filteredSubscriptions.length === 0 ? (
           <View style={styles.emptyCard} testID="subscriptions-empty-state">
             <View style={styles.emptyIconCircle}>
@@ -197,6 +224,7 @@ export default function SubscriptionsScreen() {
                 onPause={() =>
                   pauseSubscription(sub.id, sub.isActive === 1)
                 }
+                onReactivate={() => reactivateSubscription(sub.id)}
                 testID={`sub-row-${sub.id}`}
               />
             ))}
@@ -340,5 +368,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  savingsBanner: {
+    backgroundColor: 'rgba(34, 197, 94, 0.12)',
+    borderColor: COLORS.success,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  savingsText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.success,
+    textAlign: 'center',
   },
 });

@@ -20,6 +20,7 @@ export interface SubscriptionRowProps {
   onPress?: () => void;
   onDelete?: () => void;
   onPause?: () => void;
+  onReactivate?: () => void;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
@@ -29,6 +30,7 @@ export function SubscriptionRow({
   onPress,
   onDelete,
   onPause,
+  onReactivate,
   style,
   testID,
 }: SubscriptionRowProps) {
@@ -130,6 +132,11 @@ export function SubscriptionRow({
                 <Text style={styles.trialBadgeText}>Trial</Text>
               </View>
             )}
+            {subscription.status === 'cancelled' && (
+              <View style={styles.cancelledBadge} testID="cancelled-badge">
+                <Text style={styles.cancelledBadgeText}>Cancelled</Text>
+              </View>
+            )}
           </View>
           <Text style={styles.subtitleText} numberOfLines={1}>
             {subtitle}
@@ -141,6 +148,21 @@ export function SubscriptionRow({
           <Text style={styles.amountText}>{amountFormatted}</Text>
           {billingCycleSubtitle ? (
             <Text style={styles.billingCycleText}>{billingCycleSubtitle}</Text>
+          ) : null}
+          {subscription.status === 'cancelled' && onReactivate ? (
+            <TouchableOpacity
+              style={styles.reactivateButton}
+              onPress={(e) => {
+                e?.stopPropagation?.();
+                onReactivate();
+              }}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={`Reactivate ${subscription.name}`}
+              testID={`reactivate-btn-${subscription.id}`}
+            >
+              <Text style={styles.reactivateButtonText}>Reactivate</Text>
+            </TouchableOpacity>
           ) : null}
         </View>
       </TouchableOpacity>
@@ -258,5 +280,34 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.textSecondary,
     marginTop: 4,
+  },
+  cancelledBadge: {
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderColor: COLORS.danger,
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    marginLeft: 6,
+  },
+  cancelledBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.danger,
+    textTransform: 'uppercase',
+  },
+  reactivateButton: {
+    backgroundColor: COLORS.accentPurple,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginTop: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reactivateButtonText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
 });

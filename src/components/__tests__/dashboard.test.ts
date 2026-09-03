@@ -542,4 +542,116 @@ describe('Dashboard and Tabs Layout', () => {
       assert.equal(pausedVal, true);
     });
   });
+
+  describe('Trial Expiry Prompt Card', () => {
+    const fixedDate = new Date(2026, 8, 3, 10, 0, 0); // 2026-09-03
+
+    it('renders prominent trial expiry prompt when active trial ends today (0 days) or tomorrow (1 day)', () => {
+      const expiringSub = createSub({
+        id: 'sub-trial-exp',
+        name: 'Canva Pro',
+        amount: 12.99,
+        currency: 'USD',
+        isTrial: 1,
+        isActive: 1,
+        status: 'active',
+        trialEndDate: '2026-09-04', // 1 day away (tomorrow)
+      });
+
+      useSubscriptionStore.setState({ subscriptions: [expiringSub] });
+
+      const element = DashboardScreen({ referenceDate: fixedDate });
+
+      const card = findByTestId(element, 'trial-expiry-card-sub-trial-exp');
+      assert.ok(card, 'Trial expiry prompt card should be displayed');
+
+      const titleEl = findByTestId(card, 'trial-expiry-title');
+      assert.ok(titleEl);
+      assert.equal(titleEl.props.children, '⚠️ Free Trial Ending');
+
+      const subtitleEl = findByTestId(card, 'trial-expiry-subtitle');
+      assert.ok(subtitleEl);
+      assert.equal(
+        subtitleEl.props.children,
+        'Canva Pro trial ends tomorrow. Auto-charge of USD 12.99 will occur.'
+      );
+
+      const cancelBtn = findByTestId(card, 'trial-expiry-cancelled-btn-sub-trial-exp');
+      assert.ok(cancelBtn);
+
+      const keepBtn = findByTestId(card, 'trial-expiry-keep-btn-sub-trial-exp');
+      assert.ok(keepBtn);
+    });
+
+    it('calls cancelSubscription when [I Cancelled It] is pressed', () => {
+      let cancelledId = '';
+      useSubscriptionStore.setState({
+        cancelSubscription: async (id: string) => {
+          cancelledId = id;
+        },
+      });
+
+      const expiringSub = createSub({
+        id: 'sub-trial-cancel',
+        name: 'GymPass',
+        amount: 29.99,
+        currency: 'USD',
+        isTrial: 1,
+        isActive: 1,
+        status: 'active',
+        trialEndDate: '2026-09-03', // 0 days away (today)
+      });
+
+      useSubscriptionStore.setState({ subscriptions: [expiringSub] });
+
+      const element = DashboardScreen({ referenceDate: fixedDate });
+      const cancelBtn = findByTestId(element, 'trial-expiry-cancelled-btn-sub-trial-cancel');
+      assert.ok(cancelBtn);
+
+      cancelBtn.props.onPress();
+      assert.equal(cancelledId, 'sub-trial-cancel');
+    });
+
+    it('does not render card if trial ends in > 1 day, trial is inactive, or not a trial', () => {
+      const farSub = createSub({
+        id: 'sub-far',
+        name: 'Notion',
+        isTrial: 1,
+        isActive: 1,
+        status: 'active',
+        trialEndDate: '2026-09-10', // 7 days away
+      });
+      const inactiveSub = createSub({
+        id: 'sub-inact',
+        name: 'Figma',
+        isTrial: 1,
+        isActive: 0,
+        status: 'active',
+        trialEndDate: '2026-09-03',
+      });
+      const cancelledSub = createSub({
+        id: 'sub-canc',
+        name: 'Adobe',
+        isTrial: 1,
+        isActive: 1,
+        status: 'cancelled',
+        trialEndDate: '2026-09-03',
+      });
+      const nonTrialSub = createSub({
+        id: 'sub-nontrial',
+        name: 'Spotify',
+        isTrial: 0,
+        isActive: 1,
+        status: 'active',
+        trialEndDate: '2026-09-03',
+      });
+
+      useSubscriptionStore.setState({
+        subscriptions: [farSub, inactiveSub, cancelledSub, nonTrialSub],
+      });
+
+      const element = DashboardScreen({ referenceDate: fixedDate });
+      assert.equal(findByTestId(element, 'dashboard-trial-expiry-container'), null);
+    });
+  });
 });

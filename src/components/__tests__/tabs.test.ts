@@ -11,6 +11,7 @@ import { useSettingsStore } from '../../stores/settingsStore';
 import SubscriptionsScreen, {
   filterSubscriptions,
   FILTER_OPTIONS,
+  FILTER_TABS,
 } from '../../../app/(tabs)/subscriptions';
 import CalendarScreen, {
   formatCalendarDateHeader,
@@ -247,6 +248,28 @@ describe('Tabs Screens Logic and Components', () => {
         const resultActive = filterSubscriptions(subs, 'pass', 'Active');
         assert.equal(resultActive.length, 0);
       });
+
+      it('includes Cancelled in FILTER_TABS and FILTER_OPTIONS', () => {
+        assert.ok(FILTER_TABS.includes('Cancelled'));
+        assert.ok(FILTER_OPTIONS.includes('Cancelled'));
+      });
+
+      it('filters only cancelled subscriptions when filter is "Cancelled"', () => {
+        const testSubs: Subscription[] = [
+          ...subs,
+          createSub({
+            id: 'sub-canc-1',
+            name: 'Hulu Cancelled',
+            amount: 14.99,
+            currency: 'USD',
+            status: 'cancelled',
+            isActive: 0,
+          }),
+        ];
+        const result = filterSubscriptions(testSubs, '', 'Cancelled');
+        assert.equal(result.length, 1);
+        assert.equal(result[0].id, 'sub-canc-1');
+      });
     });
 
     describe('SubscriptionsScreen component rendering & interaction', () => {
@@ -368,6 +391,80 @@ describe('Tabs Screens Logic and Components', () => {
         rows = findAllByType(element, SubscriptionRow);
         assert.equal(rows.length, 1);
         assert.equal(rows[0].props.subscription.id, 'sub-gym');
+      });
+
+      it('renders savings banner when Cancelled filter is selected and calculates monthly money saved', () => {
+        const cancelledSubs: Subscription[] = [
+          createSub({
+            id: 'sub-c1',
+            name: 'Gym',
+            amount: 30,
+            billingCycle: 'monthly',
+            currency: '$',
+            status: 'cancelled',
+            isActive: 0,
+          }),
+          createSub({
+            id: 'sub-c2',
+            name: 'Magazine',
+            amount: 15,
+            billingCycle: 'monthly',
+            currency: '$',
+            status: 'cancelled',
+            isActive: 0,
+          }),
+        ];
+        useSubscriptionStore.setState({ subscriptions: cancelledSubs });
+
+        startRender();
+        const element = SubscriptionsScreen();
+
+        // Click Cancelled chip
+        const chip = findByTestId(element, 'filter-chip-cancelled');
+        assert.ok(chip);
+        chip.props.onPress();
+
+        startRender();
+        const cancelledElement = SubscriptionsScreen();
+        const banner = findByTestId(cancelledElement, 'cancelled-savings-banner');
+        assert.ok(banner);
+
+        const bannerText = findByTestId(banner, 'cancelled-savings-text');
+        assert.ok(bannerText);
+        assert.equal(
+          bannerText.props.children,
+          "🎉 You're saving $45.00/mo by cancelling unneeded subs"
+        );
+      });
+
+      it('calls reactivateSubscription when reactivate button is pressed on cancelled subscription row', () => {
+        let reactivatedId = '';
+        useSubscriptionStore.setState({
+          subscriptions: [
+            createSub({
+              id: 'sub-c-react',
+              name: 'Netflix Cancelled',
+              amount: 15.99,
+              currency: '$',
+              status: 'cancelled',
+              isActive: 0,
+            }),
+          ],
+          reactivateSubscription: async (id: string) => {
+            reactivatedId = id;
+          },
+        });
+
+        startRender();
+        const element = SubscriptionsScreen();
+        const listContainer = findByTestId(element, 'subscriptions-list');
+        assert.ok(listContainer);
+
+        const rows = findAllByType(listContainer, SubscriptionRow);
+        assert.equal(rows.length, 1);
+
+        rows[0].props.onReactivate();
+        assert.equal(reactivatedId, 'sub-c-react');
       });
     });
   });
