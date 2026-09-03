@@ -1,6 +1,6 @@
 import { mock } from 'node:test';
-import type { Subscription } from '../../db/schema';
-import { settings, subscriptions } from '../../db/schema';
+import type { Subscription, NotificationLog } from '../../db/schema';
+import { notificationLog, settings, subscriptions } from '../../db/schema';
 
 // Setup expo-notifications mock first
 export const mockGetPermissionsAsync = mock.fn(async () => ({
@@ -51,6 +51,7 @@ require.cache[expoNotifResolved] = {
 // In-memory DB store
 let inMemorySettings: Record<string, string> = {};
 let inMemorySubscriptions: Subscription[] = [];
+let inMemoryNotificationLogs: NotificationLog[] = [];
 
 export interface DbCallLog {
   selects: Array<{ table: string; where?: string | null }>;
@@ -69,6 +70,7 @@ export const dbCallLog: DbCallLog = {
 export function resetDbMock() {
   inMemorySettings = {};
   inMemorySubscriptions = [];
+  inMemoryNotificationLogs = [];
   dbCallLog.selects = [];
   dbCallLog.inserts = [];
   dbCallLog.updates = [];
@@ -110,9 +112,14 @@ export function getInMemorySubscriptions(): Subscription[] {
   return inMemorySubscriptions.map((s) => ({ ...s }));
 }
 
+export function getInMemoryNotificationLogs(): NotificationLog[] {
+  return inMemoryNotificationLogs.map((l) => ({ ...l }));
+}
+
 function getTableName(table: any): string {
   if (table === settings) return 'settings';
   if (table === subscriptions) return 'subscriptions';
+  if (table === notificationLog) return 'notification_log';
   const name = table?.[Symbol.for('drizzle:Name')] ?? table?._?.name ?? table?.name;
   return String(name || '');
 }
@@ -185,6 +192,8 @@ export const mockDb = {
             inMemorySettings[val.key] = val.value;
           } else if (tableName === 'subscriptions') {
             inMemorySubscriptions.push({ ...val });
+          } else if (tableName === 'notification_log') {
+            inMemoryNotificationLogs.push({ ...val });
           }
         };
 

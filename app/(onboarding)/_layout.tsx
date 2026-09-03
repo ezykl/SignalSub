@@ -16,6 +16,7 @@ export default function OnboardingLayout() {
       <Stack.Screen name="step-2" />
       <Stack.Screen name="step-3" />
       <Stack.Screen name="currency" />
+      <Stack.Screen name="personalize" />
     </Stack>
   );
 }

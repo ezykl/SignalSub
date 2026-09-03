@@ -1,6 +1,8 @@
 import * as Notifications from 'expo-notifications';
 import { parseDateParts } from './renewalService';
 import type { Subscription } from '../db/schema';
+import { notificationLog } from '../db/schema';
+import { db } from '../db/client';
 
 // Configure default notification handler for foreground notifications
 Notifications.setNotificationHandler({
@@ -26,14 +28,18 @@ export async function requestNotificationPermission(): Promise<boolean> {
 }
 
 /**
- * Schedules a local push notification reminder before a subscription renews.
+ * Schedules local push notification reminders before a subscription renews.
  * 
- * Trigger date: sub.nextRenewalDate minus sub.notifyBeforeDays days at 09:00:00 AM local time.
- * If permission is not granted or trigger date <= current date/time, returns null.
+ * When notifyBeforeDays >= 2, schedules multi-stage reminders:
+ * - Day N warning: `${sub.name} renews in ${days} days (${sub.currency} ${sub.amount})`
+ * - Day 1 warning: `Reminder: ${sub.name} renews tomorrow (${sub.currency} ${sub.amount})`
+ * - Day 0 (renewal day at 9:00 AM): `Auto-charge Today: ${sub.name} (${sub.currency} ${sub.amount})`
+ * 
+ * Logs each scheduled notification in notification_log using db queries.
  * 
  * @param sub Subscription record
  * @param referenceDate Optional current reference date (defaults to new Date())
- * @returns Notification identifier string or null if skipped
+ * @returns Comma-separated notification identifier string or null if skipped
  */
 export async function scheduleRenewalReminder(
   sub: Subscription,
@@ -46,33 +52,153 @@ export async function scheduleRenewalReminder(
 
   const parts = parseDateParts(sub.nextRenewalDate);
   const notifyDays = sub.notifyBeforeDays ?? 3;
-  const triggerDate = new Date(
-    parts.year,
-    parts.month - 1,
-    parts.day - notifyDays,
-    9,
-    0,
-    0,
-    0
-  );
 
-  if (triggerDate.getTime() <= referenceDate.getTime()) {
+  interface ReminderStage {
+    daysBefore: number;
+    title: string;
+    body: string;
+    triggerDate: Date;
+  }
+
+  const stages: ReminderStage[] = [];
+
+  if (notifyDays >= 2) {
+    // Day N warning
+    stages.push({
+      daysBefore: notifyDays,
+      title: `${sub.name} renews in ${notifyDays} days (${sub.currency} ${sub.amount})`,
+      body: `${sub.currency} ${sub.amount} will be charged. Tap to review.`,
+      triggerDate: new Date(
+        parts.year,
+        parts.month - 1,
+        parts.day - notifyDays,
+        9,
+        0,
+        0,
+        0
+      ),
+    });
+
+    // Day 1 warning
+    stages.push({
+      daysBefore: 1,
+      title: `Reminder: ${sub.name} renews tomorrow (${sub.currency} ${sub.amount})`,
+      body: `${sub.currency} ${sub.amount} will be charged tomorrow. Tap to review.`,
+      triggerDate: new Date(
+        parts.year,
+        parts.month - 1,
+        parts.day - 1,
+        9,
+        0,
+        0,
+        0
+      ),
+    });
+
+    // Day 0 warning
+    stages.push({
+      daysBefore: 0,
+      title: `Auto-charge Today: ${sub.name} (${sub.currency} ${sub.amount})`,
+      body: `${sub.currency} ${sub.amount} is being charged today. Tap to review.`,
+      triggerDate: new Date(
+        parts.year,
+        parts.month - 1,
+        parts.day,
+        9,
+        0,
+        0,
+        0
+      ),
+    });
+  } else if (notifyDays === 1) {
+    stages.push({
+      daysBefore: 1,
+      title: `Reminder: ${sub.name} renews tomorrow (${sub.currency} ${sub.amount})`,
+      body: `${sub.currency} ${sub.amount} will be charged tomorrow. Tap to review.`,
+      triggerDate: new Date(
+        parts.year,
+        parts.month - 1,
+        parts.day - 1,
+        9,
+        0,
+        0,
+        0
+      ),
+    });
+    stages.push({
+      daysBefore: 0,
+      title: `Auto-charge Today: ${sub.name} (${sub.currency} ${sub.amount})`,
+      body: `${sub.currency} ${sub.amount} is being charged today. Tap to review.`,
+      triggerDate: new Date(
+        parts.year,
+        parts.month - 1,
+        parts.day,
+        9,
+        0,
+        0,
+        0
+      ),
+    });
+  } else if (notifyDays === 0) {
+    stages.push({
+      daysBefore: 0,
+      title: `Auto-charge Today: ${sub.name} (${sub.currency} ${sub.amount})`,
+      body: `${sub.currency} ${sub.amount} is being charged today. Tap to review.`,
+      triggerDate: new Date(
+        parts.year,
+        parts.month - 1,
+        parts.day,
+        9,
+        0,
+        0,
+        0
+      ),
+    });
+  }
+
+  const scheduledIds: string[] = [];
+
+  for (const stage of stages) {
+    if (stage.triggerDate.getTime() > referenceDate.getTime()) {
+      const notificationId = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: stage.title,
+          body: stage.body,
+          data: {
+            subscriptionId: sub.id,
+            type: 'renewal_reminder',
+            daysBefore: stage.daysBefore,
+          },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: stage.triggerDate,
+        },
+      });
+
+      if (notificationId) {
+        scheduledIds.push(notificationId);
+      }
+
+      // Log in notification_log using db queries
+      try {
+        await db.insert(notificationLog).values({
+          id: `notif-log-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          subscriptionId: sub.id,
+          type: 'renewal_reminder',
+          sentAt: new Date().toISOString(),
+        });
+      } catch {
+        // Ignore DB logging failure in environments where DB is unavailable
+      }
+    }
+  }
+
+  if (scheduledIds.length === 0) {
     return null;
   }
 
-  const notificationId = await Notifications.scheduleNotificationAsync({
-    content: {
-      title: `${sub.name} renews in ${notifyDays} days`,
-      body: `${sub.currency} ${sub.amount.toFixed(2)} will be charged. Tap to review.`,
-      data: { subscriptionId: sub.id, type: 'renewal_reminder' },
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DATE,
-      date: triggerDate,
-    },
-  });
-
-  return notificationId;
+  return scheduledIds.join(',');
 }
 
 /**
@@ -124,17 +250,28 @@ export async function scheduleTrialExpiryAlert(
 }
 
 /**
- * Cancels a scheduled notification by ID.
+ * Cancels scheduled notifications by ID or comma-separated IDs.
  * Catches and ignores errors (e.g. if already dismissed or not found).
  * 
- * @param notificationId Identifier of the notification to cancel
+ * @param notificationId Identifier or comma-separated identifiers of notifications to cancel
  */
 export async function cancelNotification(notificationId: string): Promise<void> {
-  try {
-    await Notifications.cancelScheduledNotificationAsync(notificationId);
-  } catch {
-    // Ignore error if already dismissed or not found
+  if (!notificationId) return;
+  const ids = notificationId.split(',').map((id) => id.trim()).filter(Boolean);
+  for (const id of ids) {
+    try {
+      await Notifications.cancelScheduledNotificationAsync(id);
+    } catch {
+      // Ignore error if already dismissed or not found
+    }
   }
+}
+
+/**
+ * Cleanup helper for a subscription's notifications.
+ */
+export async function cleanupNotifications(notificationId: string): Promise<void> {
+  await cancelNotification(notificationId);
 }
 
 /**

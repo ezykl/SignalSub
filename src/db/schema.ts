@@ -16,6 +16,7 @@ export const subscriptions = sqliteTable('subscriptions', {
   isTrial: integer('is_trial').notNull().default(0),
   trialEndDate: text('trial_end_date'),
   isActive: integer('is_active').notNull().default(1),
+  status: text('status').notNull().default('active'),
   notifyBeforeDays: integer('notify_before_days').notNull().default(3),
   notificationId: text('notification_id'),
   paymentMethod: text('payment_method').notNull().default('card'),

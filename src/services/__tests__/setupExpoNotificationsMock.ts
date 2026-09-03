@@ -1,3 +1,4 @@
+import '../../stores/__tests__/setupDbMock';
 import { mock } from 'node:test';
 
 export const mockGetPermissionsAsync = mock.fn(async () => ({

@@ -27,6 +27,7 @@ function createMockSubscription(overrides: Partial<Subscription>): Subscription 
     isTrial: 0,
     trialEndDate: null,
     isActive: 1,
+    status: 'active',
     notifyBeforeDays: 3,
     notificationId: null,
     paymentMethod: 'card',

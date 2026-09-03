@@ -31,6 +31,8 @@ export interface SubscriptionState {
   ) => Promise<void>;
   deleteSubscription: (id: string) => Promise<void>;
   pauseSubscription: (id: string, pause: boolean) => Promise<void>;
+  cancelSubscription: (id: string) => Promise<void>;
+  reactivateSubscription: (id: string) => Promise<void>;
 }
 
 export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
@@ -67,6 +69,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       isTrial: data.isTrial ?? 0,
       trialEndDate: data.trialEndDate ?? null,
       isActive: data.isActive ?? 1,
+      status: data.status ?? 'active',
       notifyBeforeDays: data.notifyBeforeDays ?? 3,
       notificationId: null,
       paymentMethod: data.paymentMethod ?? 'card',
@@ -208,6 +211,66 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
         })
         .where(eq(subscriptions.id, id));
     }
+
+    await get().loadSubscriptions();
+  },
+
+  cancelSubscription: async (id: string) => {
+    const [existing] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.id, id));
+
+    if (!existing) return;
+
+    if (existing.notificationId) {
+      await cancelNotification(existing.notificationId);
+    }
+
+    const updatedAt = new Date().toISOString();
+    await db
+      .update(subscriptions)
+      .set({
+        isActive: 0,
+        status: 'cancelled',
+        notificationId: null,
+        updatedAt,
+      })
+      .where(eq(subscriptions.id, id));
+
+    await get().loadSubscriptions();
+  },
+
+  reactivateSubscription: async (id: string) => {
+    const [existing] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.id, id));
+
+    if (!existing) return;
+
+    const updatedAt = new Date().toISOString();
+    const reactivated: Subscription = {
+      ...existing,
+      isActive: 1,
+      status: 'active',
+      updatedAt,
+    };
+
+    const scheduledId =
+      reactivated.isTrial === 1
+        ? await scheduleTrialExpiryAlert(reactivated)
+        : await scheduleRenewalReminder(reactivated);
+
+    await db
+      .update(subscriptions)
+      .set({
+        isActive: 1,
+        status: 'active',
+        notificationId: scheduledId ?? null,
+        updatedAt,
+      })
+      .where(eq(subscriptions.id, id));
 
     await get().loadSubscriptions();
   },

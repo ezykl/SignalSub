@@ -32,6 +32,7 @@ export async function runMigrations(): Promise<void> {
       is_trial INTEGER NOT NULL DEFAULT 0,
       trial_end_date TEXT,
       is_active INTEGER NOT NULL DEFAULT 1,
+      status TEXT NOT NULL DEFAULT 'active',
       notify_before_days INTEGER NOT NULL DEFAULT 3,
       notification_id TEXT,
       payment_method TEXT NOT NULL DEFAULT 'card',
@@ -56,6 +57,15 @@ export async function runMigrations(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_subscriptions_is_active ON subscriptions (is_active);
     CREATE INDEX IF NOT EXISTS idx_notification_log_subscription_id ON notification_log (subscription_id);
   `);
+
+  // Migrate existing tables if columns do not exist yet
+  try {
+    await sqliteDb.execAsync(`
+      ALTER TABLE subscriptions ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
+    `);
+  } catch {
+    // Column already exists
+  }
 
   // Migrate existing tables if columns do not exist yet
   try {

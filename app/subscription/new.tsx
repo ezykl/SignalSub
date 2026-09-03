@@ -20,6 +20,7 @@ import {
   searchPresets,
   getIconForPreset,
 } from '@/constants/servicePresets';
+import { isPresetInFavoriteCategories } from '@/constants/personalization';
 import { BillingCycle, BillingCyclePill } from '@/components/BillingCyclePill';
 import { CategoryChip } from '@/components/CategoryChip';
 import { BrandIcon } from '@/components/BrandIcon';
@@ -72,13 +73,50 @@ export default function NewSubscriptionScreen() {
   const [trialEndDate, setTrialEndDate] = useState(() => getDefaultTrialEndDate());
   const [notifyBeforeDays, setNotifyBeforeDays] = useState(3);
   const [isSaving, setIsSaving] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<string>('card');
-  const [paymentDetails, setPaymentDetails] = useState<string>('');
+  const defaultPaymentMethod =
+    getSetting('default_payment_method', 'card') || 'card';
+  const defaultPaymentDetails = getSetting('default_payment_details', '');
+
+  const [paymentMethod, setPaymentMethod] = useState<string>(
+    () => defaultPaymentMethod
+  );
+  const [paymentDetails, setPaymentDetails] = useState<string>(
+    () => defaultPaymentDetails
+  );
+
+  // Favorite categories & recommendations
+  const favoriteCategoriesRaw = getSetting('favorite_categories', '');
+  const favoriteCategories = useMemo<string[]>(() => {
+    if (!favoriteCategoriesRaw) return [];
+    try {
+      const parsed = JSON.parse(favoriteCategoriesRaw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }, [favoriteCategoriesRaw]);
 
   // Filter presets
   const filteredPresets = useMemo(() => {
     return searchPresets(presetSearch);
   }, [presetSearch]);
+
+  // Reorder presets with user's favorite categories at top
+  const orderedPresets = useMemo(() => {
+    if (favoriteCategories.length === 0 || presetSearch.trim().length > 0) {
+      return filteredPresets;
+    }
+    const recommended: ServicePreset[] = [];
+    const others: ServicePreset[] = [];
+    for (const preset of filteredPresets) {
+      if (isPresetInFavoriteCategories(preset, favoriteCategories)) {
+        recommended.push(preset);
+      } else {
+        others.push(preset);
+      }
+    }
+    return [...recommended, ...others];
+  }, [filteredPresets, favoriteCategories, presetSearch]);
 
   const handleSelectPreset = (preset: ServicePreset) => {
     setSelectedPresetKey(preset.key);
@@ -252,9 +290,16 @@ export default function NewSubscriptionScreen() {
             ) : null}
           </View>
 
+          {/* Recommended Section Header */}
+          {favoriteCategories.length > 0 && !presetSearch.trim() ? (
+            <View style={styles.recommendedHeader} testID="recommended-presets-section">
+              <Text style={styles.recommendedHeaderText}>RECOMMENDED FOR YOU</Text>
+            </View>
+          ) : null}
+
           {/* 3-Column Grid */}
           <View style={styles.presetGrid} testID="preset-grid">
-            {filteredPresets.slice(0, 15).map((preset) => {
+            {orderedPresets.slice(0, 15).map((preset) => {
               const isSelected = selectedPresetKey === preset.key;
               return (
                 <TouchableOpacity
@@ -532,6 +577,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: COLORS.accentPurpleLight,
+  },
+  recommendedHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  recommendedHeaderText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.accentPurpleLight,
+    letterSpacing: 0.8,
   },
   presetSearchContainer: {
     flexDirection: 'row',

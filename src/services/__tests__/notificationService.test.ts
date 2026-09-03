@@ -5,6 +5,7 @@ import {
   mockCancelScheduledNotificationAsync,
   mockSetNotificationHandler,
 } from './setupExpoNotificationsMock';
+import { dbCallLog, resetDbMock } from '../../stores/__tests__/setupDbMock';
 
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
@@ -35,6 +36,7 @@ function createMockSubscription(overrides: Partial<Subscription> = {}): Subscrip
     isTrial: 0,
     trialEndDate: null,
     isActive: 1,
+    status: 'active',
     notifyBeforeDays: 3,
     notificationId: null,
     paymentMethod: 'card',
@@ -47,6 +49,12 @@ function createMockSubscription(overrides: Partial<Subscription> = {}): Subscrip
 
 describe('notificationService', () => {
   beforeEach(() => {
+    resetDbMock();
+    mockGetPermissionsAsync.mock.resetCalls();
+    mockRequestPermissionsAsync.mock.resetCalls();
+    mockScheduleNotificationAsync.mock.resetCalls();
+    mockCancelScheduledNotificationAsync.mock.resetCalls();
+
     // Reset mocks to default granted/success implementations
     mockGetPermissionsAsync.mock.mockImplementation(async () => ({
       status: 'granted',
@@ -136,8 +144,9 @@ describe('notificationService', () => {
       assert.strictEqual(result, null);
     });
 
-    it('calculates trigger date: nextRenewalDate minus notifyBeforeDays days at 09:00:00 AM local time', async () => {
+    it('when notifyBeforeDays >= 2, schedules multi-stage reminders and logs them in notification_log', async () => {
       const sub = createMockSubscription({
+        id: 'sub-spotify-1',
         name: 'Spotify',
         amount: 9.99,
         currency: 'USD',
@@ -145,33 +154,40 @@ describe('notificationService', () => {
         notifyBeforeDays: 3,
       });
 
-      // Fixed reference date: Sep 1, 2026
+      // Fixed reference date: Sep 1, 2026 (well before Day 3 = Sep 7)
       const refDate = new Date(2026, 8, 1, 12, 0, 0);
       const notifId = await scheduleRenewalReminder(sub, refDate);
 
-      assert.strictEqual(notifId, 'mock-notification-id-123');
-
-      // Verify schedule call arguments
+      assert.ok(notifId);
       const calls = mockScheduleNotificationAsync.mock.calls;
-      const lastCall = calls[calls.length - 1];
-      const payload = lastCall.arguments[0];
+      assert.strictEqual(calls.length, 3);
 
-      assert.strictEqual(payload.content.title, 'Spotify renews in 3 days');
-      assert.strictEqual(payload.content.body, 'USD 9.99 will be charged. Tap to review.');
-      assert.deepStrictEqual(payload.content.data, {
-        subscriptionId: sub.id,
-        type: 'renewal_reminder',
-      });
+      // 1. Day N warning (Day 3: Sep 7 9:00 AM)
+      const dayNCall = calls[0].arguments[0];
+      assert.strictEqual(dayNCall.content.title, 'Spotify renews in 3 days (USD 9.99)');
+      assert.strictEqual(dayNCall.trigger.type, 'date');
+      assert.strictEqual(dayNCall.trigger.date.getDate(), 7);
+      assert.strictEqual(dayNCall.trigger.date.getHours(), 9);
 
-      assert.strictEqual(payload.trigger.type, 'date');
-      const triggerDate: Date = payload.trigger.date;
-      // 2026-09-10 minus 3 days = 2026-09-07
-      assert.strictEqual(triggerDate.getFullYear(), 2026);
-      assert.strictEqual(triggerDate.getMonth(), 8); // 8 = September
-      assert.strictEqual(triggerDate.getDate(), 7);
-      assert.strictEqual(triggerDate.getHours(), 9);
-      assert.strictEqual(triggerDate.getMinutes(), 0);
-      assert.strictEqual(triggerDate.getSeconds(), 0);
+      // 2. Day 1 warning (Day 1: Sep 9 9:00 AM)
+      const day1Call = calls[1].arguments[0];
+      assert.strictEqual(day1Call.content.title, 'Reminder: Spotify renews tomorrow (USD 9.99)');
+      assert.strictEqual(day1Call.trigger.type, 'date');
+      assert.strictEqual(day1Call.trigger.date.getDate(), 9);
+      assert.strictEqual(day1Call.trigger.date.getHours(), 9);
+
+      // 3. Day 0 warning (Day 0: Sep 10 9:00 AM)
+      const day0Call = calls[2].arguments[0];
+      assert.strictEqual(day0Call.content.title, 'Auto-charge Today: Spotify (USD 9.99)');
+      assert.strictEqual(day0Call.trigger.type, 'date');
+      assert.strictEqual(day0Call.trigger.date.getDate(), 10);
+      assert.strictEqual(day0Call.trigger.date.getHours(), 9);
+
+      // Verify dbCallLog recorded 3 notification_log inserts
+      const notifLogs = dbCallLog.inserts.filter((i) => i.table === 'notification_log');
+      assert.strictEqual(notifLogs.length, 3);
+      assert.strictEqual(notifLogs[0].values.subscriptionId, 'sub-spotify-1');
+      assert.strictEqual(notifLogs[0].values.type, 'renewal_reminder');
     });
 
     it('handles month-crossing date rollback correctly (e.g. March 1 minus 3 days = Feb 26)', async () => {
@@ -184,8 +200,8 @@ describe('notificationService', () => {
       await scheduleRenewalReminder(sub, refDate);
 
       const calls = mockScheduleNotificationAsync.mock.calls;
-      const lastCall = calls[calls.length - 1];
-      const triggerDate: Date = lastCall.arguments[0].trigger.date;
+      // First call is Day N (Feb 26)
+      const triggerDate: Date = calls[0].arguments[0].trigger.date;
 
       // 2026-03-01 minus 3 days:
       // March 1 -> Feb 28 -> Feb 27 -> Feb 26 (non-leap year 2026)
@@ -195,27 +211,37 @@ describe('notificationService', () => {
       assert.strictEqual(triggerDate.getHours(), 9);
     });
 
-    it('returns null if trigger date is in the past or right now (<= reference date)', async () => {
+    it('returns null if all trigger dates are in the past or right now (<= reference date)', async () => {
       const sub = createMockSubscription({
         nextRenewalDate: '2026-09-10',
         notifyBeforeDays: 3,
       });
-      // Trigger date will be 2026-09-07 09:00:00 AM
+      // Renewal day 9:00 AM is the last stage trigger (2026-09-10 09:00:00 AM)
 
-      // Case 1: reference date is exactly trigger date -> returns null
-      const exactDate = new Date(2026, 8, 7, 9, 0, 0, 0);
-      const result1 = await scheduleRenewalReminder(sub, exactDate);
-      assert.strictEqual(result1, null);
+      // Past date: after 2026-09-10 09:00:00 AM -> returns null
+      const pastDate = new Date(2026, 8, 10, 10, 0, 0, 0);
+      const result = await scheduleRenewalReminder(sub, pastDate);
+      assert.strictEqual(result, null);
+    });
 
-      // Case 2: reference date is after trigger date -> returns null
-      const pastDate = new Date(2026, 8, 7, 10, 0, 0, 0);
-      const result2 = await scheduleRenewalReminder(sub, pastDate);
-      assert.strictEqual(result2, null);
+    it('skips past stages and schedules only remaining future stages', async () => {
+      const sub = createMockSubscription({
+        name: 'Disney+',
+        amount: 12.99,
+        currency: 'USD',
+        nextRenewalDate: '2026-09-10',
+        notifyBeforeDays: 3,
+      });
+      // Day 3 is Sep 7, Day 1 is Sep 9, Day 0 is Sep 10.
+      // Reference date: Sep 8 12:00:00 PM (Day 3 is in the past; Day 1 and Day 0 are future)
+      const refDate = new Date(2026, 8, 8, 12, 0, 0);
+      const notifId = await scheduleRenewalReminder(sub, refDate);
 
-      // Case 3: reference date is before trigger date -> schedules successfully
-      const futureDate = new Date(2026, 8, 7, 8, 59, 59, 0);
-      const result3 = await scheduleRenewalReminder(sub, futureDate);
-      assert.strictEqual(result3, 'mock-notification-id-123');
+      assert.ok(notifId);
+      const calls = mockScheduleNotificationAsync.mock.calls;
+      assert.strictEqual(calls.length, 2);
+      assert.strictEqual(calls[0].arguments[0].content.title, 'Reminder: Disney+ renews tomorrow (USD 12.99)');
+      assert.strictEqual(calls[1].arguments[0].content.title, 'Auto-charge Today: Disney+ (USD 12.99)');
     });
 
     it('defaults notifyBeforeDays to 3 if omitted/null', async () => {
@@ -226,12 +252,12 @@ describe('notificationService', () => {
 
       const refDate = new Date(2026, 8, 1);
       const notifId = await scheduleRenewalReminder(sub, refDate);
-      assert.strictEqual(notifId, 'mock-notification-id-123');
+      assert.ok(notifId);
 
       const calls = mockScheduleNotificationAsync.mock.calls;
-      const lastCall = calls[calls.length - 1];
-      assert.strictEqual(lastCall.arguments[0].content.title, 'Netflix renews in 3 days');
-      assert.strictEqual(lastCall.arguments[0].trigger.date.getDate(), 7);
+      // Day 3 is the first call
+      assert.strictEqual(calls[0].arguments[0].content.title, 'Netflix renews in 3 days (USD 15.99)');
+      assert.strictEqual(calls[0].arguments[0].trigger.date.getDate(), 7);
     });
   });
 
@@ -305,6 +331,16 @@ describe('notificationService', () => {
       const calls = mockCancelScheduledNotificationAsync.mock.calls;
       const lastCall = calls[calls.length - 1];
       assert.strictEqual(lastCall.arguments[0], 'notif-xyz-789');
+    });
+
+    it('calls cancelScheduledNotificationAsync for each ID in comma-separated string', async () => {
+      await cancelNotification('notif-1, notif-2, notif-3');
+
+      const calls = mockCancelScheduledNotificationAsync.mock.calls;
+      assert.strictEqual(calls.length, 3);
+      assert.strictEqual(calls[0].arguments[0], 'notif-1');
+      assert.strictEqual(calls[1].arguments[0], 'notif-2');
+      assert.strictEqual(calls[2].arguments[0], 'notif-3');
     });
 
     it('catches and ignores error if cancelScheduledNotificationAsync throws', async () => {

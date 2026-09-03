@@ -36,6 +36,7 @@ function createSub(overrides: Partial<Subscription> = {}): Subscription {
     isTrial: 0,
     trialEndDate: null,
     isActive: 1,
+    status: 'active',
     notifyBeforeDays: 3,
     notificationId: 'notif-' + id,
     paymentMethod: 'card',
@@ -112,7 +113,7 @@ describe('subscriptionStore', () => {
       assert.match(inserted.id, /^sub_/);
       assert.strictEqual(inserted.name, 'Netflix');
       assert.strictEqual(inserted.amount, 15.99);
-      assert.strictEqual(inserted.notificationId, 'notif-scheduled-1');
+      assert.ok(inserted.notificationId?.includes('notif-scheduled-1'));
       assert.ok(inserted.createdAt);
       assert.ok(inserted.updatedAt);
 
@@ -120,16 +121,16 @@ describe('subscriptionStore', () => {
       const inDb = getInMemorySubscriptions();
       assert.strictEqual(inDb.length, 1);
       assert.strictEqual(inDb[0].id, inserted.id);
-      assert.strictEqual(inDb[0].notificationId, 'notif-scheduled-1');
+      assert.ok(inDb[0].notificationId?.includes('notif-scheduled-1'));
 
       // Verify Zustand state
       const inStore = useSubscriptionStore.getState().subscriptions;
       assert.strictEqual(inStore.length, 1);
       assert.strictEqual(inStore[0].id, inserted.id);
-      assert.strictEqual(inStore[0].notificationId, 'notif-scheduled-1');
+      assert.ok(inStore[0].notificationId?.includes('notif-scheduled-1'));
 
       // Verify renewal notification was scheduled (not trial expiry)
-      assert.strictEqual(mockScheduleNotificationAsync.mock.callCount(), 1);
+      assert.strictEqual(mockScheduleNotificationAsync.mock.callCount(), 3);
       const callArgs = mockScheduleNotificationAsync.mock.calls[0].arguments[0];
       assert.match(callArgs.content.title, /Netflix renews in 3 days/);
       assert.strictEqual(callArgs.content.data.type, 'renewal_reminder');
@@ -222,19 +223,19 @@ describe('subscriptionStore', () => {
       );
 
       // Verify new notification was scheduled
-      assert.strictEqual(mockScheduleNotificationAsync.mock.callCount(), 1);
+      assert.strictEqual(mockScheduleNotificationAsync.mock.callCount(), 3);
 
       // Verify SQLite state updated
       const inDb = getInMemorySubscriptions();
       assert.strictEqual(inDb[0].name, 'New Name');
       assert.strictEqual(inDb[0].nextRenewalDate, '2026-09-28');
-      assert.strictEqual(inDb[0].notificationId, 'notif-rescheduled-2');
+      assert.ok(inDb[0].notificationId?.includes('notif-rescheduled-2'));
       assert.notEqual(inDb[0].updatedAt, existing.updatedAt);
 
       // Verify Zustand state updated
       const inStore = useSubscriptionStore.getState().subscriptions;
       assert.strictEqual(inStore[0].name, 'New Name');
-      assert.strictEqual(inStore[0].notificationId, 'notif-rescheduled-2');
+      assert.ok(inStore[0].notificationId?.includes('notif-rescheduled-2'));
     });
 
     it('reschedules with trial expiry alert when updating to trial subscription', async () => {
@@ -358,17 +359,17 @@ describe('subscriptionStore', () => {
       await useSubscriptionStore.getState().pauseSubscription('sub-resume-test', false);
 
       // Verify notification was rescheduled
-      assert.strictEqual(mockScheduleNotificationAsync.mock.callCount(), 1);
+      assert.strictEqual(mockScheduleNotificationAsync.mock.callCount(), 3);
 
       // Verify SQLite state
       const inDb = getInMemorySubscriptions();
       assert.strictEqual(inDb[0].isActive, 1);
-      assert.strictEqual(inDb[0].notificationId, 'notif-resumed-1');
+      assert.ok(inDb[0].notificationId?.includes('notif-resumed-1'));
 
       // Verify Zustand state
       const inStore = useSubscriptionStore.getState().subscriptions;
       assert.strictEqual(inStore[0].isActive, 1);
-      assert.strictEqual(inStore[0].notificationId, 'notif-resumed-1');
+      assert.ok(inStore[0].notificationId?.includes('notif-resumed-1'));
     });
 
     it('does nothing when called on non-existent subscription', async () => {

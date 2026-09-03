@@ -137,6 +137,7 @@ function createSub(overrides: Partial<Subscription> = {}): Subscription {
     isTrial: 0,
     trialEndDate: null,
     isActive: 1,
+    status: 'active',
     notifyBeforeDays: 3,
     notificationId: null,
     paymentMethod: 'card',
@@ -196,6 +197,7 @@ describe('Subscription Modals (New and Edit)', () => {
           isTrial: data.isTrial ?? 0,
           trialEndDate: data.trialEndDate ?? null,
           isActive: data.isActive ?? 1,
+          status: data.status ?? 'active',
           notifyBeforeDays: data.notifyBeforeDays ?? 3,
           notificationId: null,
           paymentMethod: data.paymentMethod ?? 'card',
@@ -438,6 +440,46 @@ describe('Subscription Modals (New and Edit)', () => {
       assert.equal(payload.isTrial, 0);
       assert.equal(payload.notifyBeforeDays, 3);
       assert.equal(backCalls, 1);
+    });
+
+    it('pre-populates payment method and note from settingsStore', () => {
+      useSettingsStore.setState({
+        cache: {
+          default_currency: 'USD',
+          default_payment_method: 'maya',
+          default_payment_details: '0918 ••• 9999',
+        },
+      });
+
+      startRender();
+      const element = NewSubscriptionScreen();
+
+      const paymentSelector = findByTestId(element, 'payment-method-selector');
+      assert.ok(paymentSelector);
+      assert.equal(paymentSelector.props.value, 'maya');
+      assert.equal(paymentSelector.props.details, '0918 ••• 9999');
+    });
+
+    it('reorders presets placing favorite categories at the top in recommended section', () => {
+      useSettingsStore.setState({
+        cache: {
+          default_currency: 'USD',
+          favorite_categories: JSON.stringify(['gaming']),
+        },
+      });
+
+      startRender();
+      const element = NewSubscriptionScreen();
+
+      const recommendedHeader = findByTestId(element, 'recommended-presets-section');
+      assert.ok(recommendedHeader);
+
+      const presetGrid = findByTestId(element, 'preset-grid');
+      assert.ok(presetGrid);
+
+      const firstCard = getChildren(presetGrid)[0];
+      assert.ok(firstCard);
+      assert.equal(firstCard.props.testID, 'preset-card-discord');
     });
   });
 

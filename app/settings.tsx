@@ -16,6 +16,8 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
 import { POPULAR_CURRENCIES, CurrencyInfo } from '@/constants/currencies';
+import { AVATAR_OPTIONS } from '@/constants/personalization';
+import { PaymentMethodSelector } from '@/components/PaymentMethodSelector';
 import {
   scheduleWeeklyDigest,
   cancelWeeklyDigest,
@@ -39,6 +41,7 @@ export default function SettingsScreen() {
 
   const [isCurrencyModalVisible, setIsCurrencyModalVisible] = useState(false);
   const [currencySearch, setCurrencySearch] = useState('');
+  const [aliasInput, setAliasInput] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -49,6 +52,14 @@ export default function SettingsScreen() {
 
   const currentCurrency = getSetting('default_currency', 'USD');
   const isWeeklyDigestEnabled = getSetting('notify_weekly_digest', 'true') === 'true';
+  const userAlias = getSetting('user_alias', '');
+  const userAvatar = getSetting('user_avatar', '🚀') || '🚀';
+  const defaultPaymentMethod = getSetting('default_payment_method', 'card') || 'card';
+  const defaultPaymentDetails = getSetting('default_payment_details', '');
+  const appTheme = getSetting('app_theme', 'dark') || 'dark';
+  const isGrainEnabled = getSetting('grain_enabled', 'false') === 'true';
+
+  const currentAliasDisplay = aliasInput !== null ? aliasInput : userAlias;
 
   const filteredCurrencies = useMemo(() => {
     const query = currencySearch.trim().toLowerCase();
@@ -132,6 +143,71 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Section: PROFILE & DEFAULTS */}
+        <View style={styles.section} testID="section-profile">
+          <Text style={styles.sectionHeader}>PROFILE & DEFAULTS</Text>
+          <View style={styles.card}>
+            {/* Nickname / Alias */}
+            <View style={styles.fieldBlock}>
+              <Text style={styles.subfieldLabel}>NICKNAME / ALIAS</Text>
+              <TextInput
+                style={styles.profileInput}
+                value={currentAliasDisplay}
+                onChangeText={async (text) => {
+                  setAliasInput(text);
+                  await setSetting('user_alias', text);
+                }}
+                placeholder="e.g. Janre"
+                placeholderTextColor={COLORS.textSecondary}
+                autoCapitalize="words"
+                autoCorrect={false}
+                testID="settings-alias-input"
+              />
+            </View>
+
+            {/* Avatar Selector */}
+            <View style={styles.fieldBlock}>
+              <Text style={styles.subfieldLabel}>AVATAR</Text>
+              <View style={styles.avatarRow} testID="settings-avatar-selector">
+                {AVATAR_OPTIONS.map((item) => {
+                  const isSelected = userAvatar === item.emoji;
+                  return (
+                    <TouchableOpacity
+                      key={item.id}
+                      style={[
+                        styles.avatarChip,
+                        isSelected && styles.avatarChipSelected,
+                      ]}
+                      onPress={async () => {
+                        await setSetting('user_avatar', item.emoji);
+                      }}
+                      activeOpacity={0.7}
+                      testID={`settings-avatar-${item.id}`}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${item.label} avatar`}
+                    >
+                      <Text style={styles.avatarChipEmoji}>{item.emoji}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* Default Payment Method */}
+            <PaymentMethodSelector
+              value={defaultPaymentMethod}
+              details={defaultPaymentDetails}
+              onChangeMethod={async (method) => {
+                await setSetting('default_payment_method', method);
+              }}
+              onChangeDetails={async (note) => {
+                await setSetting('default_payment_details', note);
+              }}
+              testID="settings-payment-selector"
+            />
+          </View>
+        </View>
+
         {/* Section 1: CURRENCY */}
         <View style={styles.section} testID="section-currency">
           <Text style={styles.sectionHeader}>CURRENCY</Text>
@@ -157,6 +233,100 @@ export default function SettingsScreen() {
               </View>
             </View>
           </TouchableOpacity>
+        </View>
+
+        {/* Section: THEME */}
+        <View style={styles.section} testID="section-theme">
+          <Text style={styles.sectionHeader}>THEME</Text>
+          <View style={styles.themeRowContainer}>
+            <TouchableOpacity
+              style={[
+                styles.themeOptionCard,
+                appTheme === 'dark' && styles.themeOptionCardActive,
+              ]}
+              onPress={async () => {
+                await setSetting('app_theme', 'dark');
+              }}
+              activeOpacity={0.7}
+              testID="settings-theme-dark"
+              accessibilityRole="radio"
+              accessibilityState={{ checked: appTheme === 'dark' }}
+            >
+              <View style={styles.themePreviewRow}>
+                <View style={[styles.themeSwatch, { backgroundColor: '#7B5EA7' }]} />
+                <View style={[styles.themeSwatch, { backgroundColor: '#0F0F1A' }]} />
+              </View>
+              <View style={styles.themeTextContainer}>
+                <Text style={styles.themeOptionTitle}>SignalSub Dark</Text>
+                <Text style={styles.themeOptionSubtitle}>Default purple & dark slate</Text>
+              </View>
+              {appTheme === 'dark' && (
+                <MaterialIcons
+                  name="check-circle"
+                  size={20}
+                  color={COLORS.accentPurpleLight}
+                />
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.themeOptionCard,
+                appTheme === 'oled' && styles.themeOptionCardActive,
+              ]}
+              onPress={async () => {
+                await setSetting('app_theme', 'oled');
+              }}
+              activeOpacity={0.7}
+              testID="settings-theme-oled"
+              accessibilityRole="radio"
+              accessibilityState={{ checked: appTheme === 'oled' }}
+            >
+              <View style={styles.themePreviewRow}>
+                <View style={[styles.themeSwatch, { backgroundColor: '#000000' }]} />
+                <View style={[styles.themeSwatch, { backgroundColor: '#111111' }]} />
+              </View>
+              <View style={styles.themeTextContainer}>
+                <Text style={styles.themeOptionTitle}>Midnight OLED</Text>
+                <Text style={styles.themeOptionSubtitle}>Pitch black for OLED displays</Text>
+              </View>
+              {appTheme === 'oled' && (
+                <MaterialIcons
+                  name="check-circle"
+                  size={20}
+                  color={COLORS.accentPurpleLight}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Section: VISUAL EFFECTS */}
+        <View style={styles.section} testID="section-visual-effects">
+          <Text style={styles.sectionHeader}>VISUAL EFFECTS</Text>
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <View style={styles.notificationTextContainer}>
+                <Text style={styles.rowLabel}>Grain Overlay</Text>
+                <Text style={styles.rowSubtitle}>
+                  Subtle film grain texture effect across screens
+                </Text>
+              </View>
+              <Switch
+                value={isGrainEnabled}
+                onValueChange={async (val) => {
+                  await setSetting('grain_enabled', val ? 'true' : 'false');
+                }}
+                trackColor={{
+                  false: COLORS.bgSurface,
+                  true: COLORS.accentPurple,
+                }}
+                thumbColor="#FFFFFF"
+                testID="settings-grain-switch"
+                accessibilityLabel="Grain Overlay Toggle"
+              />
+            </View>
+          </View>
         </View>
 
         {/* Section 2: NOTIFICATIONS */}
@@ -543,5 +713,89 @@ const styles = StyleSheet.create({
   },
   currencyCheckIcon: {
     marginLeft: 8,
+  },
+  fieldBlock: {
+    marginBottom: 16,
+  },
+  subfieldLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    color: COLORS.textSecondary,
+    marginBottom: 8,
+  },
+  profileInput: {
+    backgroundColor: '#161626',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: '#FFFFFF',
+  },
+  avatarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  avatarChip: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#161626',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  avatarChipSelected: {
+    borderColor: COLORS.accentPurple,
+    backgroundColor: 'rgba(123, 94, 167, 0.25)',
+  },
+  avatarChipEmoji: {
+    fontSize: 22,
+  },
+  themeRowContainer: {
+    gap: 10,
+  },
+  themeOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.bgCard,
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: COLORS.bgSurface,
+  },
+  themeOptionCardActive: {
+    borderColor: COLORS.accentPurple,
+    backgroundColor: 'rgba(123, 94, 167, 0.15)',
+  },
+  themePreviewRow: {
+    flexDirection: 'row',
+    marginRight: 12,
+    gap: 4,
+  },
+  themeSwatch: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  themeTextContainer: {
+    flex: 1,
+  },
+  themeOptionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  themeOptionSubtitle: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginTop: 2,
   },
 });

@@ -41,12 +41,11 @@ export default function CurrencyScreen() {
     setIsSubmitting(true);
     try {
       await setSetting('default_currency', selected);
-      await setSetting('has_onboarded', 'true');
       await requestNotificationPermission();
-      router.replace('/(tabs)');
+      router.push('/(onboarding)/personalize');
     } catch (error) {
       console.error('Failed to finalize onboarding:', error);
-      router.replace('/(tabs)');
+      router.push('/(onboarding)/personalize');
     } finally {
       setIsSubmitting(false);
     }

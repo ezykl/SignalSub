@@ -1,4 +1,4 @@
-﻿import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -27,15 +27,19 @@ import {
   SubscriptionRow,
 } from '@/components';
 
-export function getGreeting(date: Date = new Date()): string {
+export function getGreeting(date: Date = new Date(), userAlias?: string): string {
   const hour = date.getHours();
-  if (hour < 12) {
-    return 'Good Morning 👋';
+  const timeGreeting =
+    hour < 12
+      ? 'Good Morning'
+      : hour < 17
+      ? 'Good Afternoon'
+      : 'Good Evening';
+
+  if (userAlias && userAlias.trim()) {
+    return `${timeGreeting}, ${userAlias.trim()} 👋`;
   }
-  if (hour < 17) {
-    return 'Good Afternoon 👋';
-  }
-  return 'Good Evening 👋';
+  return `${timeGreeting} 👋`;
 }
 
 export const MONTH_NAMES = [
@@ -124,18 +128,25 @@ export default function DashboardScreen({
     (state) => state.pauseSubscription
   );
   const getSetting = useSettingsStore((state) => state.getSetting);
+  const loadSettings = useSettingsStore((state) => state.loadSettings);
+  useSettingsStore((state) => state.cache);
 
   const currency = getSetting('default_currency', 'USD');
+  const userAlias = getSetting('user_alias', '');
+  const userAvatar = getSetting('user_avatar', '');
+  const defaultPaymentMethod = getSetting('default_payment_method', '');
 
   useFocusEffect(
     useCallback(() => {
+      loadSettings?.();
       loadSubscriptions();
-    }, [loadSubscriptions])
+    }, [loadSettings, loadSubscriptions])
   );
 
   const now = referenceDate ?? new Date();
-  const greeting = getGreeting(now);
+  const greeting = getGreeting(now, userAlias);
   const formattedDate = formatDashboardDate(now);
+  const isSetupIncomplete = !userAlias.trim() || !defaultPaymentMethod.trim();
 
   const alerts = computeDashboardAlerts(subscriptions, currency, now);
   const monthlyTotal = computeMonthlyTotal(subscriptions);
@@ -156,21 +167,57 @@ export default function DashboardScreen({
             <Text style={styles.greeting}>{greeting}</Text>
             <Text style={styles.subtitle}>{formattedDate}</Text>
           </View>
-          <TouchableOpacity
-            style={styles.bellButton}
-            onPress={() => router.push('/settings')}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Notifications and Settings"
-            testID="dashboard-settings-button"
-          >
-            <MaterialIcons
-              name="notifications-none"
-              size={24}
-              color={COLORS.textPrimary}
-            />
-          </TouchableOpacity>
+          <View style={styles.headerRight}>
+            {userAvatar ? (
+              <TouchableOpacity
+                style={styles.avatarBadge}
+                onPress={() => router.push('/settings')}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={`Profile avatar: ${userAvatar}`}
+                testID="dashboard-avatar-badge"
+              >
+                <Text style={styles.avatarEmoji}>{userAvatar}</Text>
+              </TouchableOpacity>
+            ) : null}
+            <TouchableOpacity
+              style={styles.bellButton}
+              onPress={() => router.push('/settings')}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Notifications and Settings"
+              testID="dashboard-settings-button"
+            >
+              <MaterialIcons
+                name="notifications-none"
+                size={24}
+                color={COLORS.textPrimary}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
+
+        {/* Personalization Setup Card */}
+        {isSetupIncomplete && (
+          <View style={styles.setupCard} testID="dashboard-setup-card">
+            <View style={styles.setupCardContent}>
+              <Text style={styles.setupCardText}>
+                👋 Personalize your tracker: Set default payment method & alias
+              </Text>
+              <TouchableOpacity
+                style={styles.setupCardButton}
+                onPress={() => router.push('/settings')}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Set Up Now"
+                testID="setup-card-button"
+              >
+                <Text style={styles.setupCardButtonText}>Set Up Now</Text>
+                <MaterialIcons name="arrow-forward" size={14} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         {/* Alert Banners */}
         {alerts.length > 0 && (
@@ -315,7 +362,61 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bgCard,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     marginLeft: 12,
+  },
+  avatarBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(123, 94, 167, 0.18)',
+    borderWidth: 1.5,
+    borderColor: COLORS.accentPurple,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarEmoji: {
+    fontSize: 22,
+  },
+  setupCard: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    backgroundColor: 'rgba(123, 94, 167, 0.12)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(167, 139, 250, 0.3)',
+    padding: 14,
+  },
+  setupCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  setupCardText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#FFFFFF',
+    lineHeight: 18,
+    fontWeight: '500',
+  },
+  setupCardButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.accentPurple,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 4,
+  },
+  setupCardButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   alertsContainer: {
     paddingHorizontal: 16,

@@ -133,6 +133,7 @@ function createMockSub(overrides: Partial<Subscription> = {}): Subscription {
     isTrial: 0,
     trialEndDate: null,
     isActive: 1,
+    status: 'active',
     notifyBeforeDays: 3,
     notificationId: 'mock-notif-1',
     paymentMethod: 'card',
@@ -618,6 +619,109 @@ describe('Settings Screen (app/settings.tsx)', () => {
       assert.equal(deletedSubscriptionIds.length, 0);
       assert.equal(alertCalls.length, 2);
       assert.equal(alertCalls[1].title, 'Data Cleared');
+    });
+  });
+
+  // =========================================================================
+  // 5. Section: PROFILE & DEFAULTS
+  // =========================================================================
+  describe('Section: PROFILE & DEFAULTS', () => {
+    it('renders profile section and updates user_alias on text input', async () => {
+      useSettingsStore.setState({
+        cache: {
+          user_alias: 'Janre',
+        },
+      });
+
+      startRender();
+      const element = SettingsScreen();
+
+      const profileSection = findByTestId(element, 'section-profile');
+      assert.ok(profileSection);
+
+      const aliasInput = findByTestId(element, 'settings-alias-input');
+      assert.ok(aliasInput);
+      assert.equal(aliasInput.props.value, 'Janre');
+
+      // Update alias
+      await aliasInput.props.onChangeText('Janre Developer');
+      assert.equal(useSettingsStore.getState().getSetting('user_alias'), 'Janre Developer');
+    });
+
+    it('renders 6 avatar options and updates user_avatar when tapped', async () => {
+      startRender();
+      const element = SettingsScreen();
+
+      const avatarSelector = findByTestId(element, 'settings-avatar-selector');
+      assert.ok(avatarSelector);
+
+      const robotOption = findByTestId(element, 'settings-avatar-robot');
+      assert.ok(robotOption);
+
+      await robotOption.props.onPress();
+      assert.equal(useSettingsStore.getState().getSetting('user_avatar'), '🤖');
+    });
+
+    it('renders default payment selector and updates default payment method and details', async () => {
+      startRender();
+      const element = SettingsScreen();
+
+      const paymentSelector = findByTestId(element, 'settings-payment-selector');
+      assert.ok(paymentSelector);
+
+      await paymentSelector.props.onChangeMethod('gcash');
+      assert.equal(useSettingsStore.getState().getSetting('default_payment_method'), 'gcash');
+
+      await paymentSelector.props.onChangeDetails('0917 ••• 5678');
+      assert.equal(useSettingsStore.getState().getSetting('default_payment_details'), '0917 ••• 5678');
+    });
+  });
+
+  // =========================================================================
+  // 6. Section: THEME
+  // =========================================================================
+  describe('Section: THEME', () => {
+    it('renders SignalSub Dark and Midnight OLED options, switches theme when selected', async () => {
+      startRender();
+      const element = SettingsScreen();
+
+      const themeSection = findByTestId(element, 'section-theme');
+      assert.ok(themeSection);
+
+      const oledOption = findByTestId(element, 'settings-theme-oled');
+      assert.ok(oledOption);
+
+      await oledOption.props.onPress();
+      assert.equal(useSettingsStore.getState().getSetting('app_theme'), 'oled');
+
+      const darkOption = findByTestId(element, 'settings-theme-dark');
+      assert.ok(darkOption);
+
+      await darkOption.props.onPress();
+      assert.equal(useSettingsStore.getState().getSetting('app_theme'), 'dark');
+    });
+  });
+
+  // =========================================================================
+  // 7. Section: VISUAL EFFECTS
+  // =========================================================================
+  describe('Section: VISUAL EFFECTS', () => {
+    it('renders grain overlay toggle and updates grain_enabled setting', async () => {
+      startRender();
+      const element = SettingsScreen();
+
+      const visualSection = findByTestId(element, 'section-visual-effects');
+      assert.ok(visualSection);
+
+      const grainSwitch = findByTestId(element, 'settings-grain-switch');
+      assert.ok(grainSwitch);
+      assert.equal(grainSwitch.props.value, false);
+
+      await grainSwitch.props.onValueChange(true);
+      assert.equal(useSettingsStore.getState().getSetting('grain_enabled'), 'true');
+
+      await grainSwitch.props.onValueChange(false);
+      assert.equal(useSettingsStore.getState().getSetting('grain_enabled'), 'false');
     });
   });
 });
