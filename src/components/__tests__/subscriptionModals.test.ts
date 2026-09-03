@@ -139,6 +139,8 @@ function createSub(overrides: Partial<Subscription> = {}): Subscription {
     isActive: 1,
     notifyBeforeDays: 3,
     notificationId: null,
+    paymentMethod: 'card',
+    paymentDetails: null,
     createdAt: '2026-09-03T00:00:00.000Z',
     updatedAt: '2026-09-03T00:00:00.000Z',
     ...overrides,
@@ -196,6 +198,8 @@ describe('Subscription Modals (New and Edit)', () => {
           isActive: data.isActive ?? 1,
           notifyBeforeDays: data.notifyBeforeDays ?? 3,
           notificationId: null,
+          paymentMethod: data.paymentMethod ?? 'card',
+          paymentDetails: data.paymentDetails ?? null,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };

@@ -16,6 +16,8 @@ import { CATEGORIES } from '@/constants/categories';
 import { getCurrencyByCode } from '@/constants/currencies';
 import { BillingCycle, BillingCyclePill } from '@/components/BillingCyclePill';
 import { CategoryChip } from '@/components/CategoryChip';
+import { PaymentMethodSelector } from '@/components/PaymentMethodSelector';
+import { DatePickerField } from '@/components/DatePickerModal';
 import { computeNextRenewalDate } from '@/services/renewalService';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
@@ -78,6 +80,12 @@ export default function EditSubscriptionScreen() {
   );
   const [notifyBeforeDays, setNotifyBeforeDays] = useState(
     sub?.notifyBeforeDays ?? 3
+  );
+  const [paymentMethod, setPaymentMethod] = useState<string>(
+    sub?.paymentMethod ?? 'card'
+  );
+  const [paymentDetails, setPaymentDetails] = useState<string>(
+    sub?.paymentDetails ?? ''
   );
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -177,6 +185,8 @@ export default function EditSubscriptionScreen() {
         isTrial: isTrial ? 1 : 0,
         trialEndDate: isTrial ? trialEndDate.trim() || null : null,
         notifyBeforeDays,
+        paymentMethod: paymentMethod || 'card',
+        paymentDetails: paymentDetails.trim() || null,
       });
 
       router.back();
@@ -301,17 +311,13 @@ export default function EditSubscriptionScreen() {
           </View>
 
           {/* Next Renewal Date */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>NEXT RENEWAL DATE</Text>
-            <TextInput
-              testID="input-renewal-date"
-              value={nextRenewalDate}
-              onChangeText={setNextRenewalDate}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={COLORS.textSecondary}
-              style={styles.textInput}
-            />
-          </View>
+          <DatePickerField
+            label="NEXT RENEWAL DATE"
+            value={nextRenewalDate}
+            onChange={setNextRenewalDate}
+            title="Select Renewal Date"
+            testID="input-renewal-date"
+          />
 
           {/* Category */}
           <View style={styles.fieldGroup}>
@@ -334,6 +340,15 @@ export default function EditSubscriptionScreen() {
               ))}
             </ScrollView>
           </View>
+
+          {/* Payment Method Selector */}
+          <PaymentMethodSelector
+            value={paymentMethod}
+            details={paymentDetails}
+            onChangeMethod={setPaymentMethod}
+            onChangeDetails={setPaymentDetails}
+            testID="payment-method-selector"
+          />
 
           {/* Free Trial Toggle Row */}
           <View style={styles.toggleCard}>
@@ -362,17 +377,13 @@ export default function EditSubscriptionScreen() {
 
           {/* Trial End Date (if trial enabled) */}
           {isTrial ? (
-            <View style={[styles.fieldGroup, styles.trialDateGroup]}>
-              <Text style={styles.fieldLabel}>TRIAL END DATE</Text>
-              <TextInput
-                testID="input-trial-end-date"
-                value={trialEndDate}
-                onChangeText={setTrialEndDate}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={COLORS.textSecondary}
-                style={styles.textInput}
-              />
-            </View>
+            <DatePickerField
+              label="TRIAL END DATE"
+              value={trialEndDate}
+              onChange={setTrialEndDate}
+              title="Select Trial End Date"
+              testID="input-trial-end-date"
+            />
           ) : null}
 
           {/* Notification Stepper */}

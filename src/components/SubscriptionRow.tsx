@@ -13,6 +13,7 @@ import { COLORS } from '../constants/colors';
 import type { Subscription } from '../db/schema';
 import { daysUntil, formatRenewalLabel } from '../services/renewalService';
 import { BrandIcon } from './BrandIcon';
+import { getPaymentMethod } from '../constants/paymentMethods';
 
 export interface SubscriptionRowProps {
   subscription: Subscription;
@@ -47,6 +48,9 @@ export function SubscriptionRow({
   const billingCycleSubtitle = subscription.billingCycle
     ? `/${subscription.billingCycle}`
     : '';
+  const paymentDef = subscription.paymentMethod
+    ? getPaymentMethod(subscription.paymentMethod)
+    : null;
 
   const renderRightActions = (
     _progress?: any,
@@ -223,6 +227,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.warning,
     textTransform: 'uppercase',
+  },
+  paymentBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    marginLeft: 6,
+  },
+  paymentBadgeText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#94A3B8',
   },
   subtitleText: {
     fontSize: 12,

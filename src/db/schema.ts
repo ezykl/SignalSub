@@ -18,6 +18,8 @@ export const subscriptions = sqliteTable('subscriptions', {
   isActive: integer('is_active').notNull().default(1),
   notifyBeforeDays: integer('notify_before_days').notNull().default(3),
   notificationId: text('notification_id'),
+  paymentMethod: text('payment_method').notNull().default('card'),
+  paymentDetails: text('payment_details'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });

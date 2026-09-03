@@ -69,6 +69,8 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       isActive: data.isActive ?? 1,
       notifyBeforeDays: data.notifyBeforeDays ?? 3,
       notificationId: null,
+      paymentMethod: data.paymentMethod ?? 'card',
+      paymentDetails: data.paymentDetails ?? null,
       createdAt: now,
       updatedAt: now,
     };

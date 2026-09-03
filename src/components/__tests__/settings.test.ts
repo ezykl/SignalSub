@@ -135,6 +135,8 @@ function createMockSub(overrides: Partial<Subscription> = {}): Subscription {
     isActive: 1,
     notifyBeforeDays: 3,
     notificationId: 'mock-notif-1',
+    paymentMethod: 'card',
+    paymentDetails: null,
     createdAt: '2026-09-01T00:00:00.000Z',
     updatedAt: '2026-09-01T00:00:00.000Z',
     ...overrides,

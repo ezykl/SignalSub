@@ -133,6 +133,8 @@ function createSub(overrides: Partial<Subscription> = {}): Subscription {
     isActive: 1,
     notifyBeforeDays: 3,
     notificationId: null,
+    paymentMethod: 'card',
+    paymentDetails: null,
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
     ...overrides,
