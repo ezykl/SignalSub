@@ -150,6 +150,47 @@ try {
   // ignore
 }
 
+// Mock react-native-svg
+try {
+  const rnSvgResolved = require.resolve('react-native-svg');
+  const SvgMock: any = Object.assign((props: any) => props, {
+    Circle: 'Circle',
+    G: 'G',
+    Path: 'Path',
+    Text: 'SvgText',
+  });
+  require.cache[rnSvgResolved] = {
+    id: rnSvgResolved,
+    filename: rnSvgResolved,
+    loaded: true,
+    exports: {
+      default: SvgMock,
+      Svg: SvgMock,
+      Circle: 'Circle',
+      G: 'G',
+      Path: 'Path',
+      Text: 'SvgText',
+    },
+  } as unknown as NodeModule;
+} catch {
+  // ignore
+}
+
+// Mock victory-native
+try {
+  const vnResolved = require.resolve('victory-native');
+  require.cache[vnResolved] = {
+    id: vnResolved,
+    filename: vnResolved,
+    loaded: true,
+    exports: {
+      VictoryPie: 'VictoryPie',
+    },
+  } as unknown as NodeModule;
+} catch {
+  // ignore
+}
+
 // Mock expo-router
 export const mockRouter = {
   push: (_url: string) => {},
