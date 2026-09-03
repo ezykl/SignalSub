@@ -55,6 +55,11 @@ try {
   // ignore
 }
 
+// Mock Alert
+export const mockAlert = {
+  alert: (_title: string, _message?: string, _buttons?: any[]) => {},
+};
+
 // Mock react-native
 const mockReactNative = {
   View: 'View',
@@ -67,6 +72,7 @@ const mockReactNative = {
   ScrollView: 'ScrollView',
   ActivityIndicator: 'ActivityIndicator',
   StatusBar: 'StatusBar',
+  Alert: mockAlert,
   StyleSheet: {
     create: <T extends Record<string, any>>(styles: T): T => styles,
     flatten: (style: any) => {
@@ -206,6 +212,11 @@ const MockTabs: any = Object.assign((props: any) => props, {
   Screen: (props: any) => props,
 });
 
+export let mockSearchParams: Record<string, any> = {};
+export function setMockSearchParams(params: Record<string, any>) {
+  mockSearchParams = params;
+}
+
 try {
   const erResolved = require.resolve('expo-router');
   require.cache[erResolved] = {
@@ -215,6 +226,7 @@ try {
     exports: {
       mockRouter,
       useRouter: () => mockRouter,
+      useLocalSearchParams: () => mockSearchParams,
       useSegments: () => [],
       useFocusEffect: (cb: any) => {
         if (typeof cb === 'function') {
