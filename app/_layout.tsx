@@ -1,12 +1,16 @@
 import '../global.css';
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, StatusBar } from 'react-native';
+import { StatusBar } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as SplashScreen from 'expo-splash-screen';
 import { runMigrations } from '@/db/client';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { COLORS } from '@/constants/colors';
+
+// Keep the splash screen visible until we explicitly hide it after DB init
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [isReady, setIsReady] = useState(false);
@@ -28,6 +32,8 @@ export default function RootLayout() {
         console.error('Failed to initialize SignalSub database/stores:', error);
       } finally {
         setIsReady(true);
+        // Splash screen hides here — after DB + stores are ready
+        await SplashScreen.hideAsync();
       }
     }
 
@@ -47,22 +53,7 @@ export default function RootLayout() {
     }
   }, [isReady, segments, cache, getSetting, router]);
 
-  if (!isReady) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: COLORS.bgPrimary,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <StatusBar barStyle="light-content" backgroundColor={COLORS.bgPrimary} />
-        <ActivityIndicator color={COLORS.accentPurple} size="large" />
-      </View>
-    );
-  }
-
+  // Render the Stack immediately — the splash screen overlays it until hideAsync() is called
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: COLORS.bgPrimary }}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.bgPrimary} />
