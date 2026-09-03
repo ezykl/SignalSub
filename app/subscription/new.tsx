@@ -18,9 +18,11 @@ import {
   SERVICE_PRESETS,
   ServicePreset,
   searchPresets,
+  getIconForPreset,
 } from '@/constants/servicePresets';
 import { BillingCycle, BillingCyclePill } from '@/components/BillingCyclePill';
 import { CategoryChip } from '@/components/CategoryChip';
+import { InitialAvatar } from '@/components/InitialAvatar';
 import { computeNextRenewalDate } from '@/services/renewalService';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
@@ -79,8 +81,10 @@ export default function NewSubscriptionScreen() {
     setName(preset.name);
     setSelectedCategory(preset.category);
     setColor(preset.color);
-    setIconType('preset');
-    setIconValue(preset.icon);
+    const { iconType: pIconType, iconValue: pIconValue } = getIconForPreset(preset);
+    // DB schema uses 'preset' for MCI icons, 'initial' for letter avatars
+    setIconType(pIconType === 'mci' ? 'preset' : 'initial');
+    setIconValue(pIconValue);
     if (preset.defaultAmount !== undefined) {
       setAmount(String(preset.defaultAmount));
     }
@@ -259,18 +263,27 @@ export default function NewSubscriptionScreen() {
                   accessibilityRole="button"
                   accessibilityState={{ selected: isSelected }}
                 >
-                  <View
-                    style={[
-                      styles.presetIconContainer,
-                      { backgroundColor: preset.color },
-                    ]}
-                  >
-                    <MaterialCommunityIcons
-                      name={preset.icon as any}
-                      size={22}
-                      color="#FFFFFF"
+                  {preset.iconType === 'mci' ? (
+                    <View
+                      style={[
+                        styles.presetIconContainer,
+                        { backgroundColor: preset.color },
+                      ]}
+                    >
+                      <MaterialCommunityIcons
+                        name={preset.icon as any}
+                        size={22}
+                        color="#FFFFFF"
+                      />
+                    </View>
+                  ) : (
+                    <InitialAvatar
+                      letter={preset.icon || preset.name}
+                      color={preset.color}
+                      size={38}
+                      style={styles.presetIconContainer}
                     />
-                  </View>
+                  )}
                   <Text
                     numberOfLines={1}
                     style={[
