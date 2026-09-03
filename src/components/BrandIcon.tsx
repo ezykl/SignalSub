@@ -40,13 +40,17 @@ export function BrandIcon({
   let iconContent: React.ReactNode = null;
 
   if (brandIcon) {
+    const validPaths = brandIcon.paths.filter(
+      (d) => typeof d === 'string' && /^[MmLlHhVvCcSsQqTtAaZz]/.test(d.trim())
+    );
+
     iconContent = (
       <Svg
         width={calculatedIconSize}
         height={calculatedIconSize}
         viewBox={brandIcon.viewBox}
       >
-        {brandIcon.paths.map((d, index) => (
+        {validPaths.map((d, index) => (
           <Path key={index} d={d} fill={iconColor} />
         ))}
       </Svg>
