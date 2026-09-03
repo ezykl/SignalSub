@@ -28,28 +28,30 @@ try {
 }
 
 // Mock expo-notifications
+export const mockExpoNotifications = {
+  getPermissionsAsync: async () => ({ status: 'granted', granted: true }),
+  requestPermissionsAsync: async () => ({ status: 'granted', granted: true }),
+  scheduleNotificationAsync: async (_req?: any) => 'mock-notification-id',
+  cancelScheduledNotificationAsync: async (_id: string) => {},
+  setNotificationHandler: () => {},
+  SchedulableTriggerInputTypes: {
+    CALENDAR: 'calendar',
+    DAILY: 'daily',
+    WEEKLY: 'weekly',
+    MONTHLY: 'monthly',
+    YEARLY: 'yearly',
+    DATE: 'date',
+    TIME_INTERVAL: 'timeInterval',
+  },
+};
+
 try {
   const expoNotifResolved = require.resolve('expo-notifications');
   require.cache[expoNotifResolved] = {
     id: expoNotifResolved,
     filename: expoNotifResolved,
     loaded: true,
-    exports: {
-      getPermissionsAsync: async () => ({ status: 'granted', granted: true }),
-      requestPermissionsAsync: async () => ({ status: 'granted', granted: true }),
-      scheduleNotificationAsync: async () => 'mock-notification-id',
-      cancelScheduledNotificationAsync: async () => {},
-      setNotificationHandler: () => {},
-      SchedulableTriggerInputTypes: {
-        CALENDAR: 'calendar',
-        DAILY: 'daily',
-        WEEKLY: 'weekly',
-        MONTHLY: 'monthly',
-        YEARLY: 'yearly',
-        DATE: 'date',
-        TIME_INTERVAL: 'timeInterval',
-      },
-    },
+    exports: mockExpoNotifications,
   } as unknown as NodeModule;
 } catch {
   // ignore
@@ -72,6 +74,8 @@ const mockReactNative = {
   ScrollView: 'ScrollView',
   ActivityIndicator: 'ActivityIndicator',
   StatusBar: 'StatusBar',
+  Switch: 'Switch',
+  Modal: 'Modal',
   Alert: mockAlert,
   StyleSheet: {
     create: <T extends Record<string, any>>(styles: T): T => styles,
