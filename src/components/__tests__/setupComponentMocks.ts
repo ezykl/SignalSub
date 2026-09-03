@@ -151,6 +151,20 @@ try {
 }
 
 // Mock expo-router
+export const mockRouter = {
+  push: (_url: string) => {},
+  replace: (_url: string) => {},
+  back: () => {},
+};
+
+const MockStack: any = Object.assign((props: any) => props, {
+  Screen: (props: any) => props,
+});
+
+const MockTabs: any = Object.assign((props: any) => props, {
+  Screen: (props: any) => props,
+});
+
 try {
   const erResolved = require.resolve('expo-router');
   require.cache[erResolved] = {
@@ -158,17 +172,20 @@ try {
     filename: erResolved,
     loaded: true,
     exports: {
-      useRouter: () => ({
-        push: () => {},
-        replace: () => {},
-        back: () => {},
-      }),
+      mockRouter,
+      useRouter: () => mockRouter,
       useSegments: () => [],
-      Stack: Object.assign('Stack', {
-        Screen: 'Stack.Screen',
-      }),
+      useFocusEffect: (cb: any) => {
+        if (typeof cb === 'function') {
+          return cb();
+        }
+      },
+      Stack: MockStack,
+      Tabs: MockTabs,
     },
   } as unknown as NodeModule;
 } catch {
   // ignore
 }
+
+
