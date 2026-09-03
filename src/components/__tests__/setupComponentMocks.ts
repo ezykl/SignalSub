@@ -3,6 +3,58 @@ require.extensions['.png'] = (module: any) => {
   module.exports = 1;
 };
 
+// Mock @react-native/assets-registry
+try {
+  const arResolved = require.resolve('@react-native/assets-registry/registry.js');
+  require.cache[arResolved] = {
+    id: arResolved,
+    filename: arResolved,
+    loaded: true,
+    exports: {
+      registerAsset: () => 1,
+      getAssetByID: () => ({
+        httpServerLocation: '',
+        width: 100,
+        height: 100,
+        scales: [1],
+        hash: '1',
+        name: 'asset',
+        type: 'png',
+      }),
+    },
+  } as unknown as NodeModule;
+} catch {
+  // ignore
+}
+
+// Mock expo-notifications
+try {
+  const expoNotifResolved = require.resolve('expo-notifications');
+  require.cache[expoNotifResolved] = {
+    id: expoNotifResolved,
+    filename: expoNotifResolved,
+    loaded: true,
+    exports: {
+      getPermissionsAsync: async () => ({ status: 'granted', granted: true }),
+      requestPermissionsAsync: async () => ({ status: 'granted', granted: true }),
+      scheduleNotificationAsync: async () => 'mock-notification-id',
+      cancelScheduledNotificationAsync: async () => {},
+      setNotificationHandler: () => {},
+      SchedulableTriggerInputTypes: {
+        CALENDAR: 'calendar',
+        DAILY: 'daily',
+        WEEKLY: 'weekly',
+        MONTHLY: 'monthly',
+        YEARLY: 'yearly',
+        DATE: 'date',
+        TIME_INTERVAL: 'timeInterval',
+      },
+    },
+  } as unknown as NodeModule;
+} catch {
+  // ignore
+}
+
 // Mock react-native
 const mockReactNative = {
   View: 'View',
@@ -10,6 +62,11 @@ const mockReactNative = {
   Image: 'Image',
   TouchableOpacity: 'TouchableOpacity',
   Pressable: 'Pressable',
+  TextInput: 'TextInput',
+  FlatList: 'FlatList',
+  ScrollView: 'ScrollView',
+  ActivityIndicator: 'ActivityIndicator',
+  StatusBar: 'StatusBar',
   StyleSheet: {
     create: <T extends Record<string, any>>(styles: T): T => styles,
     flatten: (style: any) => {
@@ -70,6 +127,46 @@ try {
     loaded: true,
     exports: {
       Swipeable: 'Swipeable',
+    },
+  } as unknown as NodeModule;
+} catch {
+  // ignore
+}
+
+// Mock react-native-safe-area-context
+try {
+  const rnsacResolved = require.resolve('react-native-safe-area-context');
+  require.cache[rnsacResolved] = {
+    id: rnsacResolved,
+    filename: rnsacResolved,
+    loaded: true,
+    exports: {
+      SafeAreaView: 'SafeAreaView',
+      SafeAreaProvider: 'SafeAreaProvider',
+      useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+    },
+  } as unknown as NodeModule;
+} catch {
+  // ignore
+}
+
+// Mock expo-router
+try {
+  const erResolved = require.resolve('expo-router');
+  require.cache[erResolved] = {
+    id: erResolved,
+    filename: erResolved,
+    loaded: true,
+    exports: {
+      useRouter: () => ({
+        push: () => {},
+        replace: () => {},
+        back: () => {},
+      }),
+      useSegments: () => [],
+      Stack: Object.assign('Stack', {
+        Screen: 'Stack.Screen',
+      }),
     },
   } as unknown as NodeModule;
 } catch {

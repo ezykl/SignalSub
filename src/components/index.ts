@@ -8,3 +8,4 @@ export * from './StatCard';
 export * from './SpendingCard';
 export * from './SubscriptionCard';
 export * from './SubscriptionRow';
+export * from './OnboardingStep';
