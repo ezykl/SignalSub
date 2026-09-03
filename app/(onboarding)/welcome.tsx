@@ -1,33 +1,33 @@
 import React from 'react';
 import {
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const handleGetStarted = () => {
     router.push('/(onboarding)/step-1');
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom + 16 }]}>
       {/* Centered Brand Area */}
       <View style={styles.centerSection}>
-        {/* Soft purple glow behind logo */}
+        {/* Logo glow circle with icon */}
         <View style={styles.logoGlow}>
-          <Image
-            source={require('../../assets/images/logo.png')}
-            style={styles.logoImage}
-            resizeMode="contain"
-            accessibilityLabel="SignalSub Logo"
+          <MaterialCommunityIcons
+            name="bell-badge-outline"
+            size={52}
+            color={COLORS.accentPurpleLight}
           />
         </View>
 
@@ -57,7 +57,7 @@ export default function WelcomeScreen() {
           No account needed · Works offline
         </Text>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
