@@ -8,6 +8,7 @@ import {
   SubscriptionRow,
   NoiseOverlay,
   InitialAvatar,
+  BrandIcon,
 } from '../index';
 import { COLORS } from '../../constants/colors';
 import type { Subscription } from '../../db/schema';
@@ -205,13 +206,12 @@ describe('Subscription Display Components', () => {
       const [topRow] = getChildren(overlay);
       const [iconEl] = getChildren(topRow);
 
-      assert.equal(iconEl.type, 'MaterialCommunityIcons');
-      assert.equal(iconEl.props.name, 'spotify');
+      assert.equal(iconEl.type, BrandIcon);
+      assert.equal(iconEl.props.name, 'Netflix');
       assert.equal(iconEl.props.size, 28);
-      assert.equal(iconEl.props.color, '#fff');
     });
 
-    it('renders InitialAvatar with letter and semi-transparent white for custom/initial iconType', () => {
+    it('renders BrandIcon with letter and semi-transparent white for custom/initial iconType', () => {
       const sub = createMockSubscription({
         iconType: 'initial',
         iconValue: 'H',
@@ -223,9 +223,8 @@ describe('Subscription Display Components', () => {
       const [topRow] = getChildren(overlay);
       const [iconEl] = getChildren(topRow);
 
-      assert.equal(iconEl.type, InitialAvatar);
-      assert.equal(iconEl.props.letter, 'H');
-      assert.equal(iconEl.props.color, 'rgba(255,255,255,0.3)');
+      assert.equal(iconEl.type, BrandIcon);
+      assert.equal(iconEl.props.name, 'HBO Max');
       assert.equal(iconEl.props.size, 28);
     });
 
@@ -435,21 +434,13 @@ describe('Subscription Display Components', () => {
       const card = getChildren(element)[0];
       const [leftIcon] = getChildren(card);
 
-      assert.equal(leftIcon.type, 'View');
-      const iconStyle = flattenStyle(leftIcon.props.style);
-      assert.equal(iconStyle.width, 40);
-      assert.equal(iconStyle.height, 40);
-      assert.equal(iconStyle.borderRadius, 20);
-      assert.equal(iconStyle.backgroundColor, '#E50914');
-
-      const icon = getChildren(leftIcon)[0];
-      assert.equal(icon.type, 'MaterialCommunityIcons');
-      assert.equal(icon.props.name, 'netflix');
-      assert.equal(icon.props.size, 22);
-      assert.equal(icon.props.color, '#FFFFFF');
+      assert.equal(leftIcon.type, BrandIcon);
+      assert.equal(leftIcon.props.name, 'Netflix');
+      assert.equal(leftIcon.props.size, 40);
+      assert.equal(leftIcon.props.showContainer, true);
     });
 
-    it('renders 40x40 InitialAvatar for custom/initial iconType', () => {
+    it('renders 40x40 BrandIcon for custom/initial iconType', () => {
       const sub = createMockSubscription({
         iconType: 'initial',
         iconValue: 'D',
@@ -460,10 +451,10 @@ describe('Subscription Display Components', () => {
       const card = getChildren(element)[0];
       const [avatar] = getChildren(card);
 
-      assert.equal(avatar.type, InitialAvatar);
-      assert.equal(avatar.props.letter, 'D');
-      assert.equal(avatar.props.color, '#0061FF');
+      assert.equal(avatar.type, BrandIcon);
+      assert.equal(avatar.props.name, 'Dropbox');
       assert.equal(avatar.props.size, 40);
+      assert.equal(avatar.props.showContainer, true);
     });
 
     it('renders center column with name and category · renewal label subtitle', () => {

@@ -22,7 +22,7 @@ import {
 } from '@/constants/servicePresets';
 import { BillingCycle, BillingCyclePill } from '@/components/BillingCyclePill';
 import { CategoryChip } from '@/components/CategoryChip';
-import { InitialAvatar } from '@/components/InitialAvatar';
+import { BrandIcon } from '@/components/BrandIcon';
 import { computeNextRenewalDate } from '@/services/renewalService';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
@@ -82,8 +82,8 @@ export default function NewSubscriptionScreen() {
     setSelectedCategory(preset.category);
     setColor(preset.color);
     const { iconType: pIconType, iconValue: pIconValue } = getIconForPreset(preset);
-    // DB schema uses 'preset' for MCI icons, 'initial' for letter avatars
-    setIconType(pIconType === 'mci' ? 'preset' : 'initial');
+    // DB schema uses 'preset' for preset/brand icons, 'initial' for letter avatars
+    setIconType(pIconType === 'initial' ? 'initial' : 'preset');
     setIconValue(pIconValue);
     if (preset.defaultAmount !== undefined) {
       setAmount(String(preset.defaultAmount));
@@ -263,27 +263,16 @@ export default function NewSubscriptionScreen() {
                   accessibilityRole="button"
                   accessibilityState={{ selected: isSelected }}
                 >
-                  {preset.iconType === 'mci' ? (
-                    <View
-                      style={[
-                        styles.presetIconContainer,
-                        { backgroundColor: preset.color },
-                      ]}
-                    >
-                      <MaterialCommunityIcons
-                        name={preset.icon as any}
-                        size={22}
-                        color="#FFFFFF"
-                      />
-                    </View>
-                  ) : (
-                    <InitialAvatar
-                      letter={preset.icon || preset.name}
-                      color={preset.color}
-                      size={38}
-                      style={styles.presetIconContainer}
-                    />
-                  )}
+                  <BrandIcon
+                    name={preset.key}
+                    iconType={preset.iconType === 'mci' ? 'preset' : 'initial'}
+                    iconValue={preset.icon}
+                    color={preset.color}
+                    size={38}
+                    iconSize={22}
+                    showContainer
+                    style={styles.presetIconContainer}
+                  />
                   <Text
                     numberOfLines={1}
                     style={[

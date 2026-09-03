@@ -10,7 +10,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { Subscription } from '../db/schema';
 import { daysUntil, formatRenewalLabel } from '../services/renewalService';
-import { InitialAvatar } from './InitialAvatar';
+import { BrandIcon } from './BrandIcon';
 import { NoiseOverlay } from './NoiseOverlay';
 
 export interface SubscriptionCardProps {
@@ -58,19 +58,15 @@ export function SubscriptionCard({
         style={styles.card}
       >
         <View style={styles.topRow}>
-          {subscription.iconType === 'preset' ? (
-            <MaterialCommunityIcons
-              name={subscription.iconValue as any}
-              size={28}
-              color="#fff"
-            />
-          ) : (
-            <InitialAvatar
-              letter={subscription.iconValue || subscription.name}
-              color="rgba(255,255,255,0.3)"
-              size={28}
-            />
-          )}
+          <BrandIcon
+            name={subscription.name}
+            iconType={subscription.iconType}
+            iconValue={subscription.iconValue}
+            size={28}
+            iconSize={26}
+            color="rgba(255,255,255,0.2)"
+            iconColor="#FFFFFF"
+          />
 
           <View style={[styles.badge, { backgroundColor: badgeColor }]}>
             <Text style={styles.badgeText}>{renewalText}</Text>

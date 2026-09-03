@@ -209,9 +209,9 @@ describe('Onboarding Flow', () => {
   });
 
   describe('WelcomeScreen', () => {
-    it('renders title, tagline, logo, Get Started button, and trust signal', () => {
+    it('renders title, tagline, logo icon, Get Started button, and trust signal', () => {
       const element = WelcomeScreen();
-      assert.equal(element.type, 'SafeAreaView');
+      assert.equal(element.type, 'View');
 
       const allTexts = findAllByType(element, 'Text');
       const textValues = allTexts.map((t) => t.props.children);
@@ -220,11 +220,10 @@ describe('Onboarding Flow', () => {
       assert.ok(textValues.includes('Get Started →'));
       assert.ok(textValues.includes('No account needed · Works offline'));
 
-      // Check logo Image component exists
-      const images = findAllByType(element, 'Image');
-      assert.equal(images.length, 1);
-      assert.equal(images[0].props.resizeMode, 'contain');
-      assert.equal(images[0].props.accessibilityLabel, 'SignalSub Logo');
+      // Check logo icon exists
+      const icons = findAllByType(element, 'MaterialCommunityIcons');
+      assert.equal(icons.length, 1);
+      assert.equal(icons[0].props.name, 'bell-badge-outline');
 
       // Check button styling
       const button = findAllByType(element, 'TouchableOpacity')[0];
@@ -237,29 +236,29 @@ describe('Onboarding Flow', () => {
   describe('Step Screens', () => {
     it('renders Step1Screen with correct initial configuration', () => {
       const element = Step1Screen();
-      assert.equal(element.props.stepNumber, 1);
-      assert.equal(element.props.heroIcon, 'plus-circle-multiple-outline');
-      assert.equal(element.props.heroColor, COLORS.accentPurple);
-      assert.equal(element.props.headline, 'Add Your Subscriptions');
-      assert.equal(element.props.subtext, 'Takes less than 2 minutes to set up');
+      const allTexts = findAllByType(element, 'Text');
+      const textValues = allTexts.map((t) => t.props.children);
+      assert.ok(textValues.includes('Tap + to Add a Subscription'));
+      assert.ok(textValues.includes('Next →'));
+      assert.ok(textValues.includes('Skip'));
     });
 
     it('renders Step2Screen with correct initial configuration', () => {
       const element = Step2Screen();
-      assert.equal(element.props.stepNumber, 2);
-      assert.equal(element.props.heroIcon, 'bell-ring-outline');
-      assert.equal(element.props.heroColor, COLORS.warning);
-      assert.equal(element.props.headline, 'Never Miss a Renewal');
+      const allTexts = findAllByType(element, 'Text');
+      const textValues = allTexts.map((t) => t.props.children);
+      assert.ok(textValues.includes('Search & Filter Instantly'));
+      assert.ok(textValues.includes('Next →'));
+      assert.ok(textValues.includes('Skip'));
     });
 
     it('renders Step3Screen with correct initial configuration', () => {
       const element = Step3Screen();
-      assert.equal(element.props.stepNumber, 3);
-      assert.equal(element.props.heroIcon, 'chart-donut');
-      assert.equal(element.props.heroColor, COLORS.success);
-      assert.equal(element.props.headline, 'See Where Your Money Goes');
-      assert.equal(element.props.nextButtonLabel, 'Get Started 🎉');
-      assert.equal(element.props.subtext, 'No account needed · Works offline');
+      const allTexts = findAllByType(element, 'Text');
+      const textValues = allTexts.map((t) => t.props.children);
+      assert.ok(textValues.includes('Understand Your Spending'));
+      assert.ok(textValues.includes('Get Started 🎉'));
+      assert.ok(textValues.includes('Skip'));
     });
   });
 

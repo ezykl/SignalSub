@@ -1,8 +1,8 @@
 export type ServicePreset = {
   key: string;
   name: string;
-  icon: string; // MaterialCommunityIcons glyph name OR initial letter for iconType='initial'
-  iconType: 'mci' | 'initial'; // 'mci' = MaterialCommunityIcons, 'initial' = first letter as avatar
+  icon: string;
+  iconType: 'preset' | 'mci' | 'initial';
   color: string;
   category: string;
   defaultAmount?: number;
@@ -12,8 +12,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'netflix',
     name: 'Netflix',
-    icon: 'N',
-    iconType: 'initial',
+    icon: 'netflix',
+    iconType: 'preset',
     color: '#E50914',
     category: 'streaming',
     defaultAmount: 15.49,
@@ -21,8 +21,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'spotify',
     name: 'Spotify',
-    icon: 'S',
-    iconType: 'initial',
+    icon: 'spotify',
+    iconType: 'preset',
     color: '#1DB954',
     category: 'streaming',
     defaultAmount: 11.99,
@@ -40,7 +40,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
     key: 'apple-tv-plus',
     name: 'Apple TV+',
     icon: 'apple',
-    iconType: 'mci',
+    iconType: 'preset',
     color: '#1C1C1E',
     category: 'streaming',
     defaultAmount: 9.99,
@@ -48,8 +48,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'disney-plus',
     name: 'Disney+',
-    icon: 'D',
-    iconType: 'initial',
+    icon: 'disney-plus',
+    iconType: 'preset',
     color: '#113CCF',
     category: 'streaming',
     defaultAmount: 13.99,
@@ -57,8 +57,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'max',
     name: 'Max',
-    icon: 'M',
-    iconType: 'initial',
+    icon: 'max',
+    iconType: 'preset',
     color: '#002BE7',
     category: 'streaming',
     defaultAmount: 15.99,
@@ -66,8 +66,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'hulu',
     name: 'Hulu',
-    icon: 'H',
-    iconType: 'initial',
+    icon: 'hulu',
+    iconType: 'preset',
     color: '#1CE783',
     category: 'streaming',
     defaultAmount: 7.99,
@@ -75,8 +75,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'amazon-prime',
     name: 'Amazon Prime',
-    icon: 'A',
-    iconType: 'initial',
+    icon: 'amazon',
+    iconType: 'preset',
     color: '#00A8E1',
     category: 'streaming',
     defaultAmount: 14.99,
@@ -84,8 +84,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'adobe-cc',
     name: 'Adobe CC',
-    icon: 'A',
-    iconType: 'initial',
+    icon: 'adobe',
+    iconType: 'preset',
     color: '#FF0000',
     category: 'productivity',
     defaultAmount: 54.99,
@@ -94,7 +94,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
     key: 'microsoft-365',
     name: 'Microsoft 365',
     icon: 'microsoft',
-    iconType: 'mci',
+    iconType: 'preset',
     color: '#D83B01',
     category: 'productivity',
     defaultAmount: 6.99,
@@ -103,7 +103,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
     key: 'google-one',
     name: 'Google One',
     icon: 'google',
-    iconType: 'mci',
+    iconType: 'preset',
     color: '#4285F4',
     category: 'cloud',
     defaultAmount: 2.99,
@@ -111,8 +111,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'icloud',
     name: 'iCloud',
-    icon: 'apple-icloud',
-    iconType: 'mci',
+    icon: 'icloud',
+    iconType: 'preset',
     color: '#3399FF',
     category: 'cloud',
     defaultAmount: 2.99,
@@ -121,7 +121,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
     key: 'github-pro',
     name: 'GitHub Pro',
     icon: 'github',
-    iconType: 'mci',
+    iconType: 'preset',
     color: '#24292E',
     category: 'developer',
     defaultAmount: 4.0,
@@ -129,8 +129,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'figma',
     name: 'Figma',
-    icon: 'F',
-    iconType: 'initial',
+    icon: 'figma',
+    iconType: 'preset',
     color: '#F24E1E',
     category: 'productivity',
     defaultAmount: 15.0,
@@ -138,8 +138,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'notion',
     name: 'Notion',
-    icon: 'N',
-    iconType: 'initial',
+    icon: 'notion',
+    iconType: 'preset',
     color: '#191919',
     category: 'productivity',
     defaultAmount: 10.0,
@@ -148,7 +148,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
     key: 'slack',
     name: 'Slack',
     icon: 'slack',
-    iconType: 'mci',
+    iconType: 'preset',
     color: '#4A154B',
     category: 'productivity',
     defaultAmount: 8.75,
@@ -157,7 +157,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
     key: 'discord',
     name: 'Discord',
     icon: 'discord',
-    iconType: 'mci',
+    iconType: 'preset',
     color: '#5865F2',
     category: 'gaming',
     defaultAmount: 9.99,
@@ -166,7 +166,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
     key: 'dropbox',
     name: 'Dropbox',
     icon: 'dropbox',
-    iconType: 'mci',
+    iconType: 'preset',
     color: '#0061FF',
     category: 'cloud',
     defaultAmount: 11.99,
@@ -174,8 +174,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'canva',
     name: 'Canva',
-    icon: 'palette-outline',
-    iconType: 'mci',
+    icon: 'canva',
+    iconType: 'preset',
     color: '#00C4CC',
     category: 'productivity',
     defaultAmount: 12.99,
@@ -183,8 +183,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'duolingo',
     name: 'Duolingo',
-    icon: 'D',
-    iconType: 'initial',
+    icon: 'duolingo',
+    iconType: 'preset',
     color: '#58CC02',
     category: 'productivity',
     defaultAmount: 6.99,
@@ -193,7 +193,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
     key: 'linkedin',
     name: 'LinkedIn',
     icon: 'linkedin',
-    iconType: 'mci',
+    iconType: 'preset',
     color: '#0A66C2',
     category: 'productivity',
     defaultAmount: 29.99,
@@ -202,7 +202,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
     key: 'twitch',
     name: 'Twitch',
     icon: 'twitch',
-    iconType: 'mci',
+    iconType: 'preset',
     color: '#9146FF',
     category: 'streaming',
     defaultAmount: 4.99,
@@ -210,8 +210,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'chatgpt',
     name: 'ChatGPT',
-    icon: 'robot',
-    iconType: 'mci',
+    icon: 'openai',
+    iconType: 'preset',
     color: '#10A37F',
     category: 'productivity',
     defaultAmount: 20.0,
@@ -219,8 +219,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'grammarly',
     name: 'Grammarly',
-    icon: 'spellcheck',
-    iconType: 'mci',
+    icon: 'grammarly',
+    iconType: 'preset',
     color: '#15C39A',
     category: 'productivity',
     defaultAmount: 12.0,
@@ -228,8 +228,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'lastpass',
     name: 'LastPass',
-    icon: 'form-textbox-password',
-    iconType: 'mci',
+    icon: 'lastpass',
+    iconType: 'preset',
     color: '#D32D27',
     category: 'productivity',
     defaultAmount: 3.0,
@@ -237,8 +237,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'nordvpn',
     name: 'NordVPN',
-    icon: 'shield-lock-outline',
-    iconType: 'mci',
+    icon: 'nordvpn',
+    iconType: 'preset',
     color: '#4687FF',
     category: 'other',
     defaultAmount: 12.99,
@@ -246,8 +246,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'dashlane',
     name: 'Dashlane',
-    icon: 'shield-key-outline',
-    iconType: 'mci',
+    icon: 'dashlane',
+    iconType: 'preset',
     color: '#0E353D',
     category: 'productivity',
     defaultAmount: 4.99,
@@ -255,8 +255,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'expensify',
     name: 'Expensify',
-    icon: 'receipt',
-    iconType: 'mci',
+    icon: 'expensify',
+    iconType: 'preset',
     color: '#00D09C',
     category: 'productivity',
     defaultAmount: 5.0,
@@ -264,8 +264,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'zoom',
     name: 'Zoom',
-    icon: 'video',
-    iconType: 'mci',
+    icon: 'zoom',
+    iconType: 'preset',
     color: '#2D8CFF',
     category: 'productivity',
     defaultAmount: 13.33,
@@ -273,8 +273,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'todoist',
     name: 'Todoist',
-    icon: 'check-circle-outline',
-    iconType: 'mci',
+    icon: 'todoist',
+    iconType: 'preset',
     color: '#E44332',
     category: 'productivity',
     defaultAmount: 4.0,
@@ -282,8 +282,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'apple-music',
     name: 'Apple Music',
-    icon: 'music-note',
-    iconType: 'mci',
+    icon: 'apple-music',
+    iconType: 'preset',
     color: '#FA243C',
     category: 'streaming',
     defaultAmount: 10.99,
@@ -291,8 +291,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'playstation-plus',
     name: 'PlayStation Plus',
-    icon: 'sony-playstation',
-    iconType: 'mci',
+    icon: 'playstation',
+    iconType: 'preset',
     color: '#003791',
     category: 'gaming',
     defaultAmount: 9.99,
@@ -300,8 +300,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'xbox-game-pass',
     name: 'Xbox Game Pass',
-    icon: 'microsoft-xbox',
-    iconType: 'mci',
+    icon: 'xbox',
+    iconType: 'preset',
     color: '#107C10',
     category: 'gaming',
     defaultAmount: 16.99,
@@ -310,7 +310,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
     key: 'nintendo-switch-online',
     name: 'Nintendo Switch Online',
     icon: 'nintendo-switch',
-    iconType: 'mci',
+    iconType: 'preset',
     color: '#E60012',
     category: 'gaming',
     defaultAmount: 3.99,
@@ -318,8 +318,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'strava',
     name: 'Strava',
-    icon: 'bike',
-    iconType: 'mci',
+    icon: 'strava',
+    iconType: 'preset',
     color: '#FC4C02',
     category: 'fitness',
     defaultAmount: 11.99,
@@ -336,8 +336,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'audible',
     name: 'Audible',
-    icon: 'headphones',
-    iconType: 'mci',
+    icon: 'audible',
+    iconType: 'preset',
     color: '#F8991D',
     category: 'streaming',
     defaultAmount: 14.95,
@@ -345,8 +345,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: '1password',
     name: '1Password',
-    icon: 'form-textbox-password',
-    iconType: 'mci',
+    icon: '1password',
+    iconType: 'preset',
     color: '#0A85EA',
     category: 'productivity',
     defaultAmount: 2.99,
@@ -354,8 +354,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'medium',
     name: 'Medium',
-    icon: 'newspaper-variant-outline',
-    iconType: 'mci',
+    icon: 'medium',
+    iconType: 'preset',
     color: '#1A1A1A',
     category: 'productivity',
     defaultAmount: 5.0,
@@ -363,8 +363,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'substack',
     name: 'Substack',
-    icon: 'email-newsletter',
-    iconType: 'mci',
+    icon: 'substack',
+    iconType: 'preset',
     color: '#FF6719',
     category: 'productivity',
     defaultAmount: 10.0,
@@ -372,8 +372,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'claude',
     name: 'Claude',
-    icon: 'C',
-    iconType: 'initial',
+    icon: 'claude',
+    iconType: 'preset',
     color: '#D97757',
     category: 'productivity',
     defaultAmount: 20.0,
@@ -381,8 +381,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'gemini',
     name: 'Gemini',
-    icon: 'G',
-    iconType: 'initial',
+    icon: 'gemini',
+    iconType: 'preset',
     color: '#4285F4',
     category: 'productivity',
     defaultAmount: 19.99,
@@ -390,8 +390,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'midjourney',
     name: 'Midjourney',
-    icon: 'M',
-    iconType: 'initial',
+    icon: 'midjourney',
+    iconType: 'preset',
     color: '#000000',
     category: 'productivity',
     defaultAmount: 10.0,
@@ -399,8 +399,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   {
     key: 'cursor',
     name: 'Cursor',
-    icon: 'C',
-    iconType: 'initial',
+    icon: 'cursor',
+    iconType: 'preset',
     color: '#7C3AED',
     category: 'developer',
     defaultAmount: 20.0,
@@ -426,11 +426,11 @@ export function searchPresets(query: string): ServicePreset[] {
 }
 
 export function getIconForPreset(preset: ServicePreset): {
-  iconType: 'mci' | 'initial';
+  iconType: 'preset' | 'mci' | 'initial';
   iconValue: string;
 } {
   return {
     iconType: preset.iconType,
-    iconValue: preset.iconType === 'initial' ? (preset.name[0] ?? '?') : preset.icon,
+    iconValue: preset.icon || preset.name[0] || '?',
   };
 }

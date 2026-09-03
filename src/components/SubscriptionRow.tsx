@@ -12,7 +12,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import type { Subscription } from '../db/schema';
 import { daysUntil, formatRenewalLabel } from '../services/renewalService';
-import { InitialAvatar } from './InitialAvatar';
+import { BrandIcon } from './BrandIcon';
 
 export interface SubscriptionRowProps {
   subscription: Subscription;
@@ -105,27 +105,15 @@ export function SubscriptionRow({
         testID={testID}
       >
         {/* Left: 40x40 circular icon */}
-        {subscription.iconType === 'preset' ? (
-          <View
-            style={[
-              styles.iconContainer,
-              { backgroundColor: subscription.color || COLORS.accentPurple },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name={subscription.iconValue as any}
-              size={22}
-              color="#FFFFFF"
-            />
-          </View>
-        ) : (
-          <InitialAvatar
-            letter={subscription.iconValue || subscription.name}
-            color={subscription.color || COLORS.accentPurple}
-            size={40}
-            style={styles.avatar}
-          />
-        )}
+        <BrandIcon
+          name={subscription.name}
+          iconType={subscription.iconType}
+          iconValue={subscription.iconValue}
+          color={subscription.color || COLORS.accentPurple}
+          size={40}
+          showContainer
+          style={styles.avatar}
+        />
 
         {/* Center: Name, trial badge, and subtitle */}
         <View style={styles.centerContainer}>

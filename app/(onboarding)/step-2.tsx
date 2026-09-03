@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
 import { OnboardingDots } from '@/components/OnboardingDots';
+import { BrandIcon } from '@/components/BrandIcon';
 
 // ─── Mock subscription data ───────────────────────────────────────────────────
 const MOCK_SUBS = [
@@ -80,9 +81,14 @@ export default function Step2Screen() {
         {/* Subscription rows */}
         {MOCK_SUBS.map((sub) => (
           <View key={sub.id} style={[styles.subRow, { borderLeftColor: sub.color }]}>
-            <View style={[styles.subIcon, { backgroundColor: sub.color }]}>
-              <MaterialCommunityIcons name={sub.icon as any} size={20} color="#FFF" />
-            </View>
+            <BrandIcon
+              name={sub.name}
+              size={36}
+              iconSize={20}
+              color={sub.color}
+              showContainer
+              style={styles.subIcon}
+            />
             <View style={styles.subCenter}>
               <Text style={styles.subName}>{sub.name}</Text>
               <Text style={styles.subCategory}>{sub.category} · Renews in 14d</Text>

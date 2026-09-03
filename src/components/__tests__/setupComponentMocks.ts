@@ -97,6 +97,12 @@ const mockReactNative = {
     OS: 'ios',
     select: (obj: any) => obj.ios,
   },
+  useWindowDimensions: () => ({ width: 375, height: 812, scale: 2, fontScale: 1 }),
+  Dimensions: {
+    get: () => ({ width: 375, height: 812, scale: 2, fontScale: 1 }),
+    set: () => {},
+    addEventListener: () => ({ remove: () => {} }),
+  },
 };
 
 const rnResolved = require.resolve('react-native');

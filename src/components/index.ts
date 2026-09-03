@@ -9,3 +9,5 @@ export * from './SpendingCard';
 export * from './SubscriptionCard';
 export * from './SubscriptionRow';
 export * from './OnboardingStep';
+export * from './BrandIcon';
+export * from './OnboardingDots';
