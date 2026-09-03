@@ -10,7 +10,10 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { COLORS } from '@/constants/colors';
 
 // Keep the splash screen visible until we explicitly hide it after DB init
-SplashScreen.preventAutoHideAsync();
+// Wrapped in try/catch — in Expo Go this can throw if called after auto-hide
+try {
+  SplashScreen.preventAutoHideAsync();
+} catch {}
 
 export default function RootLayout() {
   const [isReady, setIsReady] = useState(false);
