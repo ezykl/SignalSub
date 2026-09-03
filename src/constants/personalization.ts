@@ -1,19 +1,71 @@
 import type { ServicePreset } from './servicePresets';
 
+if (typeof require !== 'undefined' && require.extensions) {
+  if (!require.extensions['.jpg']) {
+    require.extensions['.jpg'] = (module: any) => {
+      module.exports = 1;
+    };
+  }
+  if (!require.extensions['.jpeg']) {
+    require.extensions['.jpeg'] = (module: any) => {
+      module.exports = 1;
+    };
+  }
+}
+
 export interface AvatarOption {
   id: string;
   emoji: string;
   label: string;
+  image?: any;
 }
 
 export const AVATAR_OPTIONS: AvatarOption[] = [
-  { id: 'space', emoji: '🚀', label: 'Space' },
-  { id: 'robot', emoji: '🤖', label: 'Robot' },
+  {
+    id: 'space',
+    emoji: '🚀',
+    label: 'Astronaut',
+    image: require('../../assets/images/avatars/astronaut.jpg'),
+  },
+  {
+    id: 'robot',
+    emoji: '🤖',
+    label: 'Tech Bot',
+    image: require('../../assets/images/avatars/robot.jpg'),
+  },
+  {
+    id: 'cat',
+    emoji: '🐱',
+    label: 'Cyber Cat',
+    image: require('../../assets/images/avatars/cat.jpg'),
+  },
+  {
+    id: 'fox',
+    emoji: '🦊',
+    label: 'Neon Fox',
+    image: require('../../assets/images/avatars/fox.jpg'),
+  },
+  {
+    id: 'ninja',
+    emoji: '🥷',
+    label: 'Cyber Ninja',
+    image: require('../../assets/images/avatars/ninja.jpg'),
+  },
   { id: 'bolt', emoji: '⚡', label: 'Bolt' },
   { id: 'coffee', emoji: '☕', label: 'Coffee' },
   { id: 'gamer', emoji: '🎮', label: 'Gamer' },
   { id: 'sparkles', emoji: '✨', label: 'Sparkles' },
 ];
+
+export function getAvatarById(idOrEmoji?: string | null): AvatarOption | undefined {
+  if (!idOrEmoji) return undefined;
+  return AVATAR_OPTIONS.find(
+    (a) =>
+      a.id === idOrEmoji ||
+      a.emoji === idOrEmoji ||
+      (idOrEmoji === 'astronaut' && a.id === 'space')
+  );
+}
 
 export interface FavoriteCategoryOption {
   key: string;

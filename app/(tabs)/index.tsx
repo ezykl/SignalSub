@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import {
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -25,6 +26,7 @@ import {
   SpendingCard,
   SubscriptionCard,
   SubscriptionRow,
+  UserAvatar,
 } from '@/components';
 
 export function getGreeting(date: Date = new Date(), userAlias?: string): string {
@@ -148,6 +150,7 @@ export default function DashboardScreen({
   const formattedDate = formatDashboardDate(now);
   const isSetupIncomplete = !userAlias.trim() || !defaultPaymentMethod.trim();
 
+  const [isAlertsModalVisible, setIsAlertsModalVisible] = useState(false);
   const [dismissedTrials, setDismissedTrials] = useState<Record<string, string>>({});
   const todayStr = (now instanceof Date ? now : new Date()).toISOString().slice(0, 10);
 
@@ -188,25 +191,30 @@ export default function DashboardScreen({
                 onPress={() => router.push('/settings')}
                 activeOpacity={0.7}
                 accessibilityRole="button"
-                accessibilityLabel={`Profile avatar: ${userAvatar}`}
+                accessibilityLabel={`Profile avatar`}
                 testID="dashboard-avatar-badge"
               >
-                <Text style={styles.avatarEmoji}>{userAvatar}</Text>
+                <UserAvatar avatarId={userAvatar} size={38} />
               </TouchableOpacity>
             ) : null}
             <TouchableOpacity
               style={styles.bellButton}
-              onPress={() => router.push('/settings')}
+              onPress={() => setIsAlertsModalVisible(true)}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel="Notifications and Settings"
+              accessibilityLabel="Notifications and Alerts"
               testID="dashboard-settings-button"
             >
               <MaterialIcons
-                name="notifications-none"
+                name={alerts.length > 0 ? 'notifications-active' : 'notifications-none'}
                 size={24}
-                color={COLORS.textPrimary}
+                color={alerts.length > 0 ? COLORS.accentPurpleLight : COLORS.textPrimary}
               />
+              {alerts.length > 0 && (
+                <View style={styles.bellBadge}>
+                  <Text style={styles.bellBadgeText}>{alerts.length}</Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -383,6 +391,93 @@ export default function DashboardScreen({
         </View>
       </ScrollView>
 
+      {/* Renewal Alerts & Notifications Modal */}
+      <Modal
+        visible={isAlertsModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setIsAlertsModalVisible(false)}
+        testID="dashboard-alerts-modal"
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalSheetContainer}>
+            <View style={styles.modalHeader}>
+              <View style={styles.modalHeaderTitleRow}>
+                <MaterialIcons name="notifications-active" size={22} color={COLORS.accentPurple} />
+                <Text style={styles.modalTitle}>Renewal Alerts</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setIsAlertsModalVisible(false)}
+                style={styles.modalCloseBtn}
+                testID="alerts-modal-close-button"
+              >
+                <MaterialIcons name="close" size={22} color={COLORS.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            {alerts.length > 0 ? (
+              <ScrollView style={styles.modalList} showsVerticalScrollIndicator={false}>
+                {alerts.map((alert: DashboardAlert) => (
+                  <TouchableOpacity
+                    key={alert.id}
+                    style={styles.modalAlertItem}
+                    onPress={() => {
+                      setIsAlertsModalVisible(false);
+                      router.push(`/subscription/${alert.subscriptionId}`);
+                    }}
+                    activeOpacity={0.7}
+                    testID={`alerts-modal-item-${alert.id}`}
+                  >
+                    <View
+                      style={[
+                        styles.modalAlertIconBox,
+                        {
+                          backgroundColor:
+                            alert.type === 'trial'
+                              ? 'rgba(245, 158, 11, 0.15)'
+                              : 'rgba(123, 94, 167, 0.15)',
+                        },
+                      ]}
+                    >
+                      <MaterialIcons
+                        name={alert.type === 'trial' ? 'timer' : 'event'}
+                        size={20}
+                        color={alert.type === 'trial' ? COLORS.warning : COLORS.accentPurple}
+                      />
+                    </View>
+                    <View style={styles.modalAlertTextCol}>
+                      <Text style={styles.modalAlertMessage}>{alert.message}</Text>
+                      <Text style={styles.modalAlertAction}>Tap to view subscription →</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            ) : (
+              <View style={styles.modalEmptyContainer} testID="alerts-modal-empty">
+                <MaterialIcons name="check-circle" size={44} color={COLORS.success} />
+                <Text style={styles.modalEmptyTitle}>You're All Caught Up!</Text>
+                <Text style={styles.modalEmptySubtitle}>
+                  No renewal or trial alerts scheduled within the next 3 days.
+                </Text>
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={styles.modalSettingsLink}
+              onPress={() => {
+                setIsAlertsModalVisible(false);
+                router.push('/settings');
+              }}
+              activeOpacity={0.8}
+              testID="alerts-modal-settings-link"
+            >
+              <MaterialIcons name="tune" size={18} color={COLORS.textSecondary} />
+              <Text style={styles.modalSettingsLinkText}>Configure Notification Settings</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       {/* Floating Action Button */}
       <FAB
         onPress={() => router.push('/subscription/new')}
@@ -431,6 +526,26 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bgCard,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: COLORS.danger,
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 1.5,
+    borderColor: COLORS.bgPrimary,
+  },
+  bellBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
   headerRight: {
     flexDirection: 'row',
@@ -619,5 +734,109 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    justifyContent: 'flex-end',
+  },
+  modalSheetContainer: {
+    backgroundColor: '#161626',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(123, 94, 167, 0.25)',
+    padding: 20,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  modalHeaderTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  modalCloseBtn: {
+    padding: 4,
+  },
+  modalList: {
+    marginTop: 14,
+    maxHeight: 320,
+  },
+  modalAlertItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  modalAlertIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  modalAlertTextCol: {
+    flex: 1,
+  },
+  modalAlertMessage: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    lineHeight: 18,
+  },
+  modalAlertAction: {
+    fontSize: 12,
+    color: COLORS.accentPurpleLight,
+    marginTop: 3,
+  },
+  modalEmptyContainer: {
+    paddingVertical: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalEmptyTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginTop: 12,
+  },
+  modalEmptySubtitle: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginTop: 6,
+    paddingHorizontal: 20,
+  },
+  modalSettingsLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  modalSettingsLinkText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
   },
 });

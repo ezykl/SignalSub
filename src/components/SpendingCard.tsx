@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 24,
     borderRadius: 24,
+    overflow: 'hidden',
   },
   label: {
     fontSize: 12,

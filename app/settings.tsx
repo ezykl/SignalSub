@@ -17,7 +17,15 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
 import { POPULAR_CURRENCIES, CurrencyInfo } from '@/constants/currencies';
 import { AVATAR_OPTIONS } from '@/constants/personalization';
-import { PaymentMethodSelector } from '@/components/PaymentMethodSelector';
+import {
+  PaymentMethodSelector,
+} from '@/components/PaymentMethodSelector';
+import { UserAvatar } from '@/components/UserAvatar';
+import {
+  SavedPaymentMethod,
+  parseSavedPaymentMethods,
+  getPaymentMethod,
+} from '@/constants/paymentMethods';
 import {
   scheduleWeeklyDigest,
   cancelWeeklyDigest,
@@ -60,6 +68,67 @@ export default function SettingsScreen() {
   const isGrainEnabled = getSetting('grain_enabled', 'false') === 'true';
 
   const currentAliasDisplay = aliasInput !== null ? aliasInput : userAlias;
+
+  const rawSavedMethods = getSetting('saved_payment_methods', '');
+  const savedPaymentMethods: SavedPaymentMethod[] = useMemo(() => {
+    const list = parseSavedPaymentMethods(rawSavedMethods);
+    if (list.length > 0) return list;
+    if (defaultPaymentMethod) {
+      return [
+        {
+          id: 'pm-default',
+          methodKey: defaultPaymentMethod,
+          details: defaultPaymentDetails,
+          isDefault: true,
+        },
+      ];
+    }
+    return [];
+  }, [rawSavedMethods, defaultPaymentMethod, defaultPaymentDetails]);
+
+  const [isAddingPaymentMethod, setIsAddingPaymentMethod] = useState(false);
+  const [newMethodKey, setNewMethodKey] = useState('gcash');
+  const [newMethodDetails, setNewMethodDetails] = useState('');
+
+  const handleSaveNewPaymentMethod = async () => {
+    const newEntry: SavedPaymentMethod = {
+      id: `pm_${Date.now()}`,
+      methodKey: newMethodKey,
+      details: newMethodDetails.trim(),
+      isDefault: savedPaymentMethods.length === 0,
+    };
+    const updated = [...savedPaymentMethods, newEntry];
+    await setSetting('saved_payment_methods', JSON.stringify(updated));
+    if (newEntry.isDefault) {
+      await setSetting('default_payment_method', newEntry.methodKey);
+      await setSetting('default_payment_details', newEntry.details);
+    }
+    setIsAddingPaymentMethod(false);
+    setNewMethodDetails('');
+  };
+
+  const handleSetDefaultPaymentMethod = async (id: string) => {
+    const updated = savedPaymentMethods.map((m) => ({
+      ...m,
+      isDefault: m.id === id,
+    }));
+    const defaultOne = updated.find((m) => m.id === id);
+    await setSetting('saved_payment_methods', JSON.stringify(updated));
+    if (defaultOne) {
+      await setSetting('default_payment_method', defaultOne.methodKey);
+      await setSetting('default_payment_details', defaultOne.details);
+    }
+  };
+
+  const handleDeleteSavedPaymentMethod = async (id: string) => {
+    const updated = savedPaymentMethods.filter((m) => m.id !== id);
+    if (updated.length > 0 && !updated.some((m) => m.isDefault)) {
+      updated[0].isDefault = true;
+      await setSetting('default_payment_method', updated[0].methodKey);
+      await setSetting('default_payment_details', updated[0].details);
+    }
+    await setSetting('saved_payment_methods', JSON.stringify(updated));
+  };
 
   const filteredCurrencies = useMemo(() => {
     const query = currencySearch.trim().toLowerCase();
@@ -170,7 +239,7 @@ export default function SettingsScreen() {
               <Text style={styles.subfieldLabel}>AVATAR</Text>
               <View style={styles.avatarRow} testID="settings-avatar-selector">
                 {AVATAR_OPTIONS.map((item) => {
-                  const isSelected = userAvatar === item.emoji;
+                  const isSelected = userAvatar === item.id || userAvatar === item.emoji;
                   return (
                     <TouchableOpacity
                       key={item.id}
@@ -186,7 +255,7 @@ export default function SettingsScreen() {
                       accessibilityRole="button"
                       accessibilityLabel={`${item.label} avatar`}
                     >
-                      <Text style={styles.avatarChipEmoji}>{item.emoji}</Text>
+                      <UserAvatar avatarId={item.id} size={42} />
                     </TouchableOpacity>
                   );
                 })}
@@ -205,6 +274,91 @@ export default function SettingsScreen() {
               }}
               testID="settings-payment-selector"
             />
+
+            {/* Saved Payment Methods */}
+            <View style={styles.fieldBlock}>
+              <Text style={styles.subfieldLabel}>SAVED PAYMENT METHODS</Text>
+              <Text style={styles.subfieldHelper}>
+                Manage multiple wallets and bank cards you use. Tap one to set as default.
+              </Text>
+
+              {savedPaymentMethods.map((pm) => {
+                const def = getPaymentMethod(pm.methodKey);
+                return (
+                  <View key={pm.id} style={styles.savedPaymentRow} testID={`saved-payment-${pm.id}`}>
+                    <TouchableOpacity
+                      style={styles.savedPaymentLeft}
+                      onPress={() => handleSetDefaultPaymentMethod(pm.id)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.savedPaymentDot, { backgroundColor: def.color }]} />
+                      <View style={styles.savedPaymentInfo}>
+                        <View style={styles.savedPaymentTitleRow}>
+                          <Text style={styles.savedPaymentName}>{def.name}</Text>
+                          {pm.isDefault && (
+                            <View style={styles.defaultBadge}>
+                              <Text style={styles.defaultBadgeText}>DEFAULT</Text>
+                            </View>
+                          )}
+                        </View>
+                        {pm.details ? (
+                          <Text style={styles.savedPaymentDetails}>{pm.details}</Text>
+                        ) : null}
+                      </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.deletePaymentBtn}
+                      onPress={() => handleDeleteSavedPaymentMethod(pm.id)}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      accessibilityLabel={`Delete ${def.name}`}
+                    >
+                      <MaterialIcons name="close" size={18} color={COLORS.textSecondary} />
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+
+              {!isAddingPaymentMethod ? (
+                <TouchableOpacity
+                  style={styles.addPaymentButton}
+                  onPress={() => setIsAddingPaymentMethod(true)}
+                  activeOpacity={0.7}
+                  testID="settings-add-payment-btn"
+                >
+                  <MaterialIcons name="add" size={18} color={COLORS.accentPurpleLight} />
+                  <Text style={styles.addPaymentButtonText}>Add Another Payment Method</Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.addPaymentFormContainer}>
+                  <Text style={styles.addPaymentFormTitle}>Add Payment Method</Text>
+                  <PaymentMethodSelector
+                    value={newMethodKey}
+                    details={newMethodDetails}
+                    onChangeMethod={setNewMethodKey}
+                    onChangeDetails={setNewMethodDetails}
+                    testID="settings-new-payment-selector"
+                  />
+                  <View style={styles.addPaymentActionRow}>
+                    <TouchableOpacity
+                      style={styles.cancelAddBtn}
+                      onPress={() => {
+                        setIsAddingPaymentMethod(false);
+                        setNewMethodDetails('');
+                      }}
+                    >
+                      <Text style={styles.cancelAddBtnText}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.confirmAddBtn}
+                      onPress={handleSaveNewPaymentMethod}
+                    >
+                      <Text style={styles.confirmAddBtnText}>Save Method</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </View>
           </View>
         </View>
 
@@ -797,5 +951,127 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.textSecondary,
     marginTop: 2,
+  },
+  subfieldHelper: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginBottom: 10,
+  },
+  savedPaymentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#161626',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  savedPaymentLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  savedPaymentDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  savedPaymentInfo: {
+    flex: 1,
+  },
+  savedPaymentTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  savedPaymentName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  defaultBadge: {
+    backgroundColor: 'rgba(123, 94, 167, 0.3)',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderWidth: 1,
+    borderColor: COLORS.accentPurple,
+  },
+  defaultBadgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: COLORS.accentPurpleLight,
+  },
+  savedPaymentDetails: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  deletePaymentBtn: {
+    padding: 6,
+  },
+  addPaymentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(123, 94, 167, 0.3)',
+    backgroundColor: 'rgba(123, 94, 167, 0.08)',
+    marginTop: 4,
+  },
+  addPaymentButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.accentPurpleLight,
+  },
+  addPaymentFormContainer: {
+    backgroundColor: '#161626',
+    borderRadius: 14,
+    padding: 14,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(123, 94, 167, 0.2)',
+  },
+  addPaymentFormTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  addPaymentActionRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+    marginTop: 12,
+  },
+  cancelAddBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  cancelAddBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+  },
+  confirmAddBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: COLORS.accentPurple,
+  },
+  confirmAddBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
 });

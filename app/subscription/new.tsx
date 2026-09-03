@@ -25,6 +25,11 @@ import { BillingCycle, BillingCyclePill } from '@/components/BillingCyclePill';
 import { CategoryChip } from '@/components/CategoryChip';
 import { BrandIcon } from '@/components/BrandIcon';
 import { PaymentMethodSelector } from '@/components/PaymentMethodSelector';
+import {
+  SavedPaymentMethod,
+  parseSavedPaymentMethods,
+  getPaymentMethod,
+} from '@/constants/paymentMethods';
 import { DatePickerField } from '@/components/DatePickerModal';
 import { computeNextRenewalDate } from '@/services/renewalService';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -83,6 +88,23 @@ export default function NewSubscriptionScreen() {
   const [paymentDetails, setPaymentDetails] = useState<string>(
     () => defaultPaymentDetails
   );
+
+  const rawSavedMethods = getSetting('saved_payment_methods', '');
+  const savedPaymentMethods: SavedPaymentMethod[] = useMemo(() => {
+    const list = parseSavedPaymentMethods(rawSavedMethods);
+    if (list.length > 0) return list;
+    if (defaultPaymentMethod) {
+      return [
+        {
+          id: 'pm-default',
+          methodKey: defaultPaymentMethod,
+          details: defaultPaymentDetails,
+          isDefault: true,
+        },
+      ];
+    }
+    return [];
+  }, [rawSavedMethods, defaultPaymentMethod, defaultPaymentDetails]);
 
   // Favorite categories & recommendations
   const favoriteCategoriesRaw = getSetting('favorite_categories', '');
@@ -416,6 +438,44 @@ export default function NewSubscriptionScreen() {
               ))}
             </ScrollView>
           </View>
+
+          {/* Saved Payment Methods Quick Select */}
+          {savedPaymentMethods.length > 0 && (
+            <View style={styles.savedMethodsContainer} testID="saved-methods-quick-select">
+              <Text style={styles.fieldLabel}>MY SAVED WALLETS & CARDS</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.savedMethodsScroll}
+              >
+                {savedPaymentMethods.map((pm) => {
+                  const def = getPaymentMethod(pm.methodKey);
+                  const isSelected = paymentMethod === pm.methodKey && paymentDetails === pm.details;
+                  return (
+                    <TouchableOpacity
+                      key={pm.id}
+                      style={[
+                        styles.savedMethodChip,
+                        isSelected && styles.savedMethodChipSelected,
+                      ]}
+                      onPress={() => {
+                        setPaymentMethod(pm.methodKey);
+                        setPaymentDetails(pm.details);
+                      }}
+                      activeOpacity={0.7}
+                      testID={`saved-method-chip-${pm.id}`}
+                    >
+                      <View style={[styles.savedMethodDot, { backgroundColor: def.color }]} />
+                      <Text style={[styles.savedMethodText, isSelected && styles.savedMethodTextSelected]}>
+                        {def.shortName}
+                        {pm.details ? ` (${pm.details})` : ''}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          )}
 
           {/* Payment Method Selector */}
           <PaymentMethodSelector
@@ -807,5 +867,40 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     minWidth: 24,
     textAlign: 'center',
+  },
+  savedMethodsContainer: {
+    marginBottom: 20,
+  },
+  savedMethodsScroll: {
+    gap: 8,
+    paddingVertical: 2,
+  },
+  savedMethodChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#161626',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
+  },
+  savedMethodChipSelected: {
+    borderColor: COLORS.accentPurple,
+    backgroundColor: 'rgba(123, 94, 167, 0.2)',
+  },
+  savedMethodDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  savedMethodText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+  },
+  savedMethodTextSelected: {
+    color: '#FFFFFF',
   },
 });

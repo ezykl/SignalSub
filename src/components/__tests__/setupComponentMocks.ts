@@ -1,5 +1,11 @@
-// Setup PNG require hook for Node
+// Setup image require hook for Node
 require.extensions['.png'] = (module: any) => {
+  module.exports = 1;
+};
+require.extensions['.jpg'] = (module: any) => {
+  module.exports = 1;
+};
+require.extensions['.jpeg'] = (module: any) => {
   module.exports = 1;
 };
 
@@ -76,6 +82,8 @@ const mockReactNative = {
   StatusBar: 'StatusBar',
   Switch: 'Switch',
   Modal: 'Modal',
+  KeyboardAvoidingView: 'KeyboardAvoidingView',
+  SafeAreaView: 'SafeAreaView',
   Alert: mockAlert,
   StyleSheet: {
     create: <T extends Record<string, any>>(styles: T): T => styles,

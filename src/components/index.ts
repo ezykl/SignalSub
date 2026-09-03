@@ -13,3 +13,4 @@ export * from './BrandIcon';
 export * from './OnboardingDots';
 export * from './PaymentMethodSelector';
 export * from './DatePickerModal';
+export * from './UserAvatar';

@@ -162,3 +162,20 @@ export function getPaymentMethod(key?: string | null): PaymentMethodDef {
   );
   return found || PAYMENT_METHODS[0];
 }
+
+export interface SavedPaymentMethod {
+  id: string;
+  methodKey: string;
+  details: string;
+  isDefault?: boolean;
+}
+
+export function parseSavedPaymentMethods(raw?: string | null): SavedPaymentMethod[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}

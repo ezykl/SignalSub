@@ -18,6 +18,7 @@ import {
   FAVORITE_CATEGORY_OPTIONS,
 } from '@/constants/personalization';
 import { PaymentMethodSelector } from '@/components/PaymentMethodSelector';
+import { UserAvatar } from '@/components/UserAvatar';
 import { useSettingsStore } from '@/stores/settingsStore';
 
 export default function PersonalizeScreen() {
@@ -26,7 +27,7 @@ export default function PersonalizeScreen() {
   const getSetting = useSettingsStore((state) => state.getSetting);
 
   const [alias, setAlias] = useState<string>(() => getSetting('user_alias', ''));
-  const [avatar, setAvatar] = useState<string>(() => getSetting('user_avatar', '🚀') || '🚀');
+  const [avatar, setAvatar] = useState<string>(() => getSetting('user_avatar', 'astronaut') || 'astronaut');
   const [paymentMethod, setPaymentMethod] = useState<string>(
     () => getSetting('default_payment_method', 'card') || 'card'
   );
@@ -134,7 +135,7 @@ export default function PersonalizeScreen() {
             <Text style={styles.sectionLabel}>CHOOSE YOUR AVATAR</Text>
             <View style={styles.avatarGrid} testID="personalize-avatar-selector">
               {AVATAR_OPTIONS.map((item) => {
-                const isSelected = avatar === item.emoji;
+                const isSelected = avatar === item.id || avatar === item.emoji;
                 return (
                   <TouchableOpacity
                     key={item.id}
@@ -149,7 +150,7 @@ export default function PersonalizeScreen() {
                     accessibilityState={{ selected: isSelected }}
                     accessibilityLabel={`${item.label} avatar`}
                   >
-                    <Text style={styles.avatarEmoji}>{item.emoji}</Text>
+                    <UserAvatar avatarId={item.id} size={48} />
                     <Text
                       style={[
                         styles.avatarLabel,

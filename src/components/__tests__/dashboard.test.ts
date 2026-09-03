@@ -349,11 +349,19 @@ describe('Dashboard and Tabs Layout', () => {
       assert.ok(texts.includes('Good Morning 👋'));
       assert.ok(texts.includes('September 2026'));
 
-      // Header bell button
-      const settingsBtn = findByTestId(element, 'dashboard-settings-button');
-      assert.ok(settingsBtn);
-      settingsBtn.props.onPress();
+      // Header bell button opens alerts modal
+      const bellBtn = findByTestId(element, 'dashboard-settings-button');
+      assert.ok(bellBtn);
+      bellBtn.props.onPress();
+
+      const alertsModal = findByTestId(element, 'dashboard-alerts-modal');
+      assert.ok(alertsModal);
+
+      const settingsLink = findByTestId(element, 'alerts-modal-settings-link');
+      assert.ok(settingsLink);
+      settingsLink.props.onPress();
       assert.ok(pushedRoutes.includes('/settings'));
+
 
       // Empty State Card check
       const emptyCard = findByTestId(element, 'dashboard-empty-state');
