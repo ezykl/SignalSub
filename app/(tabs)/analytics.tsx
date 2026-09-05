@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  LogBox,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,6 +11,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { VictoryPie } from 'victory-native';
+
+LogBox.ignoreLogs([
+  'Support for defaultProps will be removed',
+  'VictoryPie: Support for defaultProps',
+]);
 import { COLORS } from '@/constants/colors';
 import { getCategoryByKey } from '@/constants/categories';
 import type { Subscription } from '@/db/schema';
