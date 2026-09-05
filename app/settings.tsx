@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: COLORS.bgSurface,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   row: {
     flexDirection: 'row',
@@ -917,11 +917,11 @@ const styles = StyleSheet.create({
   themeOptionCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.bgCard,
+    backgroundColor: 'rgba(26, 26, 46, 0.75)',
     borderRadius: 16,
     padding: 14,
     borderWidth: 1.5,
-    borderColor: COLORS.bgSurface,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   themeOptionCardActive: {
     borderColor: COLORS.accentPurple,

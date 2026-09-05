@@ -90,6 +90,18 @@ export default function SubscriptionsScreen() {
       .reduce((sum, s) => sum + toMonthlyAmount(s.amount, s.billingCycle), 0);
   }, [subscriptions]);
 
+  const activeCount = useMemo(() => {
+    return subscriptions.filter(
+      (s) => s.isActive === 1 && s.status !== 'cancelled'
+    ).length;
+  }, [subscriptions]);
+
+  const activeMonthlySpend = useMemo(() => {
+    return subscriptions
+      .filter((s) => s.isActive === 1 && s.status !== 'cancelled')
+      .reduce((sum, s) => sum + toMonthlyAmount(s.amount, s.billingCycle), 0);
+  }, [subscriptions]);
+
   const filteredSubscriptions = useMemo(() => {
     return filterSubscriptions(subscriptions, searchQuery, selectedFilter);
   }, [subscriptions, searchQuery, selectedFilter]);
@@ -98,6 +110,12 @@ export default function SubscriptionsScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Subscriptions</Text>
+        <Text style={styles.subtitle}>
+          {activeCount} Active ·{' '}
+          <Text style={styles.subtitleHighlight}>
+            {currency} {activeMonthlySpend.toFixed(2)}/mo
+          </Text>
+        </Text>
       </View>
 
       {/* Search Bar */}
@@ -256,18 +274,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
+  subtitle: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    marginTop: 3,
+  },
+  subtitleHighlight: {
+    color: COLORS.accentPurpleLight,
+    fontWeight: '700',
+  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 12,
+    backgroundColor: 'rgba(26, 26, 46, 0.75)',
+    borderRadius: 14,
     marginHorizontal: 16,
     marginTop: 8,
     marginBottom: 12,
-    paddingHorizontal: 12,
-    height: 44,
+    paddingHorizontal: 14,
+    height: 48,
     borderWidth: 1,
-    borderColor: COLORS.bgSurface,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   searchIcon: {
     marginRight: 8,
@@ -291,13 +318,16 @@ const styles = StyleSheet.create({
   chip: {
     paddingVertical: 7,
     paddingHorizontal: 14,
-    borderRadius: 9999,
+    borderRadius: 20,
+    borderWidth: 1,
   },
   chipActive: {
     backgroundColor: COLORS.accentPurple,
+    borderColor: COLORS.accentPurple,
   },
   chipInactive: {
-    backgroundColor: COLORS.bgSurface,
+    backgroundColor: 'rgba(26, 26, 46, 0.75)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   chipText: {
     fontSize: 13,
@@ -319,7 +349,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   emptyCard: {
-    backgroundColor: COLORS.bgCard,
+    backgroundColor: 'rgba(26, 26, 46, 0.75)',
     borderRadius: 16,
     padding: 24,
     marginHorizontal: 16,
@@ -327,7 +357,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: COLORS.bgSurface,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   emptyIconCircle: {
     width: 64,
