@@ -11,6 +11,15 @@ export const COLORS = {
   danger: '#EF4444',
   gradientStart: '#4C1D95',
   gradientEnd: '#2E1065',
+  // Stitch Design Tokens
+  neonCoral: '#FF6584',
+  electricCyan: '#38EF7D',
+  amberWarning: '#FFB703',
+  stitchCardStart: '#2A1A4A',
+  stitchCardEnd: '#1A1A2E',
+  glassBg: 'rgba(26, 26, 46, 0.75)',
+  glassBorder: 'rgba(255, 255, 255, 0.08)',
+  glassGlow: 'rgba(123, 94, 167, 0.35)',
 } as const;
 
 export type ColorKey = keyof typeof COLORS;

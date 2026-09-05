@@ -678,10 +678,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   trialPromptCard: {
-    backgroundColor: COLORS.bgCard,
+    backgroundColor: 'rgba(26, 26, 46, 0.85)',
     borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: COLORS.warning,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.amberWarning,
     padding: 16,
     marginBottom: 12,
   },
@@ -693,7 +695,7 @@ const styles = StyleSheet.create({
   trialPromptTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: COLORS.warning,
+    color: COLORS.amberWarning,
   },
   trialPromptSubtitle: {
     fontSize: 14,

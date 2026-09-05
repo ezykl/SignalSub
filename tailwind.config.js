@@ -18,6 +18,13 @@ module.exports = {
         'success': '#22C55E',
         'warning': '#F59E0B',
         'danger': '#EF4444',
+        // Stitch Design Tokens
+        'app-bg': '#0F0F1A',
+        'app-card': '#1A1A2E',
+        'app-purple': '#7B5EA7',
+        'app-coral': '#FF6584',
+        'app-cyan': '#38EF7D',
+        'app-warning': '#FFB703',
       },
     },
   },

@@ -21,7 +21,7 @@ import {
 } from '@/services/analyticsService';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
-import { StatCard } from '@/components';
+import { StatCard, CategoryProgressBar } from '@/components';
 
 export type PeriodType = 'monthly' | 'quarterly' | 'yearly';
 
@@ -253,38 +253,50 @@ export default function AnalyticsScreen() {
               <View style={styles.categoryList} testID="category-list">
                 {breakdown.map((item) => {
                   const cat = getCategoryByKey(item.category);
-                  const percentage =
-                    stats.monthly > 0
-                      ? ((item.total / stats.monthly) * 100).toFixed(0)
-                      : '0';
+                  const percentageNum =
+                    stats.monthly > 0 ? (item.total / stats.monthly) * 100 : 0;
+                  const percentage = percentageNum.toFixed(0);
                   return (
                     <View
                       key={item.category}
-                      style={styles.categoryRow}
+                      style={styles.categoryRowWrapper}
                       testID={`category-row-${item.category}`}
                     >
-                      <View style={styles.categoryLeft}>
+                      <View style={styles.categoryRow}>
+                        <View style={styles.categoryLeft}>
+                          <View
+                            style={[
+                              styles.categoryDot,
+                              { backgroundColor: cat.color },
+                            ]}
+                          />
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.categoryName}>
+                              {cat.label}
+                            </Text>
+                            <Text style={styles.categoryCount}>
+                              {item.count}{' '}
+                              {item.count === 1 ? 'subscription' : 'subscriptions'}{' '}
+                              · {percentage}%
+                            </Text>
+                          </View>
+                        </View>
+                        <Text style={styles.categoryAmount}>
+                          {currency} {item.total.toFixed(2)}
+                          <Text style={styles.categoryAmountSub}>/mo</Text>
+                        </Text>
+                      </View>
+                      <View style={styles.categoryProgressTrack}>
                         <View
                           style={[
-                            styles.categoryDot,
-                            { backgroundColor: cat.color },
+                            styles.categoryProgressFill,
+                            {
+                              width: `${Math.min(100, Math.max(0, percentageNum))}%`,
+                              backgroundColor: cat.color,
+                            },
                           ]}
                         />
-                        <View>
-                          <Text style={styles.categoryName}>
-                            {cat.label}
-                          </Text>
-                          <Text style={styles.categoryCount}>
-                            {item.count}{' '}
-                            {item.count === 1 ? 'subscription' : 'subscriptions'}{' '}
-                            · {percentage}%
-                          </Text>
-                        </View>
                       </View>
-                      <Text style={styles.categoryAmount}>
-                        {currency} {item.total.toFixed(2)}
-                        <Text style={styles.categoryAmountSub}>/mo</Text>
-                      </Text>
                     </View>
                   );
                 })}
@@ -441,13 +453,27 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.bgSurface,
   },
+  categoryRowWrapper: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.bgSurface,
+  },
   categoryRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.bgSurface,
+    marginBottom: 6,
+  },
+  categoryProgressTrack: {
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 2,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  categoryProgressFill: {
+    height: '100%',
+    borderRadius: 2,
   },
   categoryLeft: {
     flexDirection: 'row',
