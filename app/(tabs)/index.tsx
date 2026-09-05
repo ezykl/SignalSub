@@ -23,9 +23,12 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import {
   AlertBanner,
   FAB,
+  GlassCard,
   SpendingCard,
   SubscriptionCard,
   SubscriptionRow,
+  TrialAlertCard,
+  UpcomingRenewalCard,
   UserAvatar,
 } from '@/components';
 
@@ -221,7 +224,7 @@ export default function DashboardScreen({
 
         {/* Personalization Setup Card */}
         {isSetupIncomplete && (
-          <View style={styles.setupCard} testID="dashboard-setup-card">
+          <GlassCard style={styles.setupCard} testID="dashboard-setup-card">
             <View style={styles.setupCardContent}>
               <Text style={styles.setupCardText}>
                 👋 Personalize your tracker: Set default payment method & alias
@@ -238,61 +241,29 @@ export default function DashboardScreen({
                 <MaterialIcons name="arrow-forward" size={14} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
-          </View>
+          </GlassCard>
         )}
 
         {/* Trial Expiry Prompt Cards */}
         {expiringTrials.length > 0 && (
           <View style={styles.trialPromptContainer} testID="dashboard-trial-expiry-container">
-            {expiringTrials.map((sub) => {
-              const days = daysUntil(sub.trialEndDate!, now);
-              const endsLabel = days === 0 ? 'today' : 'tomorrow';
-              return (
-                <View
-                  key={`trial-expiry-${sub.id}`}
-                  style={styles.trialPromptCard}
-                  testID={`trial-expiry-card-${sub.id}`}
-                >
-                  <View style={styles.trialPromptHeader}>
-                    <Text style={styles.trialPromptTitle} testID="trial-expiry-title">
-                      ⚠️ Free Trial Ending
-                    </Text>
-                  </View>
-                  <Text style={styles.trialPromptSubtitle} testID="trial-expiry-subtitle">
-                    {`${sub.name} trial ends ${endsLabel}. Auto-charge of ${sub.currency} ${sub.amount} will occur.`}
-                  </Text>
-                  <View style={styles.trialPromptButtons}>
-                    <TouchableOpacity
-                      style={styles.trialPromptCancelButton}
-                      onPress={() =>
-                        useSubscriptionStore.getState().cancelSubscription(sub.id)
-                      }
-                      activeOpacity={0.8}
-                      accessibilityRole="button"
-                      accessibilityLabel={`I Cancelled ${sub.name}`}
-                      testID={`trial-expiry-cancelled-btn-${sub.id}`}
-                    >
-                      <Text style={styles.trialPromptCancelText}>I Cancelled It</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.trialPromptKeepButton}
-                      onPress={() =>
-                        setDismissedTrials((prev) => ({
-                          ...prev,
-                          [sub.id]: todayStr,
-                        }))
-                      }
-                      activeOpacity={0.8}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Keep ${sub.name} Active`}
-                      testID={`trial-expiry-keep-btn-${sub.id}`}
-                    >
-                      <Text style={styles.trialPromptKeepText}>Keep Active</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              );
-            })}
+            {expiringTrials.map((sub) => (
+              <TrialAlertCard
+                key={`trial-expiry-${sub.id}`}
+                subscription={sub}
+                referenceDate={now}
+                testID={`trial-expiry-card-${sub.id}`}
+                onCancel={() =>
+                  useSubscriptionStore.getState().cancelSubscription(sub.id)
+                }
+                onKeepActive={() =>
+                  setDismissedTrials((prev) => ({
+                    ...prev,
+                    [sub.id]: todayStr,
+                  }))
+                }
+              />
+            ))}
           </View>
         )}
 
@@ -330,7 +301,7 @@ export default function DashboardScreen({
               testID="dashboard-upcoming-scroll"
             >
               {upcomingRenewals.map((sub) => (
-                <SubscriptionCard
+                <UpcomingRenewalCard
                   key={sub.id}
                   subscription={sub}
                   onPress={() => router.push(`/subscription/${sub.id}`)}

@@ -255,49 +255,18 @@ export default function AnalyticsScreen() {
                   const cat = getCategoryByKey(item.category);
                   const percentageNum =
                     stats.monthly > 0 ? (item.total / stats.monthly) * 100 : 0;
-                  const percentage = percentageNum.toFixed(0);
                   return (
-                    <View
+                    <CategoryProgressBar
                       key={item.category}
-                      style={styles.categoryRowWrapper}
+                      category={item.category}
+                      categoryLabel={cat.label}
+                      amount={item.total}
+                      percentage={Math.round(percentageNum)}
+                      color={cat.color}
+                      currency={currency}
+                      count={item.count}
                       testID={`category-row-${item.category}`}
-                    >
-                      <View style={styles.categoryRow}>
-                        <View style={styles.categoryLeft}>
-                          <View
-                            style={[
-                              styles.categoryDot,
-                              { backgroundColor: cat.color },
-                            ]}
-                          />
-                          <View style={{ flex: 1 }}>
-                            <Text style={styles.categoryName}>
-                              {cat.label}
-                            </Text>
-                            <Text style={styles.categoryCount}>
-                              {item.count}{' '}
-                              {item.count === 1 ? 'subscription' : 'subscriptions'}{' '}
-                              · {percentage}%
-                            </Text>
-                          </View>
-                        </View>
-                        <Text style={styles.categoryAmount}>
-                          {currency} {item.total.toFixed(2)}
-                          <Text style={styles.categoryAmountSub}>/mo</Text>
-                        </Text>
-                      </View>
-                      <View style={styles.categoryProgressTrack}>
-                        <View
-                          style={[
-                            styles.categoryProgressFill,
-                            {
-                              width: `${Math.min(100, Math.max(0, percentageNum))}%`,
-                              backgroundColor: cat.color,
-                            },
-                          ]}
-                        />
-                      </View>
-                    </View>
+                    />
                   );
                 })}
               </View>

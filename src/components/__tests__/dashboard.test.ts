@@ -17,6 +17,7 @@ import DashboardScreen, {
   computeDashboardAlerts,
 } from '../../../app/(tabs)/index';
 import { SpendingCard } from '../SpendingCard';
+import { UpcomingRenewalCard } from '../UpcomingRenewalCard';
 import { SubscriptionCard } from '../SubscriptionCard';
 import { SubscriptionRow } from '../SubscriptionRow';
 import { AlertBanner } from '../AlertBanner';
@@ -45,6 +46,13 @@ function getChildren(element: any): any[] {
 function findByTestId(element: any, testID: string): any | null {
   if (!element || typeof element !== 'object') return null;
   if (element.props && element.props.testID === testID) return element;
+  if (typeof element.type === 'function') {
+    try {
+      const rendered = element.type(element.props);
+      const found = findByTestId(rendered, testID);
+      if (found) return found;
+    } catch {}
+  }
   const children = getChildren(element);
   for (const child of children) {
     const found = findByTestId(child, testID);
@@ -498,7 +506,10 @@ describe('Dashboard and Tabs Layout', () => {
       const upcomingSection = findByTestId(element, 'dashboard-upcoming-section');
       assert.ok(upcomingSection);
 
-      const upcomingCards = findAllByType(upcomingSection, SubscriptionCard);
+      const upcomingCards =
+        findAllByType(upcomingSection, UpcomingRenewalCard).length > 0
+          ? findAllByType(upcomingSection, UpcomingRenewalCard)
+          : findAllByType(upcomingSection, SubscriptionCard);
       assert.equal(upcomingCards.length, 2);
       assert.equal(upcomingCards[0].props.subscription.id, 'sub-urgent-1');
       assert.equal(upcomingCards[1].props.subscription.id, 'sub-upcoming-2');

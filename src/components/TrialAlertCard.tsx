@@ -97,8 +97,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: COLORS.amberWarning,
     padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 12,
     overflow: 'hidden',
   },
   topRow: {
