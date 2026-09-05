@@ -183,43 +183,42 @@ export default function DashboardScreen({
       >
         {/* Top Header */}
         <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.greeting}>{greeting}</Text>
-            <Text style={styles.subtitle}>{formattedDate}</Text>
-          </View>
-          <View style={styles.headerRight}>
-            {userAvatar ? (
-              <TouchableOpacity
-                style={styles.avatarBadge}
-                onPress={() => router.push('/settings')}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={`Profile avatar`}
-                testID="dashboard-avatar-badge"
-              >
-                <UserAvatar avatarId={userAvatar} size={38} />
-              </TouchableOpacity>
-            ) : null}
+          <View style={styles.headerProfileSection}>
             <TouchableOpacity
-              style={styles.bellButton}
-              onPress={() => setIsAlertsModalVisible(true)}
+              style={styles.avatarBadge}
+              onPress={() => router.push('/settings')}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel="Notifications and Alerts"
-              testID="dashboard-settings-button"
+              accessibilityLabel="Profile avatar"
+              testID="dashboard-avatar-badge"
             >
-              <MaterialIcons
-                name={alerts.length > 0 ? 'notifications-active' : 'notifications-none'}
-                size={24}
-                color={alerts.length > 0 ? COLORS.accentPurpleLight : COLORS.textPrimary}
-              />
-              {alerts.length > 0 && (
-                <View style={styles.bellBadge}>
-                  <Text style={styles.bellBadgeText}>{alerts.length}</Text>
-                </View>
-              )}
+              <UserAvatar avatarId={userAvatar || 'astronaut'} size={42} />
             </TouchableOpacity>
+            <View style={styles.headerTextGroup}>
+              <Text style={styles.greeting}>{greeting}</Text>
+              <Text style={styles.subtitle}>{formattedDate}</Text>
+            </View>
           </View>
+
+          <TouchableOpacity
+            style={styles.bellButton}
+            onPress={() => setIsAlertsModalVisible(true)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Notifications and Alerts"
+            testID="dashboard-settings-button"
+          >
+            <MaterialIcons
+              name={alerts.length > 0 ? 'notifications-active' : 'notifications-none'}
+              size={22}
+              color={alerts.length > 0 ? COLORS.accentPurpleLight : COLORS.textPrimary}
+            />
+            {alerts.length > 0 && (
+              <View style={styles.bellBadge}>
+                <Text style={styles.bellBadgeText}>{alerts.length}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
 
         {/* Personalization Setup Card */}
@@ -473,74 +472,83 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 16,
   },
-  headerLeft: {
+  headerProfileSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     flex: 1,
   },
-  greeting: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-  },
-  bellButton: {
+  avatarBadge: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: COLORS.bgCard,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(123, 94, 167, 0.18)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(123, 94, 167, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: COLORS.accentPurple,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  headerTextGroup: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  greeting: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: -0.2,
+  },
+  subtitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.accentPurpleLight,
+    marginTop: 2,
+  },
+  bellButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: 'rgba(26, 26, 46, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   bellBadge: {
     position: 'absolute',
-    top: -2,
-    right: -2,
-    backgroundColor: COLORS.danger,
+    top: -3,
+    right: -3,
+    backgroundColor: COLORS.neonCoral,
     borderRadius: 9,
     minWidth: 18,
     height: 18,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 4,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: COLORS.bgPrimary,
   },
   bellBadgeText: {
     fontSize: 10,
     fontWeight: '800',
     color: '#FFFFFF',
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginLeft: 12,
-  },
-  avatarBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(123, 94, 167, 0.18)',
-    borderWidth: 1.5,
-    borderColor: COLORS.accentPurple,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: COLORS.accentPurple,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  avatarEmoji: {
-    fontSize: 22,
   },
   setupCard: {
     marginHorizontal: 16,
