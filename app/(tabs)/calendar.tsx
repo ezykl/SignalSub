@@ -14,6 +14,7 @@ import type { Subscription } from '@/db/schema';
 import { parseDateParts } from '@/services/renewalService';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { BrandIcon } from '@/components';
 
 export const MONTH_NAMES = [
   'January',
@@ -242,14 +243,26 @@ export default function CalendarScreen({ initialDate }: CalendarScreenProps = {}
                     testID={`calendar-card-${sub.id}`}
                   >
                     <View style={styles.cardLeft}>
-                      <Text style={styles.subName} numberOfLines={1}>
-                        {sub.name}
-                      </Text>
-                      {sub.category ? (
-                        <Text style={styles.subCategory} numberOfLines={1}>
-                          {sub.category}
+                      <BrandIcon
+                        name={sub.name}
+                        iconType={sub.iconType}
+                        iconValue={sub.iconValue}
+                        size={36}
+                        iconSize={20}
+                        color="rgba(123, 94, 167, 0.15)"
+                        iconColor={sub.color || COLORS.accentPurple}
+                        style={styles.cardBrandIcon}
+                      />
+                      <View style={styles.cardTextContainer}>
+                        <Text style={styles.subName} numberOfLines={1}>
+                          {sub.name}
                         </Text>
-                      ) : null}
+                        {sub.category ? (
+                          <Text style={styles.subCategory} numberOfLines={1}>
+                            {sub.category}
+                          </Text>
+                        ) : null}
+                      </View>
                     </View>
                     <View style={styles.cardRight}>
                       <Text style={styles.subAmount}>
@@ -370,7 +383,15 @@ const styles = StyleSheet.create({
   },
   cardLeft: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     marginRight: 8,
+  },
+  cardBrandIcon: {
+    marginRight: 12,
+  },
+  cardTextContainer: {
+    flex: 1,
   },
   subName: {
     fontSize: 15,
