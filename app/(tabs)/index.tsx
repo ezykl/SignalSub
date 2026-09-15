@@ -2,7 +2,6 @@ import React, { useCallback, useState } from 'react';
 import {
   Modal,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -30,6 +29,7 @@ import {
   TrialAlertCard,
   UpcomingRenewalCard,
   UserAvatar,
+  AppIcon,
 } from '@/components';
 
 export function getGreeting(date: Date = new Date(), userAlias?: string): string {
@@ -175,17 +175,17 @@ export default function DashboardScreen({
   const activeSubscriptions = subscriptions.filter((s) => s.isActive === 1);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-background">
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 96 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Top Header */}
-        <View style={styles.header}>
-          <View style={styles.headerProfileSection}>
+        <View className="flex-row justify-between items-center px-5 pt-3 pb-4">
+          <View className="flex-row items-center gap-3 flex-1">
             <TouchableOpacity
-              style={styles.avatarBadge}
+              className="w-11 h-11 rounded-full overflow-hidden bg-primary/20 border-[1.5px] border-primary/40 items-center justify-center shadow-md shadow-purple-900/35 elevation-4"
               onPress={() => router.push('/settings')}
               activeOpacity={0.7}
               accessibilityRole="button"
@@ -194,28 +194,28 @@ export default function DashboardScreen({
             >
               <UserAvatar avatarId={userAvatar || 'astronaut'} size={42} />
             </TouchableOpacity>
-            <View style={styles.headerTextGroup}>
-              <Text style={styles.greeting}>{greeting}</Text>
-              <Text style={styles.subtitle}>{formattedDate}</Text>
+            <View className="flex-col justify-center flex-1">
+              <Text className="text-lg font-heading font-bold text-white tracking-tight">{greeting}</Text>
+              <Text className="text-[13px] font-body font-semibold text-purple-300 mt-0.5">{formattedDate}</Text>
             </View>
           </View>
 
           <TouchableOpacity
-            style={styles.bellButton}
+            className="w-[42px] h-[42px] rounded-[14px] bg-[#1A1A2E]/85 border border-white/10 items-center justify-center relative shadow-md shadow-black/30 elevation-3"
             onPress={() => setIsAlertsModalVisible(true)}
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel="Notifications and Alerts"
             testID="dashboard-settings-button"
           >
-            <MaterialIcons
-              name={alerts.length > 0 ? 'notifications-active' : 'notifications-none'}
+            <AppIcon
+              name="bell"
               size={22}
               color={alerts.length > 0 ? COLORS.accentPurpleLight : COLORS.textPrimary}
             />
             {alerts.length > 0 && (
-              <View style={styles.bellBadge}>
-                <Text style={styles.bellBadgeText}>{alerts.length}</Text>
+              <View className="absolute -top-[3px] -right-[3px] bg-coral rounded-full min-w-[18px] h-[18px] items-center justify-center px-1 border-2 border-background">
+                <Text className="text-[10px] font-heading font-extrabold text-white">{alerts.length}</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -223,20 +223,20 @@ export default function DashboardScreen({
 
         {/* Personalization Setup Card */}
         {isSetupIncomplete && (
-          <GlassCard style={styles.setupCard} testID="dashboard-setup-card">
-            <View style={styles.setupCardContent}>
-              <Text style={styles.setupCardText}>
+          <GlassCard className="mx-4 mb-4 bg-primary/10 rounded-[14px] border border-[#A78BFA]/30 p-3.5" testID="dashboard-setup-card">
+            <View className="flex-row items-center justify-between gap-3">
+              <Text className="flex-1 text-[13px] font-body text-white leading-[18px] font-medium">
                 👋 Personalize your tracker: Set default payment method & alias
               </Text>
               <TouchableOpacity
-                style={styles.setupCardButton}
+                className="flex-row items-center bg-primary px-3 py-2 rounded-full gap-1"
                 onPress={() => router.push('/settings')}
                 activeOpacity={0.8}
                 accessibilityRole="button"
                 accessibilityLabel="Set Up Now"
                 testID="setup-card-button"
               >
-                <Text style={styles.setupCardButtonText}>Set Up Now</Text>
+                <Text className="text-xs font-heading font-bold text-white">Set Up Now</Text>
                 <MaterialIcons name="arrow-forward" size={14} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
@@ -245,7 +245,7 @@ export default function DashboardScreen({
 
         {/* Trial Expiry Prompt Cards */}
         {expiringTrials.length > 0 && (
-          <View style={styles.trialPromptContainer} testID="dashboard-trial-expiry-container">
+          <View className="px-4 mb-2" testID="dashboard-trial-expiry-container">
             {expiringTrials.map((sub) => (
               <TrialAlertCard
                 key={`trial-expiry-${sub.id}`}
@@ -268,7 +268,7 @@ export default function DashboardScreen({
 
         {/* Alert Banners */}
         {alerts.length > 0 && (
-          <View style={styles.alertsContainer} testID="dashboard-alerts">
+          <View className="px-4 mb-4" testID="dashboard-alerts">
             {alerts.map((alert) => (
               <AlertBanner
                 key={alert.id}
@@ -291,12 +291,14 @@ export default function DashboardScreen({
 
         {/* Upcoming Renewals Section */}
         {upcomingRenewals.length > 0 && (
-          <View style={styles.section} testID="dashboard-upcoming-section">
-            <Text style={styles.sectionHeader}>Upcoming Renewals</Text>
+          <View className="mb-6" testID="dashboard-upcoming-section">
+            <Text className="text-xs font-heading font-bold text-[#CCC4D1] tracking-wider uppercase px-4 mb-3">
+              Upcoming Renewals
+            </Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalScrollContent}
+              contentContainerStyle={{ paddingLeft: 16, paddingRight: 4 }}
               testID="dashboard-upcoming-scroll"
             >
               {upcomingRenewals.map((sub) => (
@@ -312,23 +314,25 @@ export default function DashboardScreen({
         )}
 
         {/* Active Subscriptions Section */}
-        <View style={styles.section} testID="dashboard-active-section">
-          <Text style={styles.sectionHeader}>Active Subscriptions</Text>
+        <View className="mb-6" testID="dashboard-active-section">
+          <Text className="text-xs font-heading font-bold text-[#CCC4D1] tracking-wider uppercase px-4 mb-3">
+            Active Subscriptions
+          </Text>
           {activeSubscriptions.length === 0 ? (
-            <View style={styles.emptyCard} testID="dashboard-empty-state">
-              <View style={styles.emptyIconCircle}>
+            <View className="bg-card/75 rounded-2xl p-6 mx-4 items-center justify-center border border-white/[0.08]" testID="dashboard-empty-state">
+              <View className="w-16 h-16 rounded-full bg-primary/15 items-center justify-center mb-4">
                 <MaterialIcons
                   name="playlist-add"
                   size={40}
                   color={COLORS.accentPurple}
                 />
               </View>
-              <Text style={styles.emptyTitle}>No active subscriptions</Text>
-              <Text style={styles.emptySubtitle}>
+              <Text className="text-base font-heading font-bold text-white mb-2 text-center">No active subscriptions</Text>
+              <Text className="text-[13px] font-body text-muted text-center leading-[18px] mb-5 max-w-[260px]">
                 Track your subscriptions, upcoming renewals, and free trials in one place.
               </Text>
               <TouchableOpacity
-                style={styles.emptyButton}
+                className="flex-row items-center bg-primary py-2.5 px-4.5 rounded-full"
                 onPress={() => router.push('/subscription/new')}
                 activeOpacity={0.8}
                 accessibilityRole="button"
@@ -339,13 +343,13 @@ export default function DashboardScreen({
                   name="add"
                   size={20}
                   color="#FFFFFF"
-                  style={styles.emptyButtonIcon}
+                  style={{ marginRight: 6 }}
                 />
-                <Text style={styles.emptyButtonText}>Add Subscription</Text>
+                <Text className="text-sm font-heading font-semibold text-white">Add Subscription</Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <View style={styles.activeList} testID="dashboard-active-list">
+            <View className="px-4" testID="dashboard-active-list">
               {activeSubscriptions.map((sub) => (
                 <SubscriptionRow
                   key={sub.id}
@@ -369,16 +373,16 @@ export default function DashboardScreen({
         onRequestClose={() => setIsAlertsModalVisible(false)}
         testID="dashboard-alerts-modal"
       >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalSheetContainer}>
-            <View style={styles.modalHeader}>
-              <View style={styles.modalHeaderTitleRow}>
-                <MaterialIcons name="notifications-active" size={22} color={COLORS.accentPurple} />
-                <Text style={styles.modalTitle}>Renewal Alerts</Text>
+        <View className="flex-1 bg-black/75 justify-end">
+          <View className="bg-[#161626] rounded-t-3xl border border-[#7B5EA7]/25 p-5 max-h-[80%]">
+            <View className="flex-row justify-between items-center pb-4 border-b border-white/[0.08]">
+              <View className="flex-row items-center gap-2">
+                <AppIcon name="bell" size={22} color={COLORS.accentPurple} />
+                <Text className="text-lg font-heading font-bold text-white">Renewal Alerts</Text>
               </View>
               <TouchableOpacity
                 onPress={() => setIsAlertsModalVisible(false)}
-                style={styles.modalCloseBtn}
+                className="p-1"
                 testID="alerts-modal-close-button"
               >
                 <MaterialIcons name="close" size={22} color={COLORS.textSecondary} />
@@ -386,11 +390,11 @@ export default function DashboardScreen({
             </View>
 
             {alerts.length > 0 ? (
-              <ScrollView style={styles.modalList} showsVerticalScrollIndicator={false}>
+              <ScrollView className="mt-3.5 max-h-80" showsVerticalScrollIndicator={false}>
                 {alerts.map((alert: DashboardAlert) => (
                   <TouchableOpacity
                     key={alert.id}
-                    style={styles.modalAlertItem}
+                    className="flex-row items-center bg-white/[0.04] rounded-[14px] p-3.5 mb-2.5 border border-white/[0.06]"
                     onPress={() => {
                       setIsAlertsModalVisible(false);
                       router.push(`/subscription/${alert.subscriptionId}`);
@@ -399,15 +403,11 @@ export default function DashboardScreen({
                     testID={`alerts-modal-item-${alert.id}`}
                   >
                     <View
-                      style={[
-                        styles.modalAlertIconBox,
-                        {
-                          backgroundColor:
-                            alert.type === 'trial'
-                              ? 'rgba(245, 158, 11, 0.15)'
-                              : 'rgba(123, 94, 167, 0.15)',
-                        },
-                      ]}
+                      className={`w-[38px] h-[38px] rounded-[10px] items-center justify-center mr-3 ${
+                        alert.type === 'trial'
+                          ? 'bg-amber-500/15'
+                          : 'bg-primary/15'
+                      }`}
                     >
                       <MaterialIcons
                         name={alert.type === 'trial' ? 'timer' : 'event'}
@@ -415,25 +415,25 @@ export default function DashboardScreen({
                         color={alert.type === 'trial' ? COLORS.warning : COLORS.accentPurple}
                       />
                     </View>
-                    <View style={styles.modalAlertTextCol}>
-                      <Text style={styles.modalAlertMessage}>{alert.message}</Text>
-                      <Text style={styles.modalAlertAction}>Tap to view subscription →</Text>
+                    <View className="flex-1">
+                      <Text className="text-sm font-body font-semibold text-white leading-[18px]">{alert.message}</Text>
+                      <Text className="text-xs font-body text-purple-300 mt-0.5">Tap to view subscription →</Text>
                     </View>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
             ) : (
-              <View style={styles.modalEmptyContainer} testID="alerts-modal-empty">
+              <View className="py-9 items-center justify-center" testID="alerts-modal-empty">
                 <MaterialIcons name="check-circle" size={44} color={COLORS.success} />
-                <Text style={styles.modalEmptyTitle}>You're All Caught Up!</Text>
-                <Text style={styles.modalEmptySubtitle}>
+                <Text className="text-[17px] font-heading font-bold text-white mt-3">You're All Caught Up!</Text>
+                <Text className="text-[13px] font-body text-muted text-center mt-1.5 px-5">
                   No renewal or trial alerts scheduled within the next 3 days.
                 </Text>
               </View>
             )}
 
             <TouchableOpacity
-              style={styles.modalSettingsLink}
+              className="flex-row items-center justify-center gap-2 mt-4 py-3 rounded-xl bg-white/5"
               onPress={() => {
                 setIsAlertsModalVisible(false);
                 router.push('/settings');
@@ -442,7 +442,7 @@ export default function DashboardScreen({
               testID="alerts-modal-settings-link"
             >
               <MaterialIcons name="tune" size={18} color={COLORS.textSecondary} />
-              <Text style={styles.modalSettingsLinkText}>Configure Notification Settings</Text>
+              <Text className="text-[13px] font-heading font-semibold text-muted">Configure Notification Settings</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -456,375 +456,3 @@ export default function DashboardScreen({
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.bgPrimary,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 96,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 16,
-  },
-  headerProfileSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-  },
-  avatarBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(123, 94, 167, 0.18)',
-    borderWidth: 1.5,
-    borderColor: 'rgba(123, 94, 167, 0.4)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: COLORS.accentPurple,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  headerTextGroup: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    flex: 1,
-  },
-  greeting: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: -0.2,
-  },
-  subtitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.accentPurpleLight,
-    marginTop: 2,
-  },
-  bellButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    backgroundColor: 'rgba(26, 26, 46, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  bellBadge: {
-    position: 'absolute',
-    top: -3,
-    right: -3,
-    backgroundColor: COLORS.neonCoral,
-    borderRadius: 9,
-    minWidth: 18,
-    height: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-    borderWidth: 2,
-    borderColor: COLORS.bgPrimary,
-  },
-  bellBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  setupCard: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    backgroundColor: 'rgba(123, 94, 167, 0.12)',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(167, 139, 250, 0.3)',
-    padding: 14,
-  },
-  setupCardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  setupCardText: {
-    flex: 1,
-    fontSize: 13,
-    color: '#FFFFFF',
-    lineHeight: 18,
-    fontWeight: '500',
-  },
-  setupCardButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.accentPurple,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 4,
-  },
-  setupCardButtonText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  alertsContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#CCC4D1',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
-  horizontalScrollContent: {
-    paddingLeft: 16,
-    paddingRight: 4,
-  },
-  activeList: {
-    paddingHorizontal: 16,
-  },
-  emptyCard: {
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    borderRadius: 16,
-    padding: 24,
-    marginHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  emptyIconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(123, 94, 167, 0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: 20,
-    maxWidth: 260,
-  },
-  emptyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.accentPurple,
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: 9999,
-  },
-  emptyButtonIcon: {
-    marginRight: 6,
-  },
-  emptyButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  trialPromptContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 8,
-  },
-  trialPromptCard: {
-    backgroundColor: 'rgba(26, 26, 46, 0.85)',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.amberWarning,
-    padding: 16,
-    marginBottom: 12,
-  },
-  trialPromptHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  trialPromptTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.amberWarning,
-  },
-  trialPromptSubtitle: {
-    fontSize: 14,
-    color: COLORS.textPrimary,
-    lineHeight: 20,
-    marginBottom: 14,
-  },
-  trialPromptButtons: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  trialPromptCancelButton: {
-    flex: 1,
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-    borderWidth: 1,
-    borderColor: COLORS.danger,
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  trialPromptCancelText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.danger,
-  },
-  trialPromptKeepButton: {
-    flex: 1,
-    backgroundColor: COLORS.bgSurface,
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.25)',
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  trialPromptKeepText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    justifyContent: 'flex-end',
-  },
-  modalSheetContainer: {
-    backgroundColor: '#161626',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(123, 94, 167, 0.25)',
-    padding: 20,
-    maxHeight: '80%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  modalHeaderTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  modalCloseBtn: {
-    padding: 4,
-  },
-  modalList: {
-    marginTop: 14,
-    maxHeight: 320,
-  },
-  modalAlertItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
-  },
-  modalAlertIconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  modalAlertTextCol: {
-    flex: 1,
-  },
-  modalAlertMessage: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    lineHeight: 18,
-  },
-  modalAlertAction: {
-    fontSize: 12,
-    color: COLORS.accentPurpleLight,
-    marginTop: 3,
-  },
-  modalEmptyContainer: {
-    paddingVertical: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalEmptyTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginTop: 12,
-  },
-  modalEmptySubtitle: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    marginTop: 6,
-    paddingHorizontal: 20,
-  },
-  modalSettingsLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  modalSettingsLinkText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-});

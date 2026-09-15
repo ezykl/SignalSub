@@ -2,16 +2,16 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   useWindowDimensions,
   StatusBar,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
 import { OnboardingDots } from '@/components/OnboardingDots';
 import { BrandIcon } from '@/components/BrandIcon';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 // ─── Mock subscription data ───────────────────────────────────────────────────
 const MOCK_SUBS = [
@@ -22,17 +22,23 @@ const MOCK_SUBS = [
 
 const FILTER_CHIPS = ['All', 'Active', 'Streaming', 'Productivity', 'Trial'];
 
-// Spotlight: Search bar is typically at top:56+48+searchBarMargin ≈ top:122
-// We compute precisely in component.
 const SEARCH_TOP = 116;  // below status bar + header
 const SEARCH_HEIGHT = 44;
 
 export default function Step2Screen() {
   const router = useRouter();
   const { width: screenW, height: screenH } = useWindowDimensions();
+  const getSetting = useSettingsStore((state) => state.getSetting);
+  const hasOnboarded = getSetting('has_onboarded') === 'true';
 
   const handleNext = () => router.push('/(onboarding)/step-3');
-  const handleSkip = () => router.replace('/(onboarding)/currency');
+  const handleSkip = () => {
+    if (hasOnboarded) {
+      router.replace('/(tabs)');
+    } else {
+      router.replace('/(onboarding)/currency');
+    }
+  };
 
   const SIDE_MARGIN = 16;
   const spotTop = SEARCH_TOP;
@@ -42,36 +48,36 @@ export default function Step2Screen() {
   const OVERLAY = 'rgba(0,0,0,0.78)';
 
   // Position callout below filter chips (search bar bottom + chips + gap)
-  const calloutTop = spotTop + spotH + 56 + 12; // chips row height ~56
+  const calloutTop = spotTop + spotH + 56 + 12;
 
   return (
-    <View style={styles.root}>
+    <View className="flex-1 bg-background">
       <StatusBar barStyle="light-content" />
 
       {/* ── Mock Subscriptions Screen ─────────────────────────────────── */}
-      <View style={[styles.mockScreen, { width: screenW, height: screenH }]}>
+      <View className="bg-background pt-[52px]" style={{ width: screenW, height: screenH }}>
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Subscriptions</Text>
-          <View style={styles.headerIconBtn}>
+        <View className="flex-row items-center justify-between px-5 mb-3">
+          <Text className="text-[22px] font-bold font-heading text-white">Subscriptions</Text>
+          <View className="w-[38px] h-[38px] rounded-[19px] bg-card items-center justify-center">
             <MaterialIcons name="tune" size={20} color={COLORS.textSecondary} />
           </View>
         </View>
 
         {/* Search bar */}
-        <View style={styles.searchBar}>
+        <View className="flex-row items-center gap-2 h-11 mx-4 px-3.5 rounded-xl bg-card mb-3">
           <MaterialIcons name="search" size={18} color={COLORS.textSecondary} />
-          <Text style={styles.searchPlaceholder}>Search subscriptions...</Text>
+          <Text className="text-sm font-body text-muted">Search subscriptions...</Text>
         </View>
 
         {/* Category chips */}
-        <View style={styles.chipsRow}>
+        <View className="flex-row px-4 gap-2 mb-4 flex-nowrap">
           {FILTER_CHIPS.map((chip, idx) => (
             <View
               key={chip}
-              style={[styles.chip, idx === 0 && styles.chipActive]}
+              className={`px-3.5 py-[7px] rounded-full bg-card ${idx === 0 ? 'bg-primary' : ''}`}
             >
-              <Text style={[styles.chipText, idx === 0 && styles.chipTextActive]}>
+              <Text className={`text-[13px] ${idx === 0 ? 'text-white font-semibold font-heading' : 'text-muted font-medium font-body'}`}>
                 {chip}
               </Text>
             </View>
@@ -80,235 +86,68 @@ export default function Step2Screen() {
 
         {/* Subscription rows */}
         {MOCK_SUBS.map((sub) => (
-          <View key={sub.id} style={[styles.subRow, { borderLeftColor: sub.color }]}>
+          <View
+            key={sub.id}
+            className="flex-row items-center mx-4 mb-2 p-3.5 rounded-xl bg-card border-l-[3px]"
+            style={{ borderLeftColor: sub.color }}
+          >
             <BrandIcon
               name={sub.name}
               size={36}
               iconSize={20}
               color={sub.color}
               showContainer
-              style={styles.subIcon}
+              className="mr-3"
             />
-            <View style={styles.subCenter}>
-              <Text style={styles.subName}>{sub.name}</Text>
-              <Text style={styles.subCategory}>{sub.category} · Renews in 14d</Text>
+            <View className="flex-1">
+              <Text className="text-[15px] font-semibold font-heading text-white">{sub.name}</Text>
+              <Text className="text-xs text-muted mt-0.5 font-body">{sub.category} · Renews in 14d</Text>
             </View>
-            <View style={styles.subRight}>
-              <Text style={styles.subAmount}>${sub.amount}</Text>
-              <Text style={styles.subCycle}>/mo</Text>
+            <View className="items-end">
+              <Text className="text-sm font-bold font-heading text-white">${sub.amount}</Text>
+              <Text className="text-xs text-muted mt-0.5 font-body">/mo</Text>
             </View>
           </View>
         ))}
       </View>
 
       {/* ── Spotlight overlay ─────────────────────────────────────────── */}
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View className="absolute inset-0" pointerEvents="none">
         {/* Top */}
-        <View style={[styles.overlay, { top: 0, left: 0, right: 0, height: spotTop, backgroundColor: OVERLAY }]} />
+        <View className="absolute" style={{ top: 0, left: 0, right: 0, height: spotTop, backgroundColor: OVERLAY }} />
         {/* Bottom */}
-        <View style={[styles.overlay, { top: spotTop + spotH, left: 0, right: 0, bottom: 0, backgroundColor: OVERLAY }]} />
+        <View className="absolute" style={{ top: spotTop + spotH, left: 0, right: 0, bottom: 0, backgroundColor: OVERLAY }} />
         {/* Left */}
-        <View style={[styles.overlay, { top: spotTop, left: 0, width: spotLeft, height: spotH, backgroundColor: OVERLAY }]} />
+        <View className="absolute" style={{ top: spotTop, left: 0, width: spotLeft, height: spotH, backgroundColor: OVERLAY }} />
         {/* Right */}
-        <View style={[styles.overlay, { top: spotTop, left: spotLeft + spotW, right: 0, height: spotH, backgroundColor: OVERLAY }]} />
+        <View className="absolute" style={{ top: spotTop, left: spotLeft + spotW, right: 0, height: spotH, backgroundColor: OVERLAY }} />
         {/* Border ring */}
         <View
-          style={[
-            styles.spotlightBorder,
-            { top: spotTop, left: spotLeft, width: spotW, height: spotH, borderRadius: 12 },
-          ]}
+          className="absolute border-2 border-[#7B5EA7]/85"
+          style={{ top: spotTop, left: spotLeft, width: spotW, height: spotH, borderRadius: 12 }}
         />
       </View>
 
       {/* ── Callout card ─────────────────────────────────────────────── */}
-      <View style={[styles.callout, { top: calloutTop }]} pointerEvents="box-none">
+      <View
+        className="absolute left-4 right-4 bg-card rounded-2xl p-5 border border-[#7B5EA7]/30 gap-2.5"
+        style={{ top: calloutTop }}
+        pointerEvents="box-none"
+      >
         <OnboardingDots total={3} current={2} />
-        <Text style={styles.calloutHeadline}>Search & Filter Instantly</Text>
-        <Text style={styles.calloutBody}>
+        <Text className="text-[17px] font-bold font-heading text-white">Search & Filter Instantly</Text>
+        <Text className="text-[13px] text-muted leading-[19px] font-body">
           Find any subscription in seconds. Filter by category, status, or trial.
         </Text>
-        <View style={styles.calloutActions}>
-          <TouchableOpacity onPress={handleSkip} style={styles.skipBtn} activeOpacity={0.7}>
-            <Text style={styles.skipText}>Skip</Text>
+        <View className="flex-row items-center justify-end gap-3 mt-1">
+          <TouchableOpacity onPress={handleSkip} className="px-3 py-2" activeOpacity={0.7}>
+            <Text className="text-sm text-muted font-body">Skip</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleNext} style={styles.nextBtn} activeOpacity={0.8}>
-            <Text style={styles.nextText}>Next →</Text>
+          <TouchableOpacity onPress={handleNext} className="bg-primary px-5 py-2.5 rounded-full" activeOpacity={0.8}>
+            <Text className="text-sm font-bold font-heading text-white">Next →</Text>
           </TouchableOpacity>
         </View>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: COLORS.bgPrimary,
-  },
-  // ── Mock screen ──────────────────────────────────────────────────────────
-  mockScreen: {
-    backgroundColor: COLORS.bgPrimary,
-    paddingTop: 52,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginBottom: 12,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  headerIconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: COLORS.bgCard,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    height: SEARCH_HEIGHT,
-    marginHorizontal: 16,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    backgroundColor: COLORS.bgCard,
-    marginBottom: 12,
-  },
-  searchPlaceholder: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
-  chipsRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    gap: 8,
-    marginBottom: 16,
-    flexWrap: 'nowrap',
-  },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    backgroundColor: COLORS.bgCard,
-  },
-  chipActive: {
-    backgroundColor: COLORS.accentPurple,
-  },
-  chipText: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
-  },
-  chipTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-  },
-  subRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 16,
-    marginBottom: 8,
-    padding: 14,
-    borderRadius: 12,
-    backgroundColor: COLORS.bgCard,
-    borderLeftWidth: 3,
-  },
-  subIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  subCenter: {
-    flex: 1,
-  },
-  subName: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  subCategory: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 3,
-  },
-  subRight: {
-    alignItems: 'flex-end',
-  },
-  subAmount: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  subCycle: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-  // ── Spotlight overlay ────────────────────────────────────────────────────
-  overlay: {
-    position: 'absolute',
-  },
-  spotlightBorder: {
-    position: 'absolute',
-    borderWidth: 2,
-    borderColor: 'rgba(123,94,167,0.85)',
-  },
-  // ── Callout card ─────────────────────────────────────────────────────────
-  callout: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(123,94,167,0.3)',
-    gap: 10,
-  },
-  calloutHeadline: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  calloutBody: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    lineHeight: 19,
-  },
-  calloutActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 12,
-    marginTop: 4,
-  },
-  skipBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  skipText: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
-  nextBtn: {
-    backgroundColor: COLORS.accentPurple,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  nextText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-});

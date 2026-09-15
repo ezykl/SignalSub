@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   LogBox,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -111,18 +110,18 @@ export default function AnalyticsScreen() {
   }, [breakdown]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Analytics</Text>
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="px-4 pt-3 pb-1">
+        <Text className="text-2xl font-bold font-heading text-white">Analytics</Text>
       </View>
 
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Period Selector */}
-        <View style={styles.periodSelectorContainer} testID="period-selector">
+        <View className="flex-row bg-card rounded-xl mx-4 mt-2 mb-4 p-1 border border-surface" testID="period-selector">
           {(['monthly', 'quarterly', 'yearly'] as const).map((p) => {
             const isSelected = period === p;
             const label =
@@ -135,20 +134,18 @@ export default function AnalyticsScreen() {
               <TouchableOpacity
                 key={p}
                 onPress={() => setPeriod(p)}
-                style={[
-                  styles.periodTab,
-                  isSelected && styles.periodTabActive,
-                ]}
+                className={`flex-1 py-2 items-center justify-center rounded-lg ${
+                  isSelected ? 'bg-primary' : ''
+                }`}
                 activeOpacity={0.7}
                 accessibilityRole="button"
                 accessibilityState={{ selected: isSelected }}
                 testID={`period-${p}`}
               >
                 <Text
-                  style={[
-                    styles.periodTabText,
-                    isSelected && styles.periodTabTextActive,
-                  ]}
+                  className={`text-[13px] font-semibold font-heading ${
+                    isSelected ? 'text-white' : 'text-muted'
+                  }`}
                 >
                   {label}
                 </Text>
@@ -158,21 +155,21 @@ export default function AnalyticsScreen() {
         </View>
 
         {activeSubs.length === 0 ? (
-          <View style={styles.emptyCard} testID="analytics-empty-state">
-            <View style={styles.emptyIconCircle}>
+          <View className="bg-card rounded-2xl p-6 mx-4 mt-6 items-center justify-center border border-surface" testID="analytics-empty-state">
+            <View className="w-16 h-16 rounded-full bg-primary/15 items-center justify-center mb-4">
               <MaterialIcons
                 name="bar-chart"
                 size={40}
                 color={COLORS.accentPurple}
               />
             </View>
-            <Text style={styles.emptyTitle}>No active subscriptions</Text>
-            <Text style={styles.emptySubtitle}>
+            <Text className="text-base font-bold font-heading text-white mb-2 text-center">No active subscriptions</Text>
+            <Text className="text-[13px] text-muted text-center leading-[18px] max-w-[260px] mb-5 font-body">
               Add active subscriptions to view your spending intelligence,
               category breakdown, and extremes.
             </Text>
             <TouchableOpacity
-              style={styles.emptyButton}
+              className="flex-row items-center bg-primary py-2.5 px-4.5 rounded-full"
               onPress={() => router.push('/subscription/new')}
               activeOpacity={0.8}
               testID="analytics-empty-add-btn"
@@ -181,15 +178,15 @@ export default function AnalyticsScreen() {
                 name="add"
                 size={20}
                 color="#FFFFFF"
-                style={styles.emptyButtonIcon}
+                style={{ marginRight: 6 }}
               />
-              <Text style={styles.emptyButtonText}>Add Subscription</Text>
+              <Text className="text-sm font-semibold font-heading text-white">Add Subscription</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={styles.contentContainer} testID="analytics-content">
+          <View className="px-4" testID="analytics-content">
             {/* StatCards Row */}
-            <View style={styles.statsRow} testID="analytics-stats-row">
+            <View className="flex-row gap-2 mb-5" testID="analytics-stats-row">
               <StatCard
                 label={
                   period === 'monthly'
@@ -204,31 +201,31 @@ export default function AnalyticsScreen() {
                     ? `${currency} ${stats.monthly.toFixed(2)}/mo`
                     : undefined
                 }
-                style={styles.statCard}
+                className="flex-1 p-3"
                 testID="stat-monthly-total"
               />
               <StatCard
                 label="Yearly Projection"
                 value={`${currency} ${stats.yearly.toFixed(2)}`}
-                style={styles.statCard}
+                className="flex-1 p-3"
                 testID="stat-yearly-projection"
               />
               <StatCard
                 label="Avg / Sub"
                 value={`${currency} ${stats.avgPerSub.toFixed(2)}`}
                 subtitle={`${activeSubs.length} active`}
-                style={styles.statCard}
+                className="flex-1 p-3"
                 testID="stat-avg-per-sub"
               />
             </View>
 
             {/* Category Breakdown Section */}
-            <View style={styles.section} testID="category-breakdown-section">
-              <Text style={styles.sectionTitle}>Spending by Category</Text>
+            <View className="mb-6" testID="category-breakdown-section">
+              <Text className="text-base font-bold font-heading text-white mb-3">Spending by Category</Text>
 
               {/* VictoryPie Donut Chart */}
               <View
-                style={styles.chartContainer}
+                className="bg-card rounded-2xl items-center justify-center py-4 relative border border-surface mb-3"
                 testID="analytics-chart-container"
               >
                 {VictoryPie ? (
@@ -243,20 +240,20 @@ export default function AnalyticsScreen() {
                   />
                 ) : (
                   <View
-                    style={styles.chartPlaceholder}
+                    className="w-[240px] h-[240px]"
                     testID="chart-fallback"
                   />
                 )}
-                <View style={styles.donutCenter} pointerEvents="none">
-                  <Text style={styles.donutCenterLabel}>Total / mo</Text>
-                  <Text style={styles.donutCenterValue}>
+                <View className="absolute items-center justify-center" pointerEvents="none">
+                  <Text className="text-[11px] text-muted font-medium font-body uppercase">Total / mo</Text>
+                  <Text className="text-lg font-bold font-heading text-white mt-0.5">
                     {currency} {stats.monthly.toFixed(0)}
                   </Text>
                 </View>
               </View>
 
               {/* Category List */}
-              <View style={styles.categoryList} testID="category-list">
+              <View className="bg-card rounded-2xl px-4 py-2 border border-surface" testID="category-list">
                 {breakdown.map((item) => {
                   const cat = getCategoryByKey(item.category);
                   const percentageNum =
@@ -280,9 +277,9 @@ export default function AnalyticsScreen() {
 
             {/* Insights / Extremes Section */}
             {(stats.mostExpensive || stats.cheapest) && (
-              <View style={styles.section} testID="insights-section">
-                <Text style={styles.sectionTitle}>Insights & Extremes</Text>
-                <View style={styles.extremesRow}>
+              <View className="mb-6" testID="insights-section">
+                <Text className="text-base font-bold font-heading text-white mb-3">Insights & Extremes</Text>
+                <View className="flex-row gap-3">
                   {stats.mostExpensive && (
                     <StatCard
                       label="Most Expensive"
@@ -291,7 +288,7 @@ export default function AnalyticsScreen() {
                         stats.mostExpensive.amount,
                         stats.mostExpensive.billingCycle
                       ).toFixed(2)}/mo`}
-                      style={styles.extremeCard}
+                      className="flex-1"
                       testID="stat-most-expensive"
                     />
                   )}
@@ -303,7 +300,7 @@ export default function AnalyticsScreen() {
                         stats.cheapest.amount,
                         stats.cheapest.billingCycle
                       ).toFixed(2)}/mo`}
-                      style={styles.extremeCard}
+                      className="flex-1"
                       testID="stat-cheapest"
                     />
                   )}
@@ -316,228 +313,3 @@ export default function AnalyticsScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.bgPrimary,
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 4,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  periodSelectorContainer: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 16,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: COLORS.bgSurface,
-  },
-  periodTab: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-  },
-  periodTabActive: {
-    backgroundColor: COLORS.accentPurple,
-  },
-  periodTabText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-  periodTabTextActive: {
-    color: '#FFFFFF',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 32,
-  },
-  contentContainer: {
-    paddingHorizontal: 16,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 20,
-  },
-  statCard: {
-    flex: 1,
-    padding: 12,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 12,
-  },
-  chartContainer: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    position: 'relative',
-    borderWidth: 1,
-    borderColor: COLORS.bgSurface,
-    marginBottom: 12,
-  },
-  chartPlaceholder: {
-    width: 240,
-    height: 240,
-  },
-  donutCenter: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  donutCenterLabel: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
-    textTransform: 'uppercase',
-  },
-  donutCenterValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginTop: 2,
-  },
-  categoryList: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: COLORS.bgSurface,
-  },
-  categoryRowWrapper: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.bgSurface,
-  },
-  categoryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  categoryProgressTrack: {
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 2,
-    overflow: 'hidden',
-    width: '100%',
-  },
-  categoryProgressFill: {
-    height: '100%',
-    borderRadius: 2,
-  },
-  categoryLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginRight: 12,
-  },
-  categoryDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 12,
-  },
-  categoryName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-  },
-  categoryCount: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-  categoryAmount: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  categoryAmountSub: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    fontWeight: 'normal',
-  },
-  extremesRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  extremeCard: {
-    flex: 1,
-  },
-  emptyCard: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 16,
-    padding: 24,
-    marginHorizontal: 16,
-    marginTop: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.bgSurface,
-  },
-  emptyIconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(123, 94, 167, 0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 18,
-    maxWidth: 260,
-    marginBottom: 20,
-  },
-  emptyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.accentPurple,
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: 9999,
-  },
-  emptyButtonIcon: {
-    marginRight: 6,
-  },
-  emptyButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-});

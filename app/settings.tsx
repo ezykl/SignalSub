@@ -4,7 +4,6 @@ import {
   FlatList,
   Modal,
   ScrollView,
-  StyleSheet,
   Switch,
   Text,
   TextInput,
@@ -191,11 +190,11 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView className="flex-1 bg-background" testID="settings-screen">
       {/* Header */}
-      <View style={styles.header}>
+      <View className="flex-row items-center px-4 pt-3 pb-4 border-b border-slate-400/[0.08]">
         <TouchableOpacity
-          style={styles.backButton}
+          className="p-1.5 mr-2 rounded-lg"
           onPress={() => router.back()}
           activeOpacity={0.7}
           accessibilityRole="button"
@@ -204,23 +203,23 @@ export default function SettingsScreen() {
         >
           <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Settings</Text>
+        <Text className="text-[22px] font-bold font-heading text-white">Settings</Text>
       </View>
 
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Section: PROFILE & DEFAULTS */}
-        <View style={styles.section} testID="section-profile">
-          <Text style={styles.sectionHeader}>PROFILE & DEFAULTS</Text>
-          <View style={styles.card}>
+        <View className="mb-6" testID="section-profile">
+          <Text className="text-xs font-bold font-heading text-muted mb-2 ml-1 tracking-wider uppercase">PROFILE & DEFAULTS</Text>
+          <View className="bg-card rounded-2xl p-4 border border-white/[0.08]">
             {/* Nickname / Alias */}
-            <View style={styles.fieldBlock}>
-              <Text style={styles.subfieldLabel}>NICKNAME / ALIAS</Text>
+            <View className="mb-4">
+              <Text className="text-[11px] font-bold font-heading tracking-wider text-muted mb-2 uppercase">NICKNAME / ALIAS</Text>
               <TextInput
-                style={styles.profileInput}
+                className="bg-[#161626] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-sm font-body text-white"
                 value={currentAliasDisplay}
                 onChangeText={async (text) => {
                   setAliasInput(text);
@@ -235,18 +234,19 @@ export default function SettingsScreen() {
             </View>
 
             {/* Avatar Selector */}
-            <View style={styles.fieldBlock}>
-              <Text style={styles.subfieldLabel}>AVATAR</Text>
-              <View style={styles.avatarRow} testID="settings-avatar-selector">
+            <View className="mb-4">
+              <Text className="text-[11px] font-bold font-heading tracking-wider text-muted mb-2 uppercase">AVATAR</Text>
+              <View className="flex-row items-center justify-between gap-2" testID="settings-avatar-selector">
                 {AVATAR_OPTIONS.map((item) => {
                   const isSelected = userAvatar === item.id || userAvatar === item.emoji;
                   return (
                     <TouchableOpacity
                       key={item.id}
-                      style={[
-                        styles.avatarChip,
-                        isSelected && styles.avatarChipSelected,
-                      ]}
+                      className={`flex-1 py-2.5 items-center justify-center bg-[#161626] rounded-xl border-[1.5px] ${
+                        isSelected
+                          ? 'border-primary bg-primary/25'
+                          : 'border-white/[0.08]'
+                      }`}
                       onPress={async () => {
                         await setSetting('user_avatar', item.emoji);
                       }}
@@ -276,39 +276,39 @@ export default function SettingsScreen() {
             />
 
             {/* Saved Payment Methods */}
-            <View style={styles.fieldBlock}>
-              <Text style={styles.subfieldLabel}>SAVED PAYMENT METHODS</Text>
-              <Text style={styles.subfieldHelper}>
+            <View className="mb-4">
+              <Text className="text-[11px] font-bold font-heading tracking-wider text-muted mb-2 uppercase">SAVED PAYMENT METHODS</Text>
+              <Text className="text-xs text-muted mb-2.5 font-body">
                 Manage multiple wallets and bank cards you use. Tap one to set as default.
               </Text>
 
               {savedPaymentMethods.map((pm) => {
                 const def = getPaymentMethod(pm.methodKey);
                 return (
-                  <View key={pm.id} style={styles.savedPaymentRow} testID={`saved-payment-${pm.id}`}>
+                  <View key={pm.id} className="flex-row items-center justify-between bg-[#161626] rounded-xl p-3 mb-2 border border-white/[0.08]" testID={`saved-payment-${pm.id}`}>
                     <TouchableOpacity
-                      style={styles.savedPaymentLeft}
+                      className="flex-1 flex-row items-center"
                       onPress={() => handleSetDefaultPaymentMethod(pm.id)}
                       activeOpacity={0.7}
                     >
-                      <View style={[styles.savedPaymentDot, { backgroundColor: def.color }]} />
-                      <View style={styles.savedPaymentInfo}>
-                        <View style={styles.savedPaymentTitleRow}>
-                          <Text style={styles.savedPaymentName}>{def.name}</Text>
+                      <View className="w-2.5 h-2.5 rounded-full mr-2.5" style={{ backgroundColor: def.color }} />
+                      <View className="flex-1">
+                        <View className="flex-row items-center gap-2">
+                          <Text className="text-sm font-semibold font-heading text-white">{def.name}</Text>
                           {pm.isDefault && (
-                            <View style={styles.defaultBadge}>
-                              <Text style={styles.defaultBadgeText}>DEFAULT</Text>
+                            <View className="bg-primary/30 rounded px-1.5 py-0.5 border border-primary">
+                              <Text className="text-[9px] font-bold font-heading text-purple-300">DEFAULT</Text>
                             </View>
                           )}
                         </View>
                         {pm.details ? (
-                          <Text style={styles.savedPaymentDetails}>{pm.details}</Text>
+                          <Text className="text-xs text-muted mt-0.5 font-body">{pm.details}</Text>
                         ) : null}
                       </View>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                      style={styles.deletePaymentBtn}
+                      className="p-1.5"
                       onPress={() => handleDeleteSavedPaymentMethod(pm.id)}
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       accessibilityLabel={`Delete ${def.name}`}
@@ -321,17 +321,17 @@ export default function SettingsScreen() {
 
               {!isAddingPaymentMethod ? (
                 <TouchableOpacity
-                  style={styles.addPaymentButton}
+                  className="flex-row items-center justify-center gap-1.5 py-2.5 rounded-xl border border-primary/30 bg-primary/[0.08] mt-1"
                   onPress={() => setIsAddingPaymentMethod(true)}
                   activeOpacity={0.7}
                   testID="settings-add-payment-btn"
                 >
                   <MaterialIcons name="add" size={18} color={COLORS.accentPurpleLight} />
-                  <Text style={styles.addPaymentButtonText}>Add Another Payment Method</Text>
+                  <Text className="text-[13px] font-semibold font-heading text-purple-300">Add Another Payment Method</Text>
                 </TouchableOpacity>
               ) : (
-                <View style={styles.addPaymentFormContainer}>
-                  <Text style={styles.addPaymentFormTitle}>Add Payment Method</Text>
+                <View className="bg-[#161626] rounded-[14px] p-3.5 mt-2 border border-primary/20">
+                  <Text className="text-[13px] font-bold font-heading text-white mb-2 uppercase tracking-wider">Add Payment Method</Text>
                   <PaymentMethodSelector
                     value={newMethodKey}
                     details={newMethodDetails}
@@ -339,21 +339,21 @@ export default function SettingsScreen() {
                     onChangeDetails={setNewMethodDetails}
                     testID="settings-new-payment-selector"
                   />
-                  <View style={styles.addPaymentActionRow}>
+                  <View className="flex-row justify-end gap-2.5 mt-3">
                     <TouchableOpacity
-                      style={styles.cancelAddBtn}
+                      className="px-3.5 py-2 rounded-lg bg-white/[0.06]"
                       onPress={() => {
                         setIsAddingPaymentMethod(false);
                         setNewMethodDetails('');
                       }}
                     >
-                      <Text style={styles.cancelAddBtnText}>Cancel</Text>
+                      <Text className="text-[13px] font-semibold font-heading text-muted">Cancel</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={styles.confirmAddBtn}
+                      className="px-4 py-2 rounded-lg bg-primary"
                       onPress={handleSaveNewPaymentMethod}
                     >
-                      <Text style={styles.confirmAddBtnText}>Save Method</Text>
+                      <Text className="text-[13px] font-bold font-heading text-white">Save Method</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -363,20 +363,20 @@ export default function SettingsScreen() {
         </View>
 
         {/* Section 1: CURRENCY */}
-        <View style={styles.section} testID="section-currency">
-          <Text style={styles.sectionHeader}>CURRENCY</Text>
+        <View className="mb-6" testID="section-currency">
+          <Text className="text-xs font-bold font-heading text-muted mb-2 ml-1 tracking-wider uppercase">CURRENCY</Text>
           <TouchableOpacity
-            style={styles.card}
+            className="bg-card rounded-2xl p-4 border border-white/[0.08]"
             onPress={() => setIsCurrencyModalVisible(true)}
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel={`Default Currency, currently ${currentCurrency}`}
             testID="settings-currency-row"
           >
-            <View style={styles.row}>
-              <Text style={styles.rowLabel}>Default Currency</Text>
-              <View style={styles.rowRight}>
-                <Text style={styles.currencyValueText} testID="settings-currency-value">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-base font-semibold font-heading text-white">Default Currency</Text>
+              <View className="flex-row items-center">
+                <Text className="text-[15px] font-semibold font-heading text-purple-300 mr-1" testID="settings-currency-value">
                   {currentCurrency}
                 </Text>
                 <MaterialIcons
@@ -390,14 +390,13 @@ export default function SettingsScreen() {
         </View>
 
         {/* Section: THEME */}
-        <View style={styles.section} testID="section-theme">
-          <Text style={styles.sectionHeader}>THEME</Text>
-          <View style={styles.themeRowContainer}>
+        <View className="mb-6" testID="section-theme">
+          <Text className="text-xs font-bold font-heading text-muted mb-2 ml-1 tracking-wider uppercase">THEME</Text>
+          <View className="gap-2.5">
             <TouchableOpacity
-              style={[
-                styles.themeOptionCard,
-                appTheme === 'dark' && styles.themeOptionCardActive,
-              ]}
+              className={`flex-row items-center bg-[#1A1A2E]/75 rounded-2xl p-3.5 border-[1.5px] ${
+                appTheme === 'dark' ? 'border-primary bg-primary/15' : 'border-white/[0.08]'
+              }`}
               onPress={async () => {
                 await setSetting('app_theme', 'dark');
               }}
@@ -406,13 +405,13 @@ export default function SettingsScreen() {
               accessibilityRole="radio"
               accessibilityState={{ checked: appTheme === 'dark' }}
             >
-              <View style={styles.themePreviewRow}>
-                <View style={[styles.themeSwatch, { backgroundColor: '#7B5EA7' }]} />
-                <View style={[styles.themeSwatch, { backgroundColor: '#0F0F1A' }]} />
+              <View className="flex-row mr-3 gap-1">
+                <View className="w-3.5 h-3.5 rounded-full border border-white/20 bg-[#7B5EA7]" />
+                <View className="w-3.5 h-3.5 rounded-full border border-white/20 bg-[#0F0F1A]" />
               </View>
-              <View style={styles.themeTextContainer}>
-                <Text style={styles.themeOptionTitle}>SignalSub Dark</Text>
-                <Text style={styles.themeOptionSubtitle}>Default purple & dark slate</Text>
+              <View className="flex-1">
+                <Text className="text-[15px] font-semibold font-heading text-white">SignalSub Dark</Text>
+                <Text className="text-xs text-muted mt-0.5 font-body">Default purple & dark slate</Text>
               </View>
               {appTheme === 'dark' && (
                 <MaterialIcons
@@ -424,10 +423,9 @@ export default function SettingsScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[
-                styles.themeOptionCard,
-                appTheme === 'oled' && styles.themeOptionCardActive,
-              ]}
+              className={`flex-row items-center bg-[#1A1A2E]/75 rounded-2xl p-3.5 border-[1.5px] ${
+                appTheme === 'oled' ? 'border-primary bg-primary/15' : 'border-white/[0.08]'
+              }`}
               onPress={async () => {
                 await setSetting('app_theme', 'oled');
               }}
@@ -436,13 +434,13 @@ export default function SettingsScreen() {
               accessibilityRole="radio"
               accessibilityState={{ checked: appTheme === 'oled' }}
             >
-              <View style={styles.themePreviewRow}>
-                <View style={[styles.themeSwatch, { backgroundColor: '#000000' }]} />
-                <View style={[styles.themeSwatch, { backgroundColor: '#111111' }]} />
+              <View className="flex-row mr-3 gap-1">
+                <View className="w-3.5 h-3.5 rounded-full border border-white/20 bg-black" />
+                <View className="w-3.5 h-3.5 rounded-full border border-white/20 bg-[#111111]" />
               </View>
-              <View style={styles.themeTextContainer}>
-                <Text style={styles.themeOptionTitle}>Midnight OLED</Text>
-                <Text style={styles.themeOptionSubtitle}>Pitch black for OLED displays</Text>
+              <View className="flex-1">
+                <Text className="text-[15px] font-semibold font-heading text-white">Midnight OLED</Text>
+                <Text className="text-xs text-muted mt-0.5 font-body">Pitch black for OLED displays</Text>
               </View>
               {appTheme === 'oled' && (
                 <MaterialIcons
@@ -456,13 +454,13 @@ export default function SettingsScreen() {
         </View>
 
         {/* Section: VISUAL EFFECTS */}
-        <View style={styles.section} testID="section-visual-effects">
-          <Text style={styles.sectionHeader}>VISUAL EFFECTS</Text>
-          <View style={styles.card}>
-            <View style={styles.row}>
-              <View style={styles.notificationTextContainer}>
-                <Text style={styles.rowLabel}>Grain Overlay</Text>
-                <Text style={styles.rowSubtitle}>
+        <View className="mb-6" testID="section-visual-effects">
+          <Text className="text-xs font-bold font-heading text-muted mb-2 ml-1 tracking-wider uppercase">VISUAL EFFECTS</Text>
+          <View className="bg-card rounded-2xl p-4 border border-white/[0.08]">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1 mr-4">
+                <Text className="text-base font-semibold font-heading text-white">Grain Overlay</Text>
+                <Text className="text-[13px] text-muted mt-1 leading-[18px] font-body">
                   Subtle film grain texture effect across screens
                 </Text>
               </View>
@@ -484,13 +482,13 @@ export default function SettingsScreen() {
         </View>
 
         {/* Section 2: NOTIFICATIONS */}
-        <View style={styles.section} testID="section-notifications">
-          <Text style={styles.sectionHeader}>NOTIFICATIONS</Text>
-          <View style={styles.card}>
-            <View style={styles.row}>
-              <View style={styles.notificationTextContainer}>
-                <Text style={styles.rowLabel}>Weekly Spending Digest</Text>
-                <Text style={styles.rowSubtitle}>
+        <View className="mb-6" testID="section-notifications">
+          <Text className="text-xs font-bold font-heading text-muted mb-2 ml-1 tracking-wider uppercase">NOTIFICATIONS</Text>
+          <View className="bg-card rounded-2xl p-4 border border-white/[0.08]">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1 mr-4">
+                <Text className="text-base font-semibold font-heading text-white">Weekly Spending Digest</Text>
+                <Text className="text-[13px] text-muted mt-1 leading-[18px] font-body">
                   Summary sent every Sunday at 9:00 AM
                 </Text>
               </View>
@@ -510,18 +508,18 @@ export default function SettingsScreen() {
         </View>
 
         {/* Section 3: DATA */}
-        <View style={styles.section} testID="section-data">
-          <Text style={styles.sectionHeader}>DATA</Text>
+        <View className="mb-6" testID="section-data">
+          <Text className="text-xs font-bold font-heading text-muted mb-2 ml-1 tracking-wider uppercase">DATA</Text>
           <TouchableOpacity
-            style={styles.card}
+            className="bg-card rounded-2xl p-4 border border-white/[0.08]"
             onPress={handleClearAllData}
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel="Clear All Data"
             testID="settings-clear-data-btn"
           >
-            <View style={styles.row}>
-              <Text style={[styles.rowLabel, styles.dangerText]}>
+            <View className="flex-row items-center justify-between">
+              <Text className="text-base font-semibold font-heading text-red-500">
                 Clear All Data
               </Text>
               <MaterialIcons
@@ -533,13 +531,43 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Section: HELP & GUIDE */}
+        <View className="mb-6" testID="section-guide">
+          <Text className="text-xs font-bold font-heading text-muted mb-2 ml-1 tracking-wider uppercase">HELP & GUIDE</Text>
+          <TouchableOpacity
+            className="bg-card rounded-2xl p-4 border border-white/[0.08]"
+            onPress={() => router.push('/(onboarding)/welcome')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Getting Started Guide"
+            testID="settings-getting-started-btn"
+          >
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-3">
+                <View className="w-9 h-9 rounded-xl bg-primary/20 items-center justify-center">
+                  <MaterialIcons name="menu-book" size={20} color={COLORS.accentPurpleLight} />
+                </View>
+                <View>
+                  <Text className="text-base font-semibold font-heading text-white">Getting Started</Text>
+                  <Text className="text-xs text-muted mt-0.5 font-body">Replay feature tour & onboarding</Text>
+                </View>
+              </View>
+              <MaterialIcons
+                name="chevron-right"
+                size={22}
+                color={COLORS.textSecondary}
+              />
+            </View>
+          </TouchableOpacity>
+        </View>
+
         {/* Section 4: ABOUT */}
-        <View style={styles.section} testID="section-about">
-          <Text style={styles.sectionHeader}>ABOUT</Text>
-          <View style={[styles.card, styles.aboutCard]} testID="settings-about-card">
-            <Text style={styles.aboutAppName}>SignalSub</Text>
-            <Text style={styles.aboutVersion}>Version 1.0.0</Text>
-            <Text style={styles.aboutTagline}>
+        <View className="mb-6" testID="section-about">
+          <Text className="text-xs font-bold font-heading text-muted mb-2 ml-1 tracking-wider uppercase">ABOUT</Text>
+          <View className="bg-card rounded-2xl py-5 px-[18px] border border-white/[0.08]" testID="settings-about-card">
+            <Text className="text-base font-bold font-heading text-white">SignalSub</Text>
+            <Text className="text-sm text-muted mt-1 font-body">Version 1.0.0</Text>
+            <Text className="text-sm text-muted mt-2 leading-5 font-body">
               Never get surprised by an auto-charge.
             </Text>
           </View>
@@ -557,10 +585,10 @@ export default function SettingsScreen() {
         }}
         testID="currency-picker-modal"
       >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalContent} testID="currency-modal-container">
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Currency</Text>
+        <View className="flex-1 bg-black/65 justify-end">
+          <View className="bg-background rounded-t-3xl max-h-[80%] px-5 pt-5 pb-9 border border-surface" testID="currency-modal-container">
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-lg font-bold font-heading text-white">Select Currency</Text>
               <TouchableOpacity
                 onPress={() => {
                   setIsCurrencyModalVisible(false);
@@ -575,15 +603,15 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             </View>
 
-            <View style={styles.modalSearchContainer}>
+            <View className="flex-row items-center bg-card rounded-xl px-3 h-11 mb-3 border border-surface">
               <MaterialIcons
                 name="search"
                 size={20}
                 color={COLORS.textSecondary}
-                style={styles.modalSearchIcon}
+                style={{ marginRight: 8 }}
               />
               <TextInput
-                style={styles.modalSearchInput}
+                className="flex-1 text-white text-[15px] font-body p-0"
                 placeholder="Search currency (e.g. USD, EUR, PHP)"
                 placeholderTextColor={COLORS.textSecondary}
                 value={currencySearch}
@@ -609,38 +637,38 @@ export default function SettingsScreen() {
             <FlatList
               data={filteredCurrencies}
               keyExtractor={(item) => item.code}
-              contentContainerStyle={styles.currencyListContent}
+              contentContainerStyle={{ paddingBottom: 16 }}
               keyboardShouldPersistTaps="handled"
               testID="currency-list"
               renderItem={({ item }: { item: CurrencyInfo }) => {
                 const isSelected = item.code === currentCurrency;
                 return (
                   <TouchableOpacity
-                    style={[
-                      styles.currencyItem,
-                      isSelected && styles.currencyItemSelected,
-                    ]}
+                    className={`flex-row items-center justify-between py-3 px-3.5 rounded-xl my-1 border-[1.5px] ${
+                      isSelected
+                        ? 'border-primary bg-primary/15'
+                        : 'border-transparent bg-card'
+                    }`}
                     onPress={() => handleSelectCurrency(item.code)}
                     activeOpacity={0.7}
                     accessibilityRole="checkbox"
                     accessibilityState={{ checked: isSelected }}
                     testID={`currency-option-${item.code}`}
                   >
-                    <View style={styles.currencyItemLeft}>
-                      <Text style={styles.currencyFlag}>{item.flag}</Text>
-                      <View style={styles.currencyTextContainer}>
-                        <Text style={styles.currencyCode}>{item.code}</Text>
-                        <Text style={styles.currencyName} numberOfLines={1}>
+                    <View className="flex-row items-center flex-1 mr-3">
+                      <Text className="text-[22px] mr-3">{item.flag}</Text>
+                      <View className="flex-1">
+                        <Text className="text-[15px] font-bold font-heading text-white">{item.code}</Text>
+                        <Text className="text-xs text-muted mt-0.5 font-body" numberOfLines={1}>
                           {item.name}
                         </Text>
                       </View>
                     </View>
-                    <View style={styles.currencyItemRight}>
+                    <View className="flex-row items-center">
                       <Text
-                        style={[
-                          styles.currencySymbol,
-                          isSelected && { color: COLORS.accentPurpleLight },
-                        ]}
+                        className={`text-[15px] font-semibold font-heading ${
+                          isSelected ? 'text-purple-300' : 'text-muted'
+                        }`}
                       >
                         {item.symbol}
                       </Text>
@@ -649,7 +677,7 @@ export default function SettingsScreen() {
                           name="check"
                           size={20}
                           color={COLORS.accentPurpleLight}
-                          style={styles.currencyCheckIcon}
+                          style={{ marginLeft: 8 }}
                         />
                       )}
                     </View>
@@ -663,415 +691,3 @@ export default function SettingsScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.bgPrimary,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(148, 163, 184, 0.08)',
-  },
-  backButton: {
-    padding: 6,
-    marginRight: 8,
-    borderRadius: 8,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.textSecondary,
-    marginBottom: 8,
-    marginLeft: 4,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-  },
-  card: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  rowLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  rowSubtitle: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-    lineHeight: 18,
-  },
-  notificationTextContainer: {
-    flex: 1,
-    marginRight: 16,
-  },
-  rowRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  currencyValueText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.accentPurpleLight,
-    marginRight: 4,
-  },
-  dangerText: {
-    color: COLORS.danger,
-  },
-  aboutCard: {
-    paddingVertical: 20,
-    paddingHorizontal: 18,
-  },
-  aboutAppName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  aboutVersion: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-  },
-  aboutTagline: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginTop: 8,
-    lineHeight: 20,
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: COLORS.bgPrimary,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: '80%',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 36,
-    borderWidth: 1,
-    borderColor: COLORS.bgSurface,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  modalSearchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 44,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: COLORS.bgSurface,
-  },
-  modalSearchIcon: {
-    marginRight: 8,
-  },
-  modalSearchInput: {
-    flex: 1,
-    color: COLORS.textPrimary,
-    fontSize: 15,
-    padding: 0,
-  },
-  currencyListContent: {
-    paddingBottom: 16,
-  },
-  currencyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    marginVertical: 4,
-    borderWidth: 1.5,
-    borderColor: 'transparent',
-    backgroundColor: COLORS.bgCard,
-  },
-  currencyItemSelected: {
-    borderColor: COLORS.accentPurple,
-    backgroundColor: `${COLORS.accentPurple}26`,
-  },
-  currencyItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginRight: 12,
-  },
-  currencyFlag: {
-    fontSize: 22,
-    marginRight: 12,
-  },
-  currencyTextContainer: {
-    flex: 1,
-  },
-  currencyCode: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  currencyName: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-  currencyItemRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  currencySymbol: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-  currencyCheckIcon: {
-    marginLeft: 8,
-  },
-  fieldBlock: {
-    marginBottom: 16,
-  },
-  subfieldLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    color: COLORS.textSecondary,
-    marginBottom: 8,
-  },
-  profileInput: {
-    backgroundColor: '#161626',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: '#FFFFFF',
-  },
-  avatarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  avatarChip: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#161626',
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  avatarChipSelected: {
-    borderColor: COLORS.accentPurple,
-    backgroundColor: 'rgba(123, 94, 167, 0.25)',
-  },
-  avatarChipEmoji: {
-    fontSize: 22,
-  },
-  themeRowContainer: {
-    gap: 10,
-  },
-  themeOptionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  themeOptionCardActive: {
-    borderColor: COLORS.accentPurple,
-    backgroundColor: 'rgba(123, 94, 167, 0.15)',
-  },
-  themePreviewRow: {
-    flexDirection: 'row',
-    marginRight: 12,
-    gap: 4,
-  },
-  themeSwatch: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  themeTextContainer: {
-    flex: 1,
-  },
-  themeOptionTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  themeOptionSubtitle: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-  subfieldHelper: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginBottom: 10,
-  },
-  savedPaymentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#161626',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  savedPaymentLeft: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  savedPaymentDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 10,
-  },
-  savedPaymentInfo: {
-    flex: 1,
-  },
-  savedPaymentTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  savedPaymentName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  defaultBadge: {
-    backgroundColor: 'rgba(123, 94, 167, 0.3)',
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderWidth: 1,
-    borderColor: COLORS.accentPurple,
-  },
-  defaultBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: COLORS.accentPurpleLight,
-  },
-  savedPaymentDetails: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-  deletePaymentBtn: {
-    padding: 6,
-  },
-  addPaymentButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(123, 94, 167, 0.3)',
-    backgroundColor: 'rgba(123, 94, 167, 0.08)',
-    marginTop: 4,
-  },
-  addPaymentButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.accentPurpleLight,
-  },
-  addPaymentFormContainer: {
-    backgroundColor: '#161626',
-    borderRadius: 14,
-    padding: 14,
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(123, 94, 167, 0.2)',
-  },
-  addPaymentFormTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  addPaymentActionRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 10,
-    marginTop: 12,
-  },
-  cancelAddBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-  },
-  cancelAddBtnText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-  confirmAddBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: COLORS.accentPurple,
-  },
-  confirmAddBtnText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-});

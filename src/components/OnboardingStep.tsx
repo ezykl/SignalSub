@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -8,6 +7,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
+import { cn } from '@/utils/cn';
 
 export interface OnboardingStepProps {
   stepNumber: 1 | 2 | 3;
@@ -19,6 +19,7 @@ export interface OnboardingStepProps {
   subtext?: string;
   onNext: () => void;
   onSkip: () => void;
+  className?: string;
   testID?: string;
 }
 
@@ -32,25 +33,34 @@ export function OnboardingStep({
   subtext,
   onNext,
   onSkip,
+  className,
   testID,
 }: OnboardingStepProps) {
   return (
-    <SafeAreaView style={styles.safeArea} testID={testID}>
+    <SafeAreaView
+      className={cn('flex-1 bg-background', className)}
+      testID={testID}
+    >
       {/* Top Bar: Progress dots + Skip button */}
-      <View style={styles.topBar}>
-        <View style={styles.progressContainer} accessibilityRole="progressbar" accessibilityLabel={`Step ${stepNumber} of 3`}>
+      <View className="flex-row items-center justify-between px-6 pt-3 pb-2">
+        <View
+          className="flex-row items-center gap-2"
+          accessibilityRole="progressbar"
+          accessibilityLabel={`Step ${stepNumber} of 3`}
+        >
           {[1, 2, 3].map((step) => {
             const isActive = step === stepNumber;
             return (
               <View
                 key={step}
                 testID={`step-dot-${step}${isActive ? '-active' : ''}`}
-                style={[
-                  styles.dot,
-                  isActive
-                    ? [styles.dotActive, { backgroundColor: COLORS.accentPurple }]
-                    : styles.dotInactive,
-                ]}
+                className={`h-2 rounded-full ${isActive ? 'w-6 bg-accent' : 'w-2 bg-slate-400/[0.28]'}`}
+                style={{
+                  height: 8,
+                  borderRadius: 4,
+                  width: isActive ? 24 : 8,
+                  backgroundColor: isActive ? COLORS.accentPurple : 'rgba(148, 163, 184, 0.28)',
+                }}
               />
             );
           })}
@@ -63,21 +73,20 @@ export function OnboardingStep({
           accessibilityRole="button"
           accessibilityLabel="Skip onboarding"
         >
-          <Text style={styles.skipText}>Skip</Text>
+          <Text className="text-[15px] font-body font-semibold text-muted">Skip</Text>
         </TouchableOpacity>
       </View>
 
       {/* Content Area: Hero + Step Info */}
-      <View style={styles.contentContainer}>
+      <View className="flex-1 items-center justify-center px-7">
         {/* Hero Icon with ambient circular backdrop */}
         <View
-          style={[
-            styles.heroCircle,
-            {
-              backgroundColor: `${heroColor}1A`,
-              borderColor: `${heroColor}33`,
-            },
-          ]}
+          className="w-44 h-44 rounded-full items-center justify-center border-[1.5px] mb-9 shadow-xl"
+          style={{
+            backgroundColor: `${heroColor}1A`,
+            borderColor: `${heroColor}33`,
+            elevation: 6,
+          }}
         >
           <MaterialCommunityIcons
             name={heroIcon}
@@ -87,147 +96,38 @@ export function OnboardingStep({
         </View>
 
         {/* Step indicator tag */}
-        <Text style={styles.stepIndicator}>
+        <Text className="text-[11px] font-heading font-bold tracking-widest text-primary-light uppercase mb-2.5">
           {`STEP ${stepNumber} OF 3`}
         </Text>
 
         {/* Headline */}
-        <Text style={styles.headline}>
+        <Text className="text-[28px] font-heading font-bold text-white text-center mb-3 leading-8">
           {headline}
         </Text>
 
         {/* Body */}
-        <Text style={styles.body}>
+        <Text className="text-[15px] font-body text-muted text-center leading-[22px] max-w-[320px]">
           {body}
         </Text>
       </View>
 
       {/* Bottom CTA Area */}
-      <View style={styles.bottomContainer}>
+      <View className="px-6 pb-6 pt-3 items-center">
         <TouchableOpacity
-          style={styles.primaryButton}
+          className="bg-primary py-4 px-8 rounded-full items-center justify-center w-full shadow-lg"
+          style={{ elevation: 6 }}
           onPress={onNext}
           activeOpacity={0.8}
           accessibilityRole="button"
           accessibilityLabel={nextButtonLabel}
         >
-          <Text style={styles.primaryButtonText}>{nextButtonLabel}</Text>
+          <Text className="text-base font-heading font-bold text-white">{nextButtonLabel}</Text>
         </TouchableOpacity>
 
         {subtext ? (
-          <Text style={styles.subtext}>{subtext}</Text>
+          <Text className="text-xs font-body text-muted mt-3 text-center">{subtext}</Text>
         ) : null}
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.bgPrimary,
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  dot: {
-    height: 8,
-    borderRadius: 4,
-  },
-  dotActive: {
-    width: 24,
-  },
-  dotInactive: {
-    width: 8,
-    backgroundColor: 'rgba(148, 163, 184, 0.28)',
-  },
-  skipText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-  contentContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 28,
-  },
-  heroCircle: {
-    width: 176,
-    height: 176,
-    borderRadius: 88,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    marginBottom: 36,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 6,
-  },
-  stepIndicator: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 2,
-    color: COLORS.accentPurpleLight,
-    textTransform: 'uppercase',
-    marginBottom: 10,
-  },
-  headline: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-    marginBottom: 12,
-    lineHeight: 34,
-  },
-  body: {
-    fontSize: 15,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-    maxWidth: 320,
-  },
-  bottomContainer: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
-    paddingTop: 12,
-    alignItems: 'center',
-  },
-  primaryButton: {
-    backgroundColor: COLORS.accentPurple,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    shadowColor: COLORS.accentPurple,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  primaryButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  subtext: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 12,
-    textAlign: 'center',
-  },
-});

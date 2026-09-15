@@ -4,7 +4,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -92,33 +91,37 @@ export default function PersonalizeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} testID="personalize-screen">
+    <SafeAreaView className="flex-1 bg-background" testID="personalize-screen">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboardView}
+        className="flex-1"
       >
         <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          className="flex-1"
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 24 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.stepBadge}>FINAL STEP</Text>
-            <Text style={styles.title}>Personalize SignalSub</Text>
-            <Text style={styles.subtitle}>
+          <View className="mb-5">
+            <Text className="text-[11px] font-bold font-heading text-purple-300 tracking-[1.5px] mb-1.5 uppercase">
+              FINAL STEP
+            </Text>
+            <Text className="text-2xl font-bold font-heading text-white mb-1.5">Personalize SignalSub</Text>
+            <Text className="text-sm text-muted leading-5 font-body">
               Customize your profile and set defaults to make tracking effortless.
             </Text>
           </View>
 
           {/* 1. Nickname / Alias */}
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>NICKNAME / ALIAS</Text>
-            <View style={styles.inputContainer}>
+          <View className="mb-5">
+            <Text className="text-[11px] font-bold font-heading tracking-wider text-muted mb-2 uppercase">
+              NICKNAME / ALIAS
+            </Text>
+            <View className="bg-card rounded-xl border border-white/[0.08] px-3.5 py-3">
               <TextInput
                 testID="personalize-alias-input"
-                style={styles.textInput}
+                className="text-[15px] font-body text-white p-0"
                 value={alias}
                 onChangeText={setAlias}
                 placeholder="e.g. Janre"
@@ -131,19 +134,22 @@ export default function PersonalizeScreen() {
           </View>
 
           {/* 2. Avatar Selector */}
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>CHOOSE YOUR AVATAR</Text>
-            <View style={styles.avatarGrid} testID="personalize-avatar-selector">
+          <View className="mb-5">
+            <Text className="text-[11px] font-bold font-heading tracking-wider text-muted mb-2 uppercase">
+              CHOOSE YOUR AVATAR
+            </Text>
+            <View className="flex-row flex-wrap gap-2" testID="personalize-avatar-selector">
               {AVATAR_OPTIONS.map((item) => {
                 const isSelected = avatar === item.id || avatar === item.emoji;
                 return (
                   <TouchableOpacity
                     key={item.id}
                     testID={`avatar-option-${item.id}`}
-                    style={[
-                      styles.avatarOption,
-                      isSelected && styles.avatarOptionSelected,
-                    ]}
+                    className={`w-[31.5%] bg-card rounded-[14px] py-3 items-center justify-center border-[1.5px] ${
+                      isSelected
+                        ? 'border-primary bg-primary/25'
+                        : 'border-white/[0.08]'
+                    }`}
                     onPress={() => setAvatar(item.emoji)}
                     activeOpacity={0.7}
                     accessibilityRole="button"
@@ -152,10 +158,9 @@ export default function PersonalizeScreen() {
                   >
                     <UserAvatar avatarId={item.id} size={48} />
                     <Text
-                      style={[
-                        styles.avatarLabel,
-                        isSelected && styles.avatarLabelSelected,
-                      ]}
+                      className={`text-xs font-semibold ${
+                        isSelected ? 'text-white font-bold font-heading' : 'text-muted font-body'
+                      }`}
                     >
                       {item.label}
                     </Text>
@@ -166,7 +171,7 @@ export default function PersonalizeScreen() {
           </View>
 
           {/* 3. Primary Payment Method */}
-          <View style={styles.section}>
+          <View className="mb-5">
             <PaymentMethodSelector
               value={paymentMethod}
               details={paymentDetails}
@@ -177,33 +182,35 @@ export default function PersonalizeScreen() {
           </View>
 
           {/* 4. Favorite Categories */}
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>FAVORITE CATEGORIES</Text>
-            <Text style={styles.sectionHint}>
+          <View className="mb-5">
+            <Text className="text-[11px] font-bold font-heading tracking-wider text-muted mb-2 uppercase">
+              FAVORITE CATEGORIES
+            </Text>
+            <Text className="text-xs text-muted mb-2.5 leading-4 font-body">
               Select the types of subscriptions you use most to see tailored recommendations.
             </Text>
-            <View style={styles.categoryPillsContainer} testID="personalize-categories">
+            <View className="flex-row flex-wrap gap-2" testID="personalize-categories">
               {FAVORITE_CATEGORY_OPTIONS.map((cat) => {
                 const isSelected = selectedCategories.includes(cat.key);
                 return (
                   <TouchableOpacity
                     key={cat.key}
                     testID={`category-pill-${cat.key}`}
-                    style={[
-                      styles.categoryPill,
-                      isSelected && styles.categoryPillSelected,
-                    ]}
+                    className={`flex-row items-center py-[9px] px-3.5 rounded-full bg-card border ${
+                      isSelected
+                        ? 'border-primary bg-primary/25'
+                        : 'border-white/[0.08]'
+                    }`}
                     onPress={() => toggleCategory(cat.key)}
                     activeOpacity={0.7}
                     accessibilityRole="checkbox"
                     accessibilityState={{ checked: isSelected }}
                   >
-                    <Text style={styles.categoryPillIcon}>{cat.icon}</Text>
+                    <Text className="text-sm mr-1.5">{cat.icon}</Text>
                     <Text
-                      style={[
-                        styles.categoryPillText,
-                        isSelected && styles.categoryPillTextSelected,
-                      ]}
+                      className={`text-[13px] font-semibold ${
+                        isSelected ? 'text-white font-heading' : 'text-muted font-body'
+                      }`}
                     >
                       {cat.label}
                     </Text>
@@ -215,13 +222,12 @@ export default function PersonalizeScreen() {
         </ScrollView>
 
         {/* Bottom Actions */}
-        <View style={styles.bottomContainer}>
+        <View className="px-5 pt-3 pb-6 bg-background border-t border-white/[0.05]">
           <TouchableOpacity
             testID="personalize-continue-btn"
-            style={[
-              styles.continueButton,
-              isSubmitting && styles.continueButtonDisabled,
-            ]}
+            className={`bg-primary py-4 rounded-full items-center justify-center shadow-md shadow-purple-900/35 elevation-6 ${
+              isSubmitting ? 'opacity-60' : ''
+            }`}
             onPress={handleContinue}
             disabled={isSubmitting}
             activeOpacity={0.8}
@@ -231,7 +237,7 @@ export default function PersonalizeScreen() {
             {isSubmitting ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
-              <Text style={styles.continueButtonText}>
+              <Text className="text-base font-bold font-heading text-white">
                 Continue to Dashboard →
               </Text>
             )}
@@ -239,186 +245,17 @@ export default function PersonalizeScreen() {
 
           <TouchableOpacity
             testID="personalize-skip-btn"
-            style={styles.skipButton}
+            className="items-center justify-center py-3 mt-1.5"
             onPress={handleSkip}
             disabled={isSubmitting}
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel="Skip for Now"
           >
-            <Text style={styles.skipButtonText}>Skip for Now</Text>
+            <Text className="text-sm text-muted font-semibold font-heading">Skip for Now</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.bgPrimary,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 24,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  stepBadge: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: COLORS.accentPurpleLight,
-    letterSpacing: 1.5,
-    marginBottom: 6,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 6,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    lineHeight: 20,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
-    color: COLORS.textSecondary,
-    marginBottom: 8,
-  },
-  sectionHint: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginBottom: 10,
-    lineHeight: 16,
-  },
-  inputContainer: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  textInput: {
-    fontSize: 15,
-    color: '#FFFFFF',
-    padding: 0,
-  },
-  avatarGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  avatarOption: {
-    width: '31.5%',
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 14,
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  avatarOptionSelected: {
-    borderColor: COLORS.accentPurple,
-    backgroundColor: 'rgba(123, 94, 167, 0.22)',
-  },
-  avatarEmoji: {
-    fontSize: 26,
-    marginBottom: 4,
-  },
-  avatarLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-  avatarLabelSelected: {
-    color: '#FFFFFF',
-  },
-  categoryPillsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  categoryPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 9,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    backgroundColor: COLORS.bgCard,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  categoryPillSelected: {
-    borderColor: COLORS.accentPurple,
-    backgroundColor: 'rgba(123, 94, 167, 0.25)',
-  },
-  categoryPillIcon: {
-    fontSize: 14,
-    marginRight: 6,
-  },
-  categoryPillText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-  categoryPillTextSelected: {
-    color: '#FFFFFF',
-  },
-  bottomContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 24,
-    backgroundColor: COLORS.bgPrimary,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  continueButton: {
-    backgroundColor: COLORS.accentPurple,
-    paddingVertical: 16,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: COLORS.accentPurple,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  continueButtonDisabled: {
-    opacity: 0.6,
-  },
-  continueButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  skipButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    marginTop: 6,
-  },
-  skipButtonText: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    fontWeight: '600',
-  },
-});

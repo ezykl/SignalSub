@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import { View, StyleProp, ViewStyle } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getBrandIcon } from '@/constants/brandIcons';
@@ -15,6 +15,7 @@ export interface BrandIconProps {
   color?: string;
   iconColor?: string;
   style?: StyleProp<ViewStyle>;
+  className?: string;
   showContainer?: boolean;
   testID?: string;
 }
@@ -28,6 +29,7 @@ export function BrandIcon({
   color,
   iconColor = '#FFFFFF',
   style,
+  className = '',
   showContainer = false,
   testID,
 }: BrandIconProps) {
@@ -72,6 +74,7 @@ export function BrandIcon({
         color={bgColor}
         size={size}
         style={style}
+        className={className}
         testID={testID}
       />
     );
@@ -80,8 +83,8 @@ export function BrandIcon({
   if (showContainer) {
     return (
       <View
+        className={`items-center justify-center ${className}`}
         style={[
-          styles.container,
           {
             width: size,
             height: size,
@@ -98,19 +101,8 @@ export function BrandIcon({
   }
 
   return (
-    <View style={[styles.inlineWrapper, style]} testID={testID}>
+    <View className={`items-center justify-center ${className}`} style={style} testID={testID}>
       {iconContent}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  inlineWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

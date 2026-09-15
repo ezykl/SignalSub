@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -107,27 +106,27 @@ export default function SubscriptionsScreen() {
   }, [subscriptions, searchQuery, selectedFilter]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Subscriptions</Text>
-        <Text style={styles.subtitle}>
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="px-4 pt-3 pb-2">
+        <Text className="text-2xl font-heading font-bold text-white">Subscriptions</Text>
+        <Text className="text-[13px] font-body text-muted mt-1">
           {activeCount} Active ·{' '}
-          <Text style={styles.subtitleHighlight}>
+          <Text className="text-purple-300 font-heading font-bold">
             {currency} {activeMonthlySpend.toFixed(2)}/mo
           </Text>
         </Text>
       </View>
 
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
+      <View className="flex-row items-center bg-[#1A1A2E]/75 rounded-[14px] mx-4 mt-2 mb-3 px-3.5 h-12 border border-white/[0.08]">
         <MaterialIcons
           name="search"
           size={20}
           color={COLORS.textSecondary}
-          style={styles.searchIcon}
+          style={{ marginRight: 8 }}
         />
         <TextInput
-          style={styles.searchInput}
+          className="flex-1 text-white font-body text-[15px] h-full p-0"
           placeholder="Search subscriptions..."
           placeholderTextColor={COLORS.textSecondary}
           value={searchQuery}
@@ -139,7 +138,7 @@ export default function SubscriptionsScreen() {
         {searchQuery.length > 0 && (
           <TouchableOpacity
             onPress={() => setSearchQuery('')}
-            style={styles.clearButton}
+            className="p-1"
             testID="subscriptions-search-clear"
           >
             <MaterialIcons
@@ -152,11 +151,11 @@ export default function SubscriptionsScreen() {
       </View>
 
       {/* Filter Chips */}
-      <View style={styles.chipsWrapper}>
+      <View className="mb-3">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipsScrollContent}
+          contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
           testID="subscriptions-filter-chips"
         >
           {FILTER_OPTIONS.map((option) => {
@@ -165,18 +164,18 @@ export default function SubscriptionsScreen() {
               <TouchableOpacity
                 key={option}
                 onPress={() => setSelectedFilter(option)}
-                style={[
-                  styles.chip,
-                  isActive ? styles.chipActive : styles.chipInactive,
-                ]}
+                className={`py-[7px] px-3.5 rounded-full border ${
+                  isActive
+                    ? 'bg-primary border-primary'
+                    : 'bg-[#1A1A2E]/75 border-white/[0.08]'
+                }`}
                 activeOpacity={0.7}
                 testID={`filter-chip-${option.toLowerCase()}`}
               >
                 <Text
-                  style={[
-                    styles.chipText,
-                    isActive ? styles.chipTextActive : styles.chipTextInactive,
-                  ]}
+                  className={`text-[13px] font-heading font-semibold ${
+                    isActive ? 'text-white' : 'text-muted'
+                  }`}
                 >
                   {option}
                 </Text>
@@ -188,36 +187,36 @@ export default function SubscriptionsScreen() {
 
       {/* Subscriptions List / Empty State */}
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 96 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Savings banner when Cancelled filter is selected */}
         {selectedFilter === 'Cancelled' && (
-          <View style={styles.savingsBanner} testID="cancelled-savings-banner">
-            <Text style={styles.savingsText} testID="cancelled-savings-text">
+          <View className="bg-green-500/10 border border-green-500 rounded-xl py-3 px-4 mx-4 mb-3 items-center justify-center" testID="cancelled-savings-banner">
+            <Text className="text-sm font-heading font-bold text-green-500 text-center" testID="cancelled-savings-text">
               {`🎉 You're saving ${currency === '$' || !currency ? '$' : `${currency} `}${totalMonthlySaved.toFixed(2)}/mo by cancelling unneeded subs`}
             </Text>
           </View>
         )}
 
         {filteredSubscriptions.length === 0 ? (
-          <View style={styles.emptyCard} testID="subscriptions-empty-state">
-            <View style={styles.emptyIconCircle}>
+          <View className="bg-[#1A1A2E]/75 rounded-2xl p-6 mx-4 mt-6 items-center justify-center border border-white/[0.08]" testID="subscriptions-empty-state">
+            <View className="w-16 h-16 rounded-full bg-primary/15 items-center justify-center mb-4">
               <MaterialIcons
                 name="search-off"
                 size={40}
                 color={COLORS.accentPurple}
               />
             </View>
-            <Text style={styles.emptyTitle}>No subscriptions found</Text>
-            <Text style={styles.emptySubtitle}>
+            <Text className="text-base font-heading font-bold text-white mb-2 text-center">No subscriptions found</Text>
+            <Text className="text-[13px] font-body text-muted text-center leading-[18px] mb-5 max-w-[260px]">
               {searchQuery.length > 0 || selectedFilter !== 'All'
                 ? 'Try adjusting your search or filters.'
                 : 'You have not added any subscriptions yet.'}
             </Text>
             <TouchableOpacity
-              style={styles.emptyButton}
+              className="flex-row items-center bg-primary py-2.5 px-4.5 rounded-full"
               onPress={() => router.push('/subscription/new')}
               activeOpacity={0.8}
               testID="empty-state-add-btn"
@@ -226,13 +225,13 @@ export default function SubscriptionsScreen() {
                 name="add"
                 size={20}
                 color="#FFFFFF"
-                style={styles.emptyButtonIcon}
+                style={{ marginRight: 6 }}
               />
-              <Text style={styles.emptyButtonText}>Add Subscription</Text>
+              <Text className="text-sm font-heading font-semibold text-white">Add Subscription</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={styles.listContainer} testID="subscriptions-list">
+          <View className="px-4" testID="subscriptions-list">
             {filteredSubscriptions.map((sub) => (
               <SubscriptionRow
                 key={sub.id}
@@ -258,163 +257,3 @@ export default function SubscriptionsScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.bgPrimary,
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  subtitle: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    marginTop: 3,
-  },
-  subtitleHighlight: {
-    color: COLORS.accentPurpleLight,
-    fontWeight: '700',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    borderRadius: 14,
-    marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 12,
-    paddingHorizontal: 14,
-    height: 48,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    color: COLORS.textPrimary,
-    fontSize: 15,
-    height: '100%',
-  },
-  clearButton: {
-    padding: 4,
-  },
-  chipsWrapper: {
-    marginBottom: 12,
-  },
-  chipsScrollContent: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  chip: {
-    paddingVertical: 7,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  chipActive: {
-    backgroundColor: COLORS.accentPurple,
-    borderColor: COLORS.accentPurple,
-  },
-  chipInactive: {
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  chipText: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  chipTextActive: {
-    color: '#FFFFFF',
-  },
-  chipTextInactive: {
-    color: COLORS.textSecondary,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 96,
-  },
-  listContainer: {
-    paddingHorizontal: 16,
-  },
-  emptyCard: {
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    borderRadius: 16,
-    padding: 24,
-    marginHorizontal: 16,
-    marginTop: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  emptyIconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(123, 94, 167, 0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: 20,
-    maxWidth: 260,
-  },
-  emptyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.accentPurple,
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: 9999,
-  },
-  emptyButtonIcon: {
-    marginRight: 6,
-  },
-  emptyButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  savingsBanner: {
-    backgroundColor: 'rgba(34, 197, 94, 0.12)',
-    borderColor: COLORS.success,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginHorizontal: 16,
-    marginBottom: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  savingsText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.success,
-    textAlign: 'center',
-  },
-});

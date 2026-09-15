@@ -1,21 +1,22 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   ScrollView,
-  StyleSheet,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { COLORS } from '@/constants/colors';
-import { PAYMENT_METHODS, PaymentMethodDef } from '@/constants/paymentMethods';
+import { PAYMENT_METHODS } from '@/constants/paymentMethods';
+import { cn } from '@/utils/cn';
 
 export interface PaymentMethodSelectorProps {
   value: string;
   details?: string;
   onChangeMethod: (methodKey: string) => void;
   onChangeDetails?: (details: string) => void;
+  className?: string;
   testID?: string;
 }
 
@@ -24,6 +25,7 @@ export function PaymentMethodSelector({
   details = '',
   onChangeMethod,
   onChangeDetails,
+  className,
   testID = 'payment-method-selector',
 }: PaymentMethodSelectorProps) {
   const selectedMethod = PAYMENT_METHODS.find(
@@ -31,13 +33,15 @@ export function PaymentMethodSelector({
   ) || PAYMENT_METHODS[0];
 
   return (
-    <View style={styles.container} testID={testID}>
-      <Text style={styles.label}>PAYMENT METHOD</Text>
+    <View className={cn('my-3', className)} testID={testID}>
+      <Text className="text-[11px] font-bold tracking-wider text-muted mb-2">
+        PAYMENT METHOD
+      </Text>
 
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ flexDirection: 'row', gap: 8, paddingVertical: 4 }}
         testID={`${testID}-scroll`}
       >
         {PAYMENT_METHODS.map((method) => {
@@ -48,10 +52,12 @@ export function PaymentMethodSelector({
             <TouchableOpacity
               key={method.key}
               testID={`payment-method-chip-${method.key}`}
-              style={[
-                styles.chip,
-                isSelected ? styles.chipSelected : styles.chipUnselected,
-              ]}
+              className={cn(
+                'flex-row items-center py-2 px-3 rounded-full border',
+                isSelected
+                  ? 'bg-primary/25 border-primary'
+                  : 'bg-[#161626] border-white/[0.08]'
+              )}
               onPress={() => onChangeMethod(method.key)}
               activeOpacity={0.7}
               accessibilityRole="button"
@@ -59,10 +65,8 @@ export function PaymentMethodSelector({
               accessibilityLabel={`Payment method: ${method.name}`}
             >
               <View
-                style={[
-                  styles.iconCircle,
-                  { backgroundColor: isSelected ? method.color : 'rgba(255,255,255,0.06)' },
-                ]}
+                className="w-[22px] h-[22px] rounded-full items-center justify-center mr-1.5"
+                style={{ backgroundColor: isSelected ? method.color : 'rgba(255,255,255,0.06)' }}
               >
                 <Svg width={14} height={14} viewBox={method.viewBox}>
                   {method.paths
@@ -77,10 +81,10 @@ export function PaymentMethodSelector({
                 </Svg>
               </View>
               <Text
-                style={[
-                  styles.chipText,
-                  isSelected ? styles.chipTextSelected : styles.chipTextUnselected,
-                ]}
+                className={cn(
+                  'text-[13px] font-heading font-semibold',
+                  isSelected ? 'text-white' : 'text-muted'
+                )}
               >
                 {method.shortName}
               </Text>
@@ -90,14 +94,14 @@ export function PaymentMethodSelector({
       </ScrollView>
 
       {onChangeDetails ? (
-        <View style={styles.detailsContainer}>
+        <View className="mt-2">
           <TextInput
             testID={`${testID}-details-input`}
             value={details}
             onChangeText={onChangeDetails}
-            placeholder={`Account / Card note (e.g. 0917 ••• 1234 or •••• 4242)`}
+            placeholder="Account / Card note (e.g. 0917 ••• 1234 or •••• 4242)"
             placeholderTextColor={COLORS.textSecondary}
-            style={styles.detailsInput}
+            className="bg-[#161626] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-[13px] font-body text-white"
             maxLength={40}
           />
         </View>
@@ -105,68 +109,3 @@ export function PaymentMethodSelector({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 12,
-  },
-  label: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
-    color: COLORS.textSecondary,
-    marginBottom: 8,
-  },
-  scrollContent: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingVertical: 4,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  chipSelected: {
-    backgroundColor: 'rgba(123, 94, 167, 0.25)',
-    borderColor: COLORS.accentPurple,
-  },
-  chipUnselected: {
-    backgroundColor: '#161626',
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  iconCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 6,
-  },
-  chipText: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  chipTextSelected: {
-    color: '#FFFFFF',
-  },
-  chipTextUnselected: {
-    color: COLORS.textSecondary,
-  },
-  detailsContainer: {
-    marginTop: 8,
-  },
-  detailsInput: {
-    backgroundColor: '#161626',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontSize: 13,
-    color: '#FFFFFF',
-  },
-});

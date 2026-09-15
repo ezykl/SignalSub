@@ -1,21 +1,21 @@
 import React from 'react';
 import {
   StyleProp,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
   ViewStyle,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { Subscription } from '../db/schema';
 import { daysUntil, formatRenewalLabel } from '../services/renewalService';
 import { BrandIcon } from './BrandIcon';
 import { NoiseOverlay } from './NoiseOverlay';
+import { cn } from '@/utils/cn';
 
 export interface SubscriptionCardProps {
   subscription: Subscription;
   onPress?: () => void;
+  className?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
@@ -23,6 +23,7 @@ export interface SubscriptionCardProps {
 export function SubscriptionCard({
   subscription,
   onPress,
+  className,
   style,
   testID,
 }: SubscriptionCardProps) {
@@ -49,15 +50,16 @@ export function SubscriptionCard({
       activeOpacity={onPress ? 0.8 : 1}
       onPress={onPress}
       disabled={!onPress}
-      style={[styles.container, style]}
+      className={cn('w-40 h-[130px] mr-3', className)}
+      style={style}
       testID={testID}
     >
       <NoiseOverlay
         colors={overlayColors}
         borderRadius={16}
-        style={styles.card}
+        className="w-40 h-[130px] rounded-2xl p-3 justify-between"
       >
-        <View style={styles.topRow}>
+        <View className="flex-row justify-between items-start">
           <BrandIcon
             name={subscription.name}
             iconType={subscription.iconType}
@@ -68,16 +70,21 @@ export function SubscriptionCard({
             iconColor="#FFFFFF"
           />
 
-          <View style={[styles.badge, { backgroundColor: badgeColor }]}>
-            <Text style={styles.badgeText}>{renewalText}</Text>
+          <View
+            className="rounded-full px-2 py-0.5 self-start"
+            style={{ backgroundColor: badgeColor }}
+          >
+            <Text className="text-white font-body font-bold text-[10px]">
+              {renewalText}
+            </Text>
           </View>
         </View>
 
-        <View style={styles.bottomArea}>
-          <Text style={styles.name} numberOfLines={1}>
+        <View className="justify-end">
+          <Text className="text-sm font-heading font-bold text-white" numberOfLines={1}>
             {subscription.name}
           </Text>
-          <Text style={styles.price}>
+          <Text className="text-[13px] font-heading font-semibold text-white/85 mt-0.5">
             {`${currency} ${amount}`}
           </Text>
         </View>
@@ -85,47 +92,3 @@ export function SubscriptionCard({
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: 160,
-    height: 130,
-    marginRight: 12,
-  },
-  card: {
-    width: 160,
-    height: 130,
-    borderRadius: 16,
-    padding: 12,
-    justifyContent: 'space-between',
-  },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  badge: {
-    borderRadius: 9999,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    alignSelf: 'flex-start',
-  },
-  badgeText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 10,
-  },
-  bottomArea: {
-    justifyContent: 'flex-end',
-  },
-  name: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  price: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.85)',
-    marginTop: 2,
-  },
-});

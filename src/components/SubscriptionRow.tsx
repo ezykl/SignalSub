@@ -1,19 +1,18 @@
 import React from 'react';
 import {
   StyleProp,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
   ViewStyle,
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import type { Subscription } from '../db/schema';
 import { daysUntil, formatRenewalLabel } from '../services/renewalService';
 import { BrandIcon } from './BrandIcon';
 import { getPaymentMethod } from '../constants/paymentMethods';
+import { cn } from '@/utils/cn';
 
 export interface SubscriptionRowProps {
   subscription: Subscription;
@@ -21,6 +20,7 @@ export interface SubscriptionRowProps {
   onDelete?: () => void;
   onPause?: () => void;
   onReactivate?: () => void;
+  className?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
@@ -31,6 +31,7 @@ export function SubscriptionRow({
   onDelete,
   onPause,
   onReactivate,
+  className,
   style,
   testID,
 }: SubscriptionRowProps) {
@@ -50,9 +51,6 @@ export function SubscriptionRow({
   const billingCycleSubtitle = subscription.billingCycle
     ? `/${subscription.billingCycle}`
     : '';
-  const paymentDef = subscription.paymentMethod
-    ? getPaymentMethod(subscription.paymentMethod)
-    : null;
 
   const renderRightActions = (
     _progress?: any,
@@ -70,24 +68,27 @@ export function SubscriptionRow({
     };
 
     return (
-      <View style={styles.actionsContainer} testID="swipe-actions">
+      <View
+        className="flex-row mb-2 rounded-xl overflow-hidden"
+        testID="swipe-actions"
+      >
         <TouchableOpacity
-          style={[styles.actionButton, styles.pauseButton]}
+          className="w-[75px] justify-center items-center h-full bg-warning"
           onPress={handlePause}
           activeOpacity={0.8}
           testID="swipe-pause-btn"
         >
-          <Text style={styles.actionButtonText}>
+          <Text className="text-white font-heading font-bold text-sm">
             {isCurrentlyActive ? 'Pause' : 'Resume'}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.actionButton, styles.deleteButton]}
+          className="w-[75px] justify-center items-center h-full bg-danger"
           onPress={handleDelete}
           activeOpacity={0.8}
           testID="swipe-delete-btn"
         >
-          <Text style={styles.actionButtonText}>Delete</Text>
+          <Text className="text-white font-heading font-bold text-sm">Delete</Text>
         </TouchableOpacity>
       </View>
     );
@@ -96,16 +97,20 @@ export function SubscriptionRow({
   return (
     <Swipeable
       renderRightActions={renderRightActions}
-      containerStyle={styles.swipeableContainer}
+      containerStyle={{ overflow: 'hidden' }}
     >
       <TouchableOpacity
         activeOpacity={onPress ? 0.7 : 1}
         onPress={onPress}
         disabled={!onPress}
+        className={cn(
+          'bg-card rounded-xl p-4 mb-2 border-l-[3px] flex-row items-center',
+          !isCurrentlyActive && 'opacity-60',
+          className
+        )}
         style={[
-          styles.card,
           { borderLeftColor: subscription.color || COLORS.accentPurple },
-          !isCurrentlyActive && styles.inactiveCard,
+          !isCurrentlyActive && { opacity: 0.6 },
           style,
         ]}
         testID={testID}
@@ -118,40 +123,53 @@ export function SubscriptionRow({
           color={subscription.color || COLORS.accentPurple}
           size={40}
           showContainer
-          style={styles.avatar}
+          style={{ marginRight: 12 }}
         />
 
         {/* Center: Name, trial badge, and subtitle */}
-        <View style={styles.centerContainer}>
-          <View style={styles.nameRow}>
-            <Text style={styles.nameText} numberOfLines={1}>
+        <View className="flex-1 mr-2 justify-center">
+          <View className="flex-row items-center">
+            <Text
+              className="text-[15px] font-heading font-semibold text-white shrink"
+              numberOfLines={1}
+            >
               {subscription.name}
             </Text>
             {isTrialActive && (
-              <View style={styles.trialBadge} testID="trial-badge">
-                <Text style={styles.trialBadgeText}>Trial</Text>
+              <View
+                className="bg-warning/15 border border-warning rounded px-1.5 py-0.5 ml-1.5"
+                testID="trial-badge"
+              >
+                <Text className="text-[10px] font-heading font-bold text-warning uppercase">
+                  Trial
+                </Text>
               </View>
             )}
             {subscription.status === 'cancelled' && (
-              <View style={styles.cancelledBadge} testID="cancelled-badge">
-                <Text style={styles.cancelledBadgeText}>Cancelled</Text>
+              <View
+                className="bg-danger/15 border border-danger rounded px-1.5 py-0.5 ml-1.5"
+                testID="cancelled-badge"
+              >
+                <Text className="text-[10px] font-heading font-bold text-danger uppercase">
+                  Cancelled
+                </Text>
               </View>
             )}
           </View>
-          <Text style={styles.subtitleText} numberOfLines={1}>
+          <Text className="text-xs font-body text-muted mt-1" numberOfLines={1}>
             {subtitle}
           </Text>
         </View>
 
         {/* Right: Amount and billing cycle */}
-        <View style={styles.rightContainer}>
-          <Text style={styles.amountText}>{amountFormatted}</Text>
+        <View className="items-end justify-center">
+          <Text className="text-sm font-heading font-bold text-white">{amountFormatted}</Text>
           {billingCycleSubtitle ? (
-            <Text style={styles.billingCycleText}>{billingCycleSubtitle}</Text>
+            <Text className="text-xs font-body text-muted mt-1">{billingCycleSubtitle}</Text>
           ) : null}
           {subscription.status === 'cancelled' && onReactivate ? (
             <TouchableOpacity
-              style={styles.reactivateButton}
+              className="bg-primary px-2.5 py-1 rounded-md mt-1 items-center justify-center"
               onPress={(e) => {
                 e?.stopPropagation?.();
                 onReactivate();
@@ -161,7 +179,7 @@ export function SubscriptionRow({
               accessibilityLabel={`Reactivate ${subscription.name}`}
               testID={`reactivate-btn-${subscription.id}`}
             >
-              <Text style={styles.reactivateButtonText}>Reactivate</Text>
+              <Text className="text-[11px] font-heading font-bold text-white">Reactivate</Text>
             </TouchableOpacity>
           ) : null}
         </View>
@@ -169,145 +187,3 @@ export function SubscriptionRow({
     </Swipeable>
   );
 }
-
-const styles = StyleSheet.create({
-  swipeableContainer: {
-    overflow: 'hidden',
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    marginBottom: 8,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  actionButton: {
-    width: 75,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100%',
-  },
-  pauseButton: {
-    backgroundColor: COLORS.warning,
-  },
-  deleteButton: {
-    backgroundColor: COLORS.danger,
-  },
-  actionButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  card: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
-    borderLeftWidth: 3,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  inactiveCard: {
-    opacity: 0.6,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  avatar: {
-    marginRight: 12,
-  },
-  centerContainer: {
-    flex: 1,
-    marginRight: 8,
-    justifyContent: 'center',
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  nameText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    flexShrink: 1,
-  },
-  trialBadge: {
-    backgroundColor: '#F59E0B22',
-    borderColor: COLORS.warning,
-    borderWidth: 1,
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    marginLeft: 6,
-  },
-  trialBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: COLORS.warning,
-    textTransform: 'uppercase',
-  },
-  paymentBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 4,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    marginLeft: 6,
-  },
-  paymentBadgeText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#94A3B8',
-  },
-  subtitleText: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-  },
-  rightContainer: {
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-  },
-  amountText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  billingCycleText: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-  },
-  cancelledBadge: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-    borderColor: COLORS.danger,
-    borderWidth: 1,
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    marginLeft: 6,
-  },
-  cancelledBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: COLORS.danger,
-    textTransform: 'uppercase',
-  },
-  reactivateButton: {
-    backgroundColor: COLORS.accentPurple,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginTop: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  reactivateButtonText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-});

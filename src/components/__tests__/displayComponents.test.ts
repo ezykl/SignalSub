@@ -79,11 +79,11 @@ describe('Subscription Display Components', () => {
       assert.deepEqual(element.props.colors, [COLORS.gradientStart, COLORS.gradientEnd]);
       assert.equal(element.props.borderRadius, 24);
 
-      const style = flattenStyle(element.props.style);
-      assert.equal(style.padding, 20);
-      assert.equal(style.marginHorizontal, 16);
-      assert.equal(style.marginBottom, 24);
-      assert.equal(style.borderRadius, 24);
+      assert.match(element.props.className, /p-5/);
+      assert.match(element.props.className, /mx-4/);
+      assert.match(element.props.className, /mb-6/);
+      assert.match(element.props.className, /rounded-3xl/);
+      assert.match(element.props.className, /overflow-hidden/);
     });
 
     it('renders monthly label in COLORS.accentPurpleLight with 12sp uppercase', () => {
@@ -99,11 +99,10 @@ describe('Subscription Display Components', () => {
       assert.equal(label.type, 'Text');
       assert.equal(label.props.children, 'MONTHLY TOTAL');
 
-      const style = flattenStyle(label.props.style);
-      assert.equal(style.color, COLORS.accentPurpleLight);
-      assert.equal(style.fontSize, 12);
-      assert.equal(style.fontWeight, '600');
-      assert.equal(style.letterSpacing, 1);
+      assert.match(label.props.className, /text-xs/);
+      assert.match(label.props.className, /font-semibold/);
+      assert.match(label.props.className, /text-primary-light/);
+      assert.match(label.props.className, /uppercase/);
     });
 
     it('renders hero monthly figure in #FFFFFF 36sp with 800 weight', () => {
@@ -119,11 +118,9 @@ describe('Subscription Display Components', () => {
       assert.equal(hero.type, 'Text');
       assert.equal(hero.props.children, 'USD 34.57');
 
-      const style = flattenStyle(hero.props.style);
-      assert.equal(style.color, '#FFFFFF');
-      assert.equal(style.fontSize, 36);
-      assert.equal(style.fontWeight, '800');
-      assert.equal(style.marginVertical, 4);
+      assert.match(hero.props.className, /text-4xl/);
+      assert.match(hero.props.className, /font-extrabold/);
+      assert.match(hero.props.className, /text-white/);
     });
 
     it('renders yearly subtitle in COLORS.textSecondary 13sp', () => {
@@ -139,9 +136,7 @@ describe('Subscription Display Components', () => {
       assert.equal(yearly.type, 'Text');
       assert.equal(yearly.props.children, 'Yearly estimate: $ 120.00');
 
-      const style = flattenStyle(yearly.props.style);
-      assert.equal(style.color, COLORS.textSecondary);
-      assert.equal(style.fontSize, 13);
+      assert.match(yearly.props.className, /text-muted/);
     });
 
     it('gracefully handles missing/NaN amounts and currency fallback', () => {
@@ -180,22 +175,20 @@ describe('Subscription Display Components', () => {
       const element = SubscriptionCard({ subscription: sub });
 
       assert.equal(element.type, 'TouchableOpacity');
-      const containerStyle = flattenStyle(element.props.style);
-      assert.equal(containerStyle.width, 160);
-      assert.equal(containerStyle.height, 130);
-      assert.equal(containerStyle.marginRight, 12);
+      assert.match(element.props.className, /w-40/);
+      assert.match(element.props.className, /h-\[130px\]/);
+      assert.match(element.props.className, /mr-3/);
 
       const overlay = getChildren(element)[0];
       assert.equal(overlay.type, NoiseOverlay);
       assert.deepEqual(overlay.props.colors, ['#1DB954EE', '#1DB95499']);
       assert.equal(overlay.props.borderRadius, 16);
 
-      const overlayStyle = flattenStyle(overlay.props.style);
-      assert.equal(overlayStyle.width, 160);
-      assert.equal(overlayStyle.height, 130);
-      assert.equal(overlayStyle.borderRadius, 16);
-      assert.equal(overlayStyle.padding, 12);
-      assert.equal(overlayStyle.justifyContent, 'space-between');
+      assert.match(overlay.props.className, /w-40/);
+      assert.match(overlay.props.className, /h-\[130px\]/);
+      assert.match(overlay.props.className, /rounded-2xl/);
+      assert.match(overlay.props.className, /p-3/);
+      assert.match(overlay.props.className, /justify-between/);
     });
 
     it('renders MaterialCommunityIcons for preset iconType', () => {
@@ -247,10 +240,9 @@ describe('Subscription Display Components', () => {
       const badgeText = getChildren(badge)[0];
       assert.equal(badgeText.type, 'Text');
       assert.equal(badgeText.props.children, formatRenewalLabel(sub.nextRenewalDate));
-      const textStyle = flattenStyle(badgeText.props.style);
-      assert.equal(textStyle.color, '#FFFFFF');
-      assert.equal(textStyle.fontWeight, 'bold');
-      assert.equal(textStyle.fontSize, 10);
+      assert.match(badgeText.props.className, /text-white/);
+      assert.match(badgeText.props.className, /font-bold/);
+      assert.match(badgeText.props.className, /text-\[10px\]/);
     });
 
     it('sets renewal badge color to #F59E0B when renewal is <= 7 days but > 3 days', () => {
@@ -296,16 +288,14 @@ describe('Subscription Display Components', () => {
       assert.equal(nameEl.type, 'Text');
       assert.equal(nameEl.props.children, 'YouTube Premium Family');
       assert.equal(nameEl.props.numberOfLines, 1);
-      const nameStyle = flattenStyle(nameEl.props.style);
-      assert.equal(nameStyle.color, '#FFFFFF');
-      assert.equal(nameStyle.fontWeight, 'bold');
-      assert.equal(nameStyle.fontSize, 14);
+      assert.match(nameEl.props.className, /text-sm/);
+      assert.match(nameEl.props.className, /font-bold/);
+      assert.match(nameEl.props.className, /text-white/);
 
       assert.equal(priceEl.type, 'Text');
       assert.equal(priceEl.props.children, 'USD 22.99');
-      const priceStyle = flattenStyle(priceEl.props.style);
-      assert.equal(priceStyle.color, 'rgba(255,255,255,0.85)');
-      assert.equal(priceStyle.fontSize, 13);
+      assert.match(priceEl.props.className, /text-\[13px\]/);
+      assert.match(priceEl.props.className, /text-white\/85/);
     });
 
     it('handles onPress callback and disabled state when onPress is omitted', () => {
@@ -338,12 +328,12 @@ describe('Subscription Display Components', () => {
       const card = getChildren(element)[0];
       assert.equal(card.type, 'TouchableOpacity');
 
+      assert.match(card.props.className, /bg-card/);
+      assert.match(card.props.className, /rounded-xl/);
+      assert.match(card.props.className, /p-4/);
+      assert.match(card.props.className, /mb-2/);
+      assert.match(card.props.className, /border-l-\[3px\]/);
       const cardStyle = flattenStyle(card.props.style);
-      assert.equal(cardStyle.backgroundColor, COLORS.bgCard);
-      assert.equal(cardStyle.borderRadius, 12);
-      assert.equal(cardStyle.padding, 16);
-      assert.equal(cardStyle.marginBottom, 8);
-      assert.equal(cardStyle.borderLeftWidth, 3);
       assert.equal(cardStyle.borderLeftColor, '#FF5722');
     });
 
@@ -371,8 +361,7 @@ describe('Subscription Display Components', () => {
 
       // Pause button
       assert.equal(pauseBtn.type, 'TouchableOpacity');
-      const pauseStyle = flattenStyle(pauseBtn.props.style);
-      assert.equal(pauseStyle.backgroundColor, COLORS.warning);
+      assert.match(pauseBtn.props.className, /bg-warning/);
 
       const pauseText = getChildren(pauseBtn)[0];
       assert.equal(pauseText.type, 'Text');
@@ -415,8 +404,7 @@ describe('Subscription Display Components', () => {
       const [, deleteBtn] = getChildren(actions);
 
       assert.equal(deleteBtn.type, 'TouchableOpacity');
-      const deleteStyle = flattenStyle(deleteBtn.props.style);
-      assert.equal(deleteStyle.backgroundColor, COLORS.danger);
+      assert.match(deleteBtn.props.className, /bg-danger/);
 
       const deleteText = getChildren(deleteBtn)[0];
       assert.equal(deleteText.props.children, 'Delete');
@@ -474,18 +462,16 @@ describe('Subscription Display Components', () => {
       const nameText = getChildren(nameRow)[0];
       assert.equal(nameText.type, 'Text');
       assert.equal(nameText.props.children, 'GitHub Pro');
-      const nameStyle = flattenStyle(nameText.props.style);
-      assert.equal(nameStyle.fontSize, 15);
-      assert.equal(nameStyle.fontWeight, '600');
-      assert.equal(nameStyle.color, COLORS.textPrimary);
+      assert.match(nameText.props.className, /text-\[15px\]/);
+      assert.match(nameText.props.className, /font-semibold/);
+      assert.match(nameText.props.className, /text-white/);
 
       // Subtitle
       assert.equal(subtitle.type, 'Text');
       const expectedSub = `developer · ${formatRenewalLabel(sub.nextRenewalDate)}`;
       assert.equal(subtitle.props.children, expectedSub);
-      const subStyle = flattenStyle(subtitle.props.style);
-      assert.equal(subStyle.fontSize, 12);
-      assert.equal(subStyle.color, COLORS.textSecondary);
+      assert.match(subtitle.props.className, /text-xs/);
+      assert.match(subtitle.props.className, /text-muted/);
     });
 
     it('shows trial badge when trial is active and hides it when trial is not active', () => {
@@ -532,16 +518,14 @@ describe('Subscription Display Components', () => {
 
       assert.equal(amountEl.type, 'Text');
       assert.equal(amountEl.props.children, '$ 19.99');
-      const amountStyle = flattenStyle(amountEl.props.style);
-      assert.equal(amountStyle.fontSize, 14);
-      assert.equal(amountStyle.fontWeight, '700');
-      assert.equal(amountStyle.color, COLORS.textPrimary);
+      assert.match(amountEl.props.className, /text-sm/);
+      assert.match(amountEl.props.className, /font-bold/);
+      assert.match(amountEl.props.className, /text-white/);
 
       assert.equal(cycleEl.type, 'Text');
       assert.equal(cycleEl.props.children, '/monthly');
-      const cycleStyle = flattenStyle(cycleEl.props.style);
-      assert.equal(cycleStyle.fontSize, 12);
-      assert.equal(cycleStyle.color, COLORS.textSecondary);
+      assert.match(cycleEl.props.className, /text-xs/);
+      assert.match(cycleEl.props.className, /text-muted/);
     });
 
     it('applies inactive opacity (0.6) when subscription is inactive', () => {

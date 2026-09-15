@@ -10,6 +10,8 @@
     "test": "tsx --test src/services/__tests__/*.test.ts src/stores/__tests__/*.test.ts src/components/__tests__/*.test.ts"
   },
   "dependencies": {
+    "@expo-google-fonts/montserrat": "^0.4.2",
+    "@expo-google-fonts/roboto": "^0.4.3",
     "@expo/vector-icons": "~14.0.4",
     "drizzle-orm": "^0.39.3",
     "expo": "~52.0.49",

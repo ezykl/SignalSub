@@ -1,31 +1,28 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { COLORS } from '@/constants/colors';
+import { View } from 'react-native';
+import { cn } from '@/utils/cn';
 
 interface Props {
   total: number;
   current: number; // 1-indexed
+  className?: string;
 }
 
-export function OnboardingDots({ total, current }: Props) {
+export function OnboardingDots({ total, current, className }: Props) {
   return (
-    <View style={styles.row}>
-      {Array.from({ length: total }, (_, i) => (
-        <View
-          key={i}
-          style={[
-            styles.dot,
-            i + 1 === current ? styles.dotActive : styles.dotInactive,
-          ]}
-        />
-      ))}
+    <View className={cn('flex-row gap-1.5 items-center', className)}>
+      {Array.from({ length: total }, (_, i) => {
+        const isActive = i + 1 === current;
+        return (
+          <View
+            key={i}
+            className={cn(
+              'h-2 rounded-full',
+              isActive ? 'w-5 bg-primary' : 'w-2 bg-white/30'
+            )}
+          />
+        );
+      })}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: 6, alignItems: 'center' },
-  dot: { height: 8, borderRadius: 4 },
-  dotActive: { width: 20, backgroundColor: COLORS.accentPurple },
-  dotInactive: { width: 8, backgroundColor: 'rgba(255,255,255,0.3)' },
-});

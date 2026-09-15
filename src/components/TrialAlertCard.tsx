@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   StyleProp,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -11,11 +10,13 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import type { Subscription } from '../db/schema';
 import { daysUntil } from '../services/renewalService';
+import { cn } from '@/utils/cn';
 
 export interface TrialAlertCardProps {
   subscription: Subscription;
   onCancel: () => void;
   onKeepActive: () => void;
+  className?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
   referenceDate?: Date | string;
@@ -31,6 +32,7 @@ export function TrialAlertCard({
   subscription,
   onCancel,
   onKeepActive,
+  className,
   style,
   testID = 'trial-alert-card',
   referenceDate,
@@ -40,46 +42,62 @@ export function TrialAlertCard({
     : 0;
   const endsLabel = days <= 0 ? 'today' : days === 1 ? 'tomorrow' : `in ${days} days`;
   const curr = subscription.currency || '$';
-  const amountStr = `${curr} ${subscription.amount ?? 0}`;
 
   return (
-    <View style={[styles.container, style]} testID={testID}>
-      <View style={styles.topRow}>
+    <View
+      className={cn(
+        'bg-[#1A1A2E]/85 rounded-2xl border border-white/[0.08] border-l-4 border-l-warning p-4 mb-3 overflow-hidden',
+        className
+      )}
+      style={style}
+      testID={testID}
+    >
+      <View className="flex-row items-start gap-3">
         <MaterialIcons
           name="warning"
           size={20}
           color={COLORS.amberWarning}
-          style={styles.icon}
+          className="mt-0.5"
         />
-        <View style={styles.content}>
-          <Text style={styles.title} testID="trial-expiry-title">
+        <View className="flex-1">
+          <Text
+            className="text-xs font-heading font-bold text-warning tracking-wide uppercase mb-1"
+            testID="trial-expiry-title"
+          >
             ⚠️ Free Trial Ending
           </Text>
-          <Text style={styles.body} testID="trial-expiry-subtitle">
+          <Text
+            className="text-sm font-body text-[#E7E0E7] leading-5 mb-3"
+            testID="trial-expiry-subtitle"
+          >
             {`${subscription.name} trial ends ${endsLabel}. Auto-charge of ${curr} ${subscription.amount} will occur.`}
           </Text>
 
-          <View style={styles.actionsRow}>
+          <View className="flex-row gap-2.5">
             <TouchableOpacity
-              style={styles.cancelButton}
+              className="px-3 py-1.5 rounded-lg border border-white/15 bg-white/5"
               onPress={onCancel}
               activeOpacity={0.7}
               testID={`trial-expiry-cancelled-btn-${subscription.id}`}
               accessibilityRole="button"
               accessibilityLabel={`I Cancelled ${subscription.name}`}
             >
-              <Text style={styles.cancelButtonText}>I Cancelled It</Text>
+              <Text className="text-[13px] font-heading font-semibold text-[#E7E0E7]">
+                I Cancelled It
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.keepButton}
+              className="px-3 py-1.5 rounded-lg border border-warning/30 bg-warning/15"
               onPress={onKeepActive}
               activeOpacity={0.7}
               testID={`trial-expiry-keep-btn-${subscription.id}`}
               accessibilityRole="button"
               accessibilityLabel={`Keep ${subscription.name} Active`}
             >
-              <Text style={styles.keepButtonText}>Keep Active</Text>
+              <Text className="text-[13px] font-heading font-bold text-warning">
+                Keep Active
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -87,72 +105,3 @@ export function TrialAlertCard({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'rgba(26, 26, 46, 0.85)',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.amberWarning,
-    padding: 16,
-    marginBottom: 12,
-    overflow: 'hidden',
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  icon: {
-    marginTop: 2,
-  },
-  content: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.amberWarning,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    marginBottom: 4,
-  },
-  body: {
-    fontSize: 14,
-    color: '#E7E0E7',
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  cancelButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  cancelButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#E7E0E7',
-  },
-  keepButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 183, 3, 0.3)',
-    backgroundColor: 'rgba(255, 183, 3, 0.15)',
-  },
-  keepButtonText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: COLORS.amberWarning,
-  },
-});

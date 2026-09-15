@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import {
   Alert,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -228,45 +227,45 @@ export default function NewSubscriptionScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView className="flex-1 bg-background">
       {/* Header */}
-      <View style={styles.header}>
+      <View className="h-14 flex-row items-center justify-between px-4 border-b border-white/[0.08]">
         <TouchableOpacity
           onPress={() => router.back()}
-          style={styles.headerButton}
+          className="p-1.5 min-w-[44px] items-center justify-center"
           testID="header-close-btn"
           accessibilityRole="button"
           accessibilityLabel="Close"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Text style={styles.closeIcon}>✕</Text>
+          <Text className="text-xl text-muted font-bold font-heading">✕</Text>
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Add Subscription</Text>
+        <Text className="text-lg font-bold font-heading text-white">Add Subscription</Text>
 
         <TouchableOpacity
           onPress={handleSave}
           disabled={isSaving}
-          style={styles.headerButton}
+          className="p-1.5 min-w-[44px] items-center justify-center"
           testID="header-save-btn"
           accessibilityRole="button"
           accessibilityLabel="Save"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Text style={styles.saveButtonText}>Save</Text>
+          <Text className="text-base font-bold font-heading text-purple-300">Save</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         {/* Preset Service Selection */}
-        <View style={styles.section}>
-          <View style={styles.presetSectionHeader}>
-            <Text style={styles.sectionLabel}>PRESET SERVICES</Text>
+        <View className="px-4 pt-4 pb-2">
+          <View className="flex-row justify-between items-center mb-2">
+            <Text className="text-xs font-bold font-heading text-muted tracking-wider">PRESET SERVICES</Text>
             {selectedPresetKey ? (
               <TouchableOpacity
                 onPress={handleClearPreset}
@@ -274,18 +273,18 @@ export default function NewSubscriptionScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Clear preset"
               >
-                <Text style={styles.customPresetText}>Use Custom</Text>
+                <Text className="text-xs font-semibold font-heading text-purple-300">Use Custom</Text>
               </TouchableOpacity>
             ) : null}
           </View>
 
           {/* Search Bar */}
-          <View style={styles.presetSearchContainer}>
+          <View className="flex-row items-center bg-[#1A1A2E]/75 rounded-xl px-3 py-2 border border-white/[0.08] mb-3">
             <MaterialCommunityIcons
               name="magnify"
               size={18}
               color={COLORS.textSecondary}
-              style={styles.searchIcon}
+              style={{ marginRight: 8 }}
             />
             <TextInput
               testID="preset-search-input"
@@ -293,7 +292,7 @@ export default function NewSubscriptionScreen() {
               onChangeText={setPresetSearch}
               placeholder="Search popular services..."
               placeholderTextColor={COLORS.textSecondary}
-              style={styles.presetSearchInput}
+              className="flex-1 text-sm font-body text-white p-0"
               autoCapitalize="none"
               autoCorrect={false}
             />
@@ -314,23 +313,23 @@ export default function NewSubscriptionScreen() {
 
           {/* Recommended Section Header */}
           {favoriteCategories.length > 0 && !presetSearch.trim() ? (
-            <View style={styles.recommendedHeader} testID="recommended-presets-section">
-              <Text style={styles.recommendedHeaderText}>RECOMMENDED FOR YOU</Text>
+            <View className="flex-row items-center mb-2" testID="recommended-presets-section">
+              <Text className="text-[11px] font-bold font-heading text-purple-300 tracking-wider">RECOMMENDED FOR YOU</Text>
             </View>
           ) : null}
 
           {/* 3-Column Grid */}
-          <View style={styles.presetGrid} testID="preset-grid">
+          <View className="flex-row flex-wrap gap-2" testID="preset-grid">
             {orderedPresets.slice(0, 15).map((preset) => {
               const isSelected = selectedPresetKey === preset.key;
               return (
                 <TouchableOpacity
                   key={preset.key}
                   testID={`preset-card-${preset.key}`}
-                  style={[
-                    styles.presetCard,
-                    isSelected && styles.presetCardSelected,
-                  ]}
+                  style={{ borderColor: isSelected ? '#FFFFFF' : 'transparent' }}
+                  className={`w-[31.5%] rounded-[14px] py-3 px-2 items-center justify-center border-[1.5px] ${
+                    isSelected ? 'bg-[#7B5EA7]/[0.22]' : 'bg-[#1A1A2E]/75'
+                  }`}
                   onPress={() => handleSelectPreset(preset)}
                   activeOpacity={0.7}
                   accessibilityRole="button"
@@ -344,14 +343,13 @@ export default function NewSubscriptionScreen() {
                     size={38}
                     iconSize={22}
                     showContainer
-                    style={styles.presetIconContainer}
+                    className="w-[38px] h-[38px] rounded-[10px] items-center justify-center mb-1.5"
                   />
                   <Text
                     numberOfLines={1}
-                    style={[
-                      styles.presetName,
-                      isSelected && styles.presetNameSelected,
-                    ]}
+                    className={`text-xs text-center ${
+                      isSelected ? 'text-white font-bold font-heading' : 'text-muted font-semibold font-body'
+                    }`}
                   >
                     {preset.name}
                   </Text>
@@ -362,10 +360,10 @@ export default function NewSubscriptionScreen() {
         </View>
 
         {/* Form Fields */}
-        <View style={styles.formContainer}>
+        <View className="px-4 pt-3">
           {/* Subscription Name */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>SUBSCRIPTION NAME *</Text>
+          <View className="mb-[18px]">
+            <Text className="text-xs font-bold font-heading text-muted mb-2 tracking-wider">SUBSCRIPTION NAME *</Text>
             <TextInput
               testID="input-name"
               value={name}
@@ -377,15 +375,15 @@ export default function NewSubscriptionScreen() {
               }}
               placeholder="e.g. Netflix, Spotify, AWS"
               placeholderTextColor={COLORS.textSecondary}
-              style={styles.textInput}
+              className="bg-[#1A1A2E]/75 rounded-[14px] px-3.5 py-3 text-[15px] font-body text-white border border-white/[0.08]"
             />
           </View>
 
           {/* Amount */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>AMOUNT *</Text>
-            <View style={styles.amountInputRow}>
-              <Text style={styles.currencyPrefix}>{currencySymbol}</Text>
+          <View className="mb-[18px]">
+            <Text className="text-xs font-bold font-heading text-muted mb-2 tracking-wider">AMOUNT *</Text>
+            <View className="flex-row items-center bg-[#1A1A2E]/75 rounded-[14px] px-3.5 py-1 border border-white/[0.08]">
+              <Text className="text-lg font-bold font-heading text-purple-300 mr-2">{currencySymbol}</Text>
               <TextInput
                 testID="input-amount"
                 value={amount}
@@ -393,14 +391,14 @@ export default function NewSubscriptionScreen() {
                 placeholder="0.00"
                 placeholderTextColor={COLORS.textSecondary}
                 keyboardType="decimal-pad"
-                style={styles.amountInput}
+                className="flex-1 text-base font-semibold font-heading text-white py-2"
               />
             </View>
           </View>
 
           {/* Billing Cycle */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>BILLING CYCLE</Text>
+          <View className="mb-[18px]">
+            <Text className="text-xs font-bold font-heading text-muted mb-2 tracking-wider">BILLING CYCLE</Text>
             <BillingCyclePill
               value={billingCycle}
               onChange={handleBillingCycleChange}
@@ -418,12 +416,12 @@ export default function NewSubscriptionScreen() {
           />
 
           {/* Category */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>CATEGORY</Text>
+          <View className="mb-[18px]">
+            <Text className="text-xs font-bold font-heading text-muted mb-2 tracking-wider">CATEGORY</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryScroll}
+              contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
               testID="category-chips-scroll"
             >
               {CATEGORIES.map((cat) => (
@@ -433,7 +431,7 @@ export default function NewSubscriptionScreen() {
                   selected={selectedCategory === cat.key}
                   onPress={() => setSelectedCategory(cat.key)}
                   testID={`category-chip-${cat.key}`}
-                  style={styles.categoryChipItem}
+                  className="mr-2"
                 />
               ))}
             </ScrollView>
@@ -441,12 +439,12 @@ export default function NewSubscriptionScreen() {
 
           {/* Saved Payment Methods Quick Select */}
           {savedPaymentMethods.length > 0 && (
-            <View style={styles.savedMethodsContainer} testID="saved-methods-quick-select">
-              <Text style={styles.fieldLabel}>MY SAVED WALLETS & CARDS</Text>
+            <View className="mb-5" testID="saved-methods-quick-select">
+              <Text className="text-xs font-bold font-heading text-muted mb-2 tracking-wider">MY SAVED WALLETS & CARDS</Text>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.savedMethodsScroll}
+                contentContainerStyle={{ gap: 8, paddingVertical: 2 }}
               >
                 {savedPaymentMethods.map((pm) => {
                   const def = getPaymentMethod(pm.methodKey);
@@ -454,10 +452,11 @@ export default function NewSubscriptionScreen() {
                   return (
                     <TouchableOpacity
                       key={pm.id}
-                      style={[
-                        styles.savedMethodChip,
-                        isSelected && styles.savedMethodChipSelected,
-                      ]}
+                      className={`flex-row items-center bg-[#161626] border rounded-[10px] px-3 py-2 gap-2 ${
+                        isSelected
+                          ? 'border-accent bg-accent/20'
+                          : 'border-white/10'
+                      }`}
                       onPress={() => {
                         setPaymentMethod(pm.methodKey);
                         setPaymentDetails(pm.details);
@@ -465,8 +464,8 @@ export default function NewSubscriptionScreen() {
                       activeOpacity={0.7}
                       testID={`saved-method-chip-${pm.id}`}
                     >
-                      <View style={[styles.savedMethodDot, { backgroundColor: def.color }]} />
-                      <Text style={[styles.savedMethodText, isSelected && styles.savedMethodTextSelected]}>
+                      <View className="w-2 h-2 rounded-full" style={{ backgroundColor: def.color }} />
+                      <Text className={`text-[13px] font-semibold font-heading ${isSelected ? 'text-white' : 'text-muted'}`}>
                         {def.shortName}
                         {pm.details ? ` (${pm.details})` : ''}
                       </Text>
@@ -487,26 +486,27 @@ export default function NewSubscriptionScreen() {
           />
 
           {/* Free Trial Toggle Row */}
-          <View style={styles.toggleCard}>
-            <View style={styles.toggleInfo}>
-              <Text style={styles.toggleTitle}>Free Trial</Text>
-              <Text style={styles.toggleSubtitle}>
+          <View className="flex-row items-center justify-between bg-[#1A1A2E]/75 rounded-[14px] px-3.5 py-3 mb-3.5 border border-white/[0.08]">
+            <View className="flex-1 mr-3">
+              <Text className="text-[15px] font-semibold font-heading text-white mb-0.5">Free Trial</Text>
+              <Text className="text-xs text-muted font-body">
                 Is this subscription currently on a trial?
               </Text>
             </View>
             <TouchableOpacity
               testID="trial-toggle"
-              style={[styles.switchTrack, isTrial && styles.switchTrackActive]}
+              className={`w-12 h-7 rounded-full p-0.5 justify-center ${
+                isTrial ? 'bg-accent' : 'bg-surface'
+              }`}
               onPress={handleToggleTrial}
               activeOpacity={0.8}
               accessibilityRole="switch"
               accessibilityState={{ checked: isTrial }}
             >
               <View
-                style={[
-                  styles.switchThumb,
-                  isTrial ? styles.switchThumbActive : styles.switchThumbInactive,
-                ]}
+                className={`w-6 h-6 rounded-full bg-white ${
+                  isTrial ? 'self-end' : 'self-start'
+                }`}
               />
             </TouchableOpacity>
           </View>
@@ -523,21 +523,20 @@ export default function NewSubscriptionScreen() {
           ) : null}
 
           {/* Notification Stepper */}
-          <View style={styles.stepperCard}>
-            <View style={styles.stepperInfo}>
-              <Text style={styles.stepperTitle}>Reminder Alert</Text>
-              <Text style={styles.stepperSubtitle}>
+          <View className="flex-row items-center justify-between bg-[#1A1A2E]/75 rounded-[14px] px-3.5 py-3 border border-white/[0.08]">
+            <View className="flex-1 mr-3">
+              <Text className="text-[15px] font-semibold font-heading text-white mb-0.5">Reminder Alert</Text>
+              <Text className="text-xs text-muted font-body">
                 Notify me {notifyBeforeDays} day{notifyBeforeDays === 1 ? '' : 's'}{' '}
                 before renewal
               </Text>
             </View>
-            <View style={styles.stepperControls}>
+            <View className="flex-row items-center gap-2">
               <TouchableOpacity
                 testID="stepper-decrement"
-                style={[
-                  styles.stepperButton,
-                  notifyBeforeDays <= 1 && styles.stepperButtonDisabled,
-                ]}
+                className={`w-8 h-8 rounded-lg bg-surface items-center justify-center ${
+                  notifyBeforeDays <= 1 ? 'opacity-40' : ''
+                }`}
                 onPress={() =>
                   setNotifyBeforeDays((prev) => Math.max(1, prev - 1))
                 }
@@ -545,19 +544,18 @@ export default function NewSubscriptionScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Decrease notification days"
               >
-                <Text style={styles.stepperButtonText}>−</Text>
+                <Text className="text-lg font-bold font-heading text-white leading-5">−</Text>
               </TouchableOpacity>
 
-              <Text testID="stepper-value" style={styles.stepperValue}>
+              <Text testID="stepper-value" className="text-[15px] font-bold font-heading text-white min-w-[24px] text-center">
                 {notifyBeforeDays}
               </Text>
 
               <TouchableOpacity
                 testID="stepper-increment"
-                style={[
-                  styles.stepperButton,
-                  notifyBeforeDays >= 14 && styles.stepperButtonDisabled,
-                ]}
+                className={`w-8 h-8 rounded-lg bg-surface items-center justify-center ${
+                  notifyBeforeDays >= 14 ? 'opacity-40' : ''
+                }`}
                 onPress={() =>
                   setNotifyBeforeDays((prev) => Math.min(14, prev + 1))
                 }
@@ -565,7 +563,7 @@ export default function NewSubscriptionScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Increase notification days"
               >
-                <Text style={styles.stepperButtonText}>+</Text>
+                <Text className="text-lg font-bold font-heading text-white leading-5">+</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -574,333 +572,3 @@ export default function NewSubscriptionScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.bgPrimary,
-  },
-  header: {
-    height: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  headerButton: {
-    padding: 6,
-    minWidth: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  closeIcon: {
-    fontSize: 20,
-    color: COLORS.textSecondary,
-    fontWeight: 'bold',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.accentPurpleLight,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  section: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-  presetSectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.textSecondary,
-    letterSpacing: 0.8,
-  },
-  customPresetText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.accentPurpleLight,
-  },
-  recommendedHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  recommendedHeaderText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: COLORS.accentPurpleLight,
-    letterSpacing: 0.8,
-  },
-  presetSearchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    marginBottom: 12,
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  presetSearchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: COLORS.textPrimary,
-    padding: 0,
-  },
-  presetGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  presetCard: {
-    width: '31.5%',
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'transparent',
-  },
-  presetCardSelected: {
-    borderColor: '#FFFFFF',
-    backgroundColor: 'rgba(123, 94, 167, 0.22)',
-  },
-  presetIconContainer: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
-  },
-  presetName: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-  },
-  presetNameSelected: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-  },
-  formContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-  },
-  fieldGroup: {
-    marginBottom: 18,
-  },
-  fieldLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.textSecondary,
-    marginBottom: 8,
-    letterSpacing: 0.5,
-  },
-  textInput: {
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: COLORS.textPrimary,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  amountInputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  currencyPrefix: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.accentPurpleLight,
-    marginRight: 8,
-  },
-  amountInput: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    paddingVertical: 8,
-  },
-  categoryScroll: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  categoryChipItem: {
-    marginRight: 8,
-  },
-  toggleCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  toggleInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  toggleTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    marginBottom: 2,
-  },
-  toggleSubtitle: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-  },
-  switchTrack: {
-    width: 48,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: COLORS.bgSurface,
-    padding: 2,
-    justifyContent: 'center',
-  },
-  switchTrackActive: {
-    backgroundColor: COLORS.accentPurple,
-  },
-  switchThumb: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-  },
-  switchThumbActive: {
-    alignSelf: 'flex-end',
-  },
-  switchThumbInactive: {
-    alignSelf: 'flex-start',
-  },
-  trialDateGroup: {
-    marginTop: -4,
-  },
-  stepperCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  stepperInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  stepperTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    marginBottom: 2,
-  },
-  stepperSubtitle: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-  },
-  stepperControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepperButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: COLORS.bgSurface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepperButtonDisabled: {
-    opacity: 0.4,
-  },
-  stepperButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    lineHeight: 20,
-  },
-  stepperValue: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    minWidth: 24,
-    textAlign: 'center',
-  },
-  savedMethodsContainer: {
-    marginBottom: 20,
-  },
-  savedMethodsScroll: {
-    gap: 8,
-    paddingVertical: 2,
-  },
-  savedMethodChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#161626',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 8,
-  },
-  savedMethodChipSelected: {
-    borderColor: COLORS.accentPurple,
-    backgroundColor: 'rgba(123, 94, 167, 0.2)',
-  },
-  savedMethodDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  savedMethodText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-  savedMethodTextSelected: {
-    color: '#FFFFFF',
-  },
-});

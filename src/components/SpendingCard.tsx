@@ -1,17 +1,18 @@
 import React from 'react';
 import {
   StyleProp,
-  StyleSheet,
   Text,
   ViewStyle,
 } from 'react-native';
 import { COLORS } from '../constants/colors';
 import { NoiseOverlay } from './NoiseOverlay';
+import { cn } from '@/utils/cn';
 
 export interface SpendingCardProps {
   monthlyTotal: number;
   yearlyTotal: number;
   currency: string;
+  className?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
@@ -20,6 +21,7 @@ export function SpendingCard({
   monthlyTotal,
   yearlyTotal,
   currency,
+  className,
   style,
   testID,
 }: SpendingCardProps) {
@@ -33,43 +35,19 @@ export function SpendingCard({
     <NoiseOverlay
       colors={[COLORS.gradientStart, COLORS.gradientEnd]}
       borderRadius={24}
-      style={[styles.container, style]}
+      className={cn('p-5 mx-4 mb-6 rounded-3xl overflow-hidden', className)}
+      style={style}
       testID={testID}
     >
-      <Text style={styles.label}>MONTHLY TOTAL</Text>
-      <Text style={styles.heroFigure}>
+      <Text className="text-xs font-heading font-semibold text-primary-light uppercase tracking-widest">
+        MONTHLY TOTAL
+      </Text>
+      <Text className="text-4xl font-metric font-extrabold text-white my-1">
         {`${curr} ${safeMonthly.toFixed(2)}`}
       </Text>
-      <Text style={styles.yearlySubtitle}>
+      <Text className="text-[13px] font-body text-muted">
         {`Yearly estimate: ${curr} ${safeYearly.toFixed(2)}`}
       </Text>
     </NoiseOverlay>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    marginHorizontal: 16,
-    marginBottom: 24,
-    borderRadius: 24,
-    overflow: 'hidden',
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.accentPurpleLight,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  heroFigure: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginVertical: 4,
-  },
-  yearlySubtitle: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-  },
-});

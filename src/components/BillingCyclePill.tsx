@@ -1,19 +1,19 @@
 import React from 'react';
 import {
   StyleProp,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
   ViewStyle,
 } from 'react-native';
-import { COLORS } from '@/constants/colors';
+import { cn } from '@/utils/cn';
 
 export type BillingCycle = 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 
 export interface BillingCyclePillProps {
   value: BillingCycle;
   onChange: (cycle: BillingCycle) => void;
+  className?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
@@ -28,11 +28,16 @@ const CYCLES: { key: BillingCycle; label: string }[] = [
 export function BillingCyclePill({
   value,
   onChange,
+  className,
   style,
   testID,
 }: BillingCyclePillProps) {
   return (
-    <View testID={testID} style={[styles.container, style]}>
+    <View
+      testID={testID}
+      className={cn('bg-surface rounded-full flex-row p-1 items-center w-full', className)}
+      style={style}
+    >
       {CYCLES.map((cycle) => {
         const isSelected = value === cycle.key;
         return (
@@ -42,16 +47,16 @@ export function BillingCyclePill({
             activeOpacity={0.8}
             accessibilityRole="button"
             accessibilityState={{ selected: isSelected }}
-            style={[
-              styles.segment,
-              isSelected && styles.segmentSelected,
-            ]}
+            className={cn(
+              'flex-1 py-2 rounded-full items-center justify-center',
+              isSelected ? 'bg-primary' : 'bg-transparent'
+            )}
           >
             <Text
-              style={[
-                styles.segmentText,
-                isSelected ? styles.textSelected : styles.textUnselected,
-              ]}
+              className={cn(
+                'text-xs text-center font-heading',
+                isSelected ? 'text-white font-semibold' : 'text-muted font-medium'
+              )}
               numberOfLines={1}
             >
               {cycle.label}
@@ -62,37 +67,3 @@ export function BillingCyclePill({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: COLORS.bgSurface,
-    borderRadius: 9999,
-    flexDirection: 'row',
-    padding: 4,
-    alignItems: 'center',
-    width: '100%',
-  },
-  segment: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-  },
-  segmentSelected: {
-    backgroundColor: COLORS.accentPurple,
-  },
-  segmentText: {
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  textSelected: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-  },
-  textUnselected: {
-    color: COLORS.textSecondary,
-    fontWeight: '500',
-  },
-});

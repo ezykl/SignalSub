@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -148,16 +147,16 @@ export default function CalendarScreen({ initialDate }: CalendarScreenProps = {}
   }, [subscriptions, selectedYear, selectedMonth]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Calendar</Text>
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="px-4 pt-3 pb-1">
+        <Text className="text-2xl font-bold font-heading text-white">Calendar</Text>
       </View>
 
       {/* Month Selector */}
-      <View style={styles.selectorContainer}>
+      <View className="flex-row items-center justify-between bg-[#1A1A2E]/75 mx-4 mt-2 mb-4 py-3.5 px-3 rounded-2xl border border-white/[0.08]">
         <TouchableOpacity
           onPress={handlePrevMonth}
-          style={styles.navButton}
+          className="w-11 h-11 rounded-full items-center justify-center bg-white/[0.04]"
           activeOpacity={0.7}
           accessibilityRole="button"
           accessibilityLabel="Previous month"
@@ -170,11 +169,11 @@ export default function CalendarScreen({ initialDate }: CalendarScreenProps = {}
           />
         </TouchableOpacity>
 
-        <View style={styles.monthCenter}>
-          <Text style={styles.monthTitle} testID="calendar-month-year">
+        <View className="flex-1 items-center">
+          <Text className="text-[17px] font-bold font-heading text-white" testID="calendar-month-year">
             {MONTH_NAMES[selectedMonth]} {selectedYear}
           </Text>
-          <Text style={styles.monthSubtitle} testID="calendar-summary">
+          <Text className="text-xs text-purple-300 mt-0.5 font-medium font-body" testID="calendar-summary">
             {totalCount} {totalCount === 1 ? 'renewal' : 'renewals'} · {currency}{' '}
             {totalSpend.toFixed(2)} this month
           </Text>
@@ -182,7 +181,7 @@ export default function CalendarScreen({ initialDate }: CalendarScreenProps = {}
 
         <TouchableOpacity
           onPress={handleNextMonth}
-          style={styles.navButton}
+          className="w-11 h-11 rounded-full items-center justify-center bg-white/[0.04]"
           activeOpacity={0.7}
           accessibilityRole="button"
           accessibilityLabel="Next month"
@@ -198,32 +197,32 @@ export default function CalendarScreen({ initialDate }: CalendarScreenProps = {}
 
       {/* Timeline / Empty State */}
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
       >
         {groups.length === 0 ? (
-          <View style={styles.emptyCard} testID="calendar-empty-state">
-            <View style={styles.emptyIconCircle}>
+          <View className="bg-[#1A1A2E]/75 rounded-2xl p-6 mx-4 mt-6 items-center justify-center border border-white/[0.08]" testID="calendar-empty-state">
+            <View className="w-16 h-16 rounded-full bg-primary/15 items-center justify-center mb-4">
               <MaterialIcons
                 name="event-available"
                 size={40}
                 color={COLORS.accentPurple}
               />
             </View>
-            <Text style={styles.emptyTitle}>No renewals this month</Text>
-            <Text style={styles.emptySubtitle}>
+            <Text className="text-base font-bold font-heading text-white mb-2 text-center">No renewals this month</Text>
+            <Text className="text-[13px] text-muted text-center leading-[18px] max-w-[260px] font-body">
               You don&apos;t have any active subscriptions renewing in{' '}
               {MONTH_NAMES[selectedMonth]} {selectedYear}.
             </Text>
           </View>
         ) : (
-          <View style={styles.timelineContainer} testID="calendar-timeline">
+          <View className="px-4" testID="calendar-timeline">
             {groups.map((group) => (
-              <View key={group.date} style={styles.dateSection}>
-                <View style={styles.dateHeaderRow}>
-                  <View style={styles.dateDot} />
-                  <Text style={styles.dateHeaderText}>
+              <View key={group.date} className="mb-5">
+                <View className="flex-row items-center mb-2">
+                  <View className="w-2 h-2 rounded-full bg-primary mr-2" />
+                  <Text className="text-sm font-bold font-heading text-muted uppercase tracking-wider">
                     {group.formattedDate}
                   </Text>
                 </View>
@@ -231,18 +230,16 @@ export default function CalendarScreen({ initialDate }: CalendarScreenProps = {}
                 {group.subscriptions.map((sub) => (
                   <TouchableOpacity
                     key={sub.id}
-                    style={[
-                      styles.card,
-                      {
-                        borderLeftColor:
-                          sub.color || COLORS.accentPurple,
-                      },
-                    ]}
+                    className="bg-[#1A1A2E]/75 rounded-[14px] p-3.5 mb-2 border-l-[3px] border border-white/[0.06] flex-row items-center justify-between"
+                    style={{
+                      borderLeftColor:
+                        sub.color || COLORS.accentPurple,
+                    }}
                     onPress={() => router.push(`/subscription/${sub.id}`)}
                     activeOpacity={0.7}
                     testID={`calendar-card-${sub.id}`}
                   >
-                    <View style={styles.cardLeft}>
+                    <View className="flex-1 flex-row items-center mr-2">
                       <BrandIcon
                         name={sub.name}
                         iconType={sub.iconType}
@@ -251,26 +248,26 @@ export default function CalendarScreen({ initialDate }: CalendarScreenProps = {}
                         iconSize={20}
                         color="rgba(123, 94, 167, 0.15)"
                         iconColor={sub.color || COLORS.accentPurple}
-                        style={styles.cardBrandIcon}
+                        className="mr-3"
                       />
-                      <View style={styles.cardTextContainer}>
-                        <Text style={styles.subName} numberOfLines={1}>
+                      <View className="flex-1">
+                        <Text className="text-[15px] font-semibold font-heading text-white" numberOfLines={1}>
                           {sub.name}
                         </Text>
                         {sub.category ? (
-                          <Text style={styles.subCategory} numberOfLines={1}>
+                          <Text className="text-xs text-muted mt-0.5 capitalize font-body" numberOfLines={1}>
                             {sub.category}
                           </Text>
                         ) : null}
                       </View>
                     </View>
-                    <View style={styles.cardRight}>
-                      <Text style={styles.subAmount}>
+                    <View className="items-end">
+                      <Text className="text-[15px] font-bold font-heading text-white">
                         {sub.currency || currency}{' '}
                         {(sub.amount ?? 0).toFixed(2)}
                       </Text>
                       {sub.billingCycle ? (
-                        <Text style={styles.subBillingCycle}>
+                        <Text className="text-[11px] text-muted mt-0.5 font-body">
                           /{sub.billingCycle}
                         </Text>
                       ) : null}
@@ -285,170 +282,3 @@ export default function CalendarScreen({ initialDate }: CalendarScreenProps = {}
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.bgPrimary,
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 4,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  selectorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  navButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-  },
-  monthCenter: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  monthTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  monthSubtitle: {
-    fontSize: 12,
-    color: COLORS.accentPurpleLight,
-    marginTop: 3,
-    fontWeight: '500',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 32,
-  },
-  timelineContainer: {
-    paddingHorizontal: 16,
-  },
-  dateSection: {
-    marginBottom: 20,
-  },
-  dateHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  dateDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.accentPurple,
-    marginRight: 8,
-  },
-  dateHeaderText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  card: {
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 8,
-    borderLeftWidth: 3,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  cardLeft: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  cardBrandIcon: {
-    marginRight: 12,
-  },
-  cardTextContainer: {
-    flex: 1,
-  },
-  subName: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-  },
-  subCategory: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-    textTransform: 'capitalize',
-  },
-  cardRight: {
-    alignItems: 'flex-end',
-  },
-  subAmount: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  subBillingCycle: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-  emptyCard: {
-    backgroundColor: 'rgba(26, 26, 46, 0.75)',
-    borderRadius: 16,
-    padding: 24,
-    marginHorizontal: 16,
-    marginTop: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  emptyIconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(123, 94, 167, 0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 18,
-    maxWidth: 260,
-  },
-});

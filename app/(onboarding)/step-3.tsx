@@ -2,7 +2,6 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   useWindowDimensions,
   StatusBar,
@@ -10,6 +9,7 @@ import {
 import { useRouter } from 'expo-router';
 import { COLORS } from '@/constants/colors';
 import { OnboardingDots } from '@/components/OnboardingDots';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 // ─── Mock chart / legend data ─────────────────────────────────────────────────
 const LEGEND = [
@@ -19,93 +19,59 @@ const LEGEND = [
   { label: 'Storage', pct: 10, color: COLORS.accentPurple },
 ];
 
-// Donut: pure View with nested Views + borderRadius trick
-// We render a solid circle and a smaller cutout circle on top.
 const DONUT_SIZE = 140;
 const DONUT_HOLE = 76;
 
 // ─── Donut component (no SVG) ─────────────────────────────────────────────────
 function MockDonut() {
-  // Render stacked quarter arcs via gradients-free technique:
-  // Use a solid circle split visually into segments using box colors stacked.
-  // For a simple approximation, render colored concentric border-radius rings.
   return (
-    <View style={donutStyles.wrapper}>
+    <View className="w-[140px] h-[140px] items-center justify-center">
       {/* Bottom layer: full solid circle in the largest segment color */}
-      <View style={donutStyles.ring}>
+      <View className="w-[140px] h-[140px] rounded-full overflow-hidden relative">
         {/* Quadrant coloring approximation using absolute quarter circles */}
-        <View style={[donutStyles.quadrant, donutStyles.q1]} />
-        <View style={[donutStyles.quadrant, donutStyles.q2]} />
-        <View style={[donutStyles.quadrant, donutStyles.q3]} />
-        <View style={[donutStyles.quadrant, donutStyles.q4]} />
+        <View className="absolute w-[70px] h-[70px] top-0 left-0 bg-[#E50914]" />
+        <View className="absolute w-[70px] h-[70px] top-0 right-0 bg-[#1DB954]" />
+        <View className="absolute w-[70px] h-[70px] bottom-0 left-0 bg-primary" />
+        <View className="absolute w-[70px] h-[70px] bottom-0 right-0 bg-[#3a86ff]" />
         {/* Center hole */}
-        <View style={donutStyles.hole}>
-          <Text style={donutStyles.holeTotal}>$28.47</Text>
-          <Text style={donutStyles.holeLabel}>/ month</Text>
+        <View
+          className="absolute w-[76px] h-[76px] rounded-full bg-card self-center items-center justify-center"
+          style={{
+            top: (DONUT_SIZE - DONUT_HOLE) / 2,
+            left: (DONUT_SIZE - DONUT_HOLE) / 2,
+          }}
+        >
+          <Text className="text-sm font-extrabold font-heading text-white">$28.47</Text>
+          <Text className="text-[9px] text-muted mt-0.5 font-body">/ month</Text>
         </View>
       </View>
     </View>
   );
 }
 
-const donutStyles = StyleSheet.create({
-  wrapper: {
-    width: DONUT_SIZE,
-    height: DONUT_SIZE,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ring: {
-    width: DONUT_SIZE,
-    height: DONUT_SIZE,
-    borderRadius: DONUT_SIZE / 2,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  quadrant: {
-    position: 'absolute',
-    width: DONUT_SIZE / 2,
-    height: DONUT_SIZE / 2,
-  },
-  q1: { top: 0, left: 0, backgroundColor: '#E50914' },       // top-left  → Streaming
-  q2: { top: 0, right: 0, backgroundColor: '#1DB954' },      // top-right → Music
-  q3: { bottom: 0, left: 0, backgroundColor: COLORS.accentPurple }, // bottom-left → Storage
-  q4: { bottom: 0, right: 0, backgroundColor: '#3a86ff' },   // bottom-right → Productivity
-  hole: {
-    position: 'absolute',
-    width: DONUT_HOLE,
-    height: DONUT_HOLE,
-    borderRadius: DONUT_HOLE / 2,
-    backgroundColor: COLORS.bgCard,
-    alignSelf: 'center',
-    top: (DONUT_SIZE - DONUT_HOLE) / 2,
-    left: (DONUT_SIZE - DONUT_HOLE) / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  holeTotal: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  holeLabel: {
-    fontSize: 9,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-});
-
-// Spotlight wraps the donut area
-// Header: ~52 paddingTop + 22 title + 8 mb + summary row ~50 + gap ~12 = ~144 top for chart row
 const CHART_SECTION_TOP = 164;
-const CHART_SECTION_HEIGHT = DONUT_SIZE + 8; // a little padding
+const CHART_SECTION_HEIGHT = DONUT_SIZE + 8;
 
 export default function Step3Screen() {
   const router = useRouter();
   const { width: screenW, height: screenH } = useWindowDimensions();
+  const getSetting = useSettingsStore((state) => state.getSetting);
+  const hasOnboarded = getSetting('has_onboarded') === 'true';
 
-  const handleNext = () => router.replace('/(onboarding)/currency');
-  const handleSkip = () => router.replace('/(onboarding)/currency');
+  const handleNext = () => {
+    if (hasOnboarded) {
+      router.replace('/(tabs)');
+    } else {
+      router.replace('/(onboarding)/currency');
+    }
+  };
+  const handleSkip = () => {
+    if (hasOnboarded) {
+      router.replace('/(tabs)');
+    } else {
+      router.replace('/(onboarding)/currency');
+    }
+  };
 
   const SIDE_MARGIN = (screenW - DONUT_SIZE) / 2;
   const spotTop = CHART_SECTION_TOP;
@@ -118,216 +84,83 @@ export default function Step3Screen() {
   const calloutTop = spotTop + spotH + 16;
 
   return (
-    <View style={styles.root}>
+    <View className="flex-1 bg-background">
       <StatusBar barStyle="light-content" />
 
       {/* ── Mock Analytics Screen ─────────────────────────────────────── */}
-      <View style={[styles.mockScreen, { width: screenW, height: screenH }]}>
+      <View className="bg-background pt-[52px]" style={{ width: screenW, height: screenH }}>
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Analytics</Text>
+        <View className="px-5 mb-4">
+          <Text className="text-[22px] font-bold font-heading text-white">Analytics</Text>
         </View>
 
         {/* Summary row */}
-        <View style={styles.summaryRow}>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryLabel}>Monthly</Text>
-            <Text style={styles.summaryAmount}>$28.47</Text>
+        <View className="flex-row mx-4 mb-4 bg-card rounded-2xl overflow-hidden">
+          <View className="flex-1 p-4 items-center">
+            <Text className="text-[11px] text-muted uppercase tracking-wider mb-1 font-body">Monthly</Text>
+            <Text className="text-xl font-bold font-heading text-white">$28.47</Text>
           </View>
-          <View style={styles.summaryDivider} />
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryLabel}>Yearly</Text>
-            <Text style={styles.summaryAmount}>$341.64</Text>
+          <View className="w-px bg-white/[0.08]" />
+          <View className="flex-1 p-4 items-center">
+            <Text className="text-[11px] text-muted uppercase tracking-wider mb-1 font-body">Yearly</Text>
+            <Text className="text-xl font-bold font-heading text-white">$341.64</Text>
           </View>
         </View>
 
         {/* Donut chart */}
-        <View style={styles.chartRow}>
+        <View className="items-center mb-5">
           <MockDonut />
         </View>
 
         {/* Legend */}
-        <View style={styles.legend}>
+        <View className="mx-5 gap-2.5">
           {LEGEND.map((item) => (
-            <View key={item.label} style={styles.legendRow}>
-              <View style={[styles.legendDot, { backgroundColor: item.color }]} />
-              <Text style={styles.legendLabel}>{item.label}</Text>
-              <Text style={styles.legendPct}>{item.pct}%</Text>
+            <View key={item.label} className="flex-row items-center gap-2.5">
+              <View className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+              <Text className="flex-1 text-[13px] text-muted font-body">{item.label}</Text>
+              <Text className="text-[13px] font-semibold font-heading text-white">{item.pct}%</Text>
             </View>
           ))}
         </View>
       </View>
 
       {/* ── Spotlight overlay ─────────────────────────────────────────── */}
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View className="absolute inset-0" pointerEvents="none">
         {/* Top */}
-        <View style={[styles.overlay, { top: 0, left: 0, right: 0, height: spotTop, backgroundColor: OVERLAY }]} />
+        <View className="absolute" style={{ top: 0, left: 0, right: 0, height: spotTop, backgroundColor: OVERLAY }} />
         {/* Bottom */}
-        <View style={[styles.overlay, { top: spotTop + spotH, left: 0, right: 0, bottom: 0, backgroundColor: OVERLAY }]} />
+        <View className="absolute" style={{ top: spotTop + spotH, left: 0, right: 0, bottom: 0, backgroundColor: OVERLAY }} />
         {/* Left */}
-        <View style={[styles.overlay, { top: spotTop, left: 0, width: spotLeft, height: spotH, backgroundColor: OVERLAY }]} />
+        <View className="absolute" style={{ top: spotTop, left: 0, width: spotLeft, height: spotH, backgroundColor: OVERLAY }} />
         {/* Right */}
-        <View style={[styles.overlay, { top: spotTop, left: spotLeft + spotW, right: 0, height: spotH, backgroundColor: OVERLAY }]} />
+        <View className="absolute" style={{ top: spotTop, left: spotLeft + spotW, right: 0, height: spotH, backgroundColor: OVERLAY }} />
         {/* Border ring */}
         <View
-          style={[
-            styles.spotlightBorder,
-            { top: spotTop, left: spotLeft, width: spotW, height: spotH, borderRadius: DONUT_SIZE / 2 },
-          ]}
+          className="absolute border-2 border-[#7B5EA7]/85"
+          style={{ top: spotTop, left: spotLeft, width: spotW, height: spotH, borderRadius: DONUT_SIZE / 2 }}
         />
       </View>
 
       {/* ── Callout card ─────────────────────────────────────────────── */}
-      <View style={[styles.callout, { top: calloutTop }]} pointerEvents="box-none">
+      <View
+        className="absolute left-4 right-4 bg-card rounded-2xl p-5 border border-[#7B5EA7]/30 gap-2.5"
+        style={{ top: calloutTop }}
+        pointerEvents="box-none"
+      >
         <OnboardingDots total={3} current={3} />
-        <Text style={styles.calloutHeadline}>Understand Your Spending</Text>
-        <Text style={styles.calloutBody}>
+        <Text className="text-[17px] font-bold font-heading text-white">Understand Your Spending</Text>
+        <Text className="text-[13px] text-muted leading-[19px] font-body">
           See a breakdown by category. Know exactly where your money goes each month.
         </Text>
-        <View style={styles.calloutActions}>
-          <TouchableOpacity onPress={handleSkip} style={styles.skipBtn} activeOpacity={0.7}>
-            <Text style={styles.skipText}>Skip</Text>
+        <View className="flex-row items-center justify-end gap-3 mt-1">
+          <TouchableOpacity onPress={handleSkip} className="px-3 py-2" activeOpacity={0.7}>
+            <Text className="text-sm text-muted font-body">Skip</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleNext} style={styles.nextBtn} activeOpacity={0.8}>
-            <Text style={styles.nextText}>Get Started 🎉</Text>
+          <TouchableOpacity onPress={handleNext} className="bg-primary px-5 py-2.5 rounded-full" activeOpacity={0.8}>
+            <Text className="text-sm font-bold font-heading text-white">Get Started 🎉</Text>
           </TouchableOpacity>
         </View>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: COLORS.bgPrimary,
-  },
-  // ── Mock screen ──────────────────────────────────────────────────────────
-  mockScreen: {
-    backgroundColor: COLORS.bgPrimary,
-    paddingTop: 52,
-  },
-  header: {
-    paddingHorizontal: 20,
-    marginBottom: 16,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  summaryCard: {
-    flex: 1,
-    padding: 16,
-    alignItems: 'center',
-  },
-  summaryDivider: {
-    width: 1,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  summaryLabel: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 4,
-  },
-  summaryAmount: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  chartRow: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  legend: {
-    marginHorizontal: 20,
-    gap: 10,
-  },
-  legendRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  legendLabel: {
-    flex: 1,
-    fontSize: 13,
-    color: COLORS.textSecondary,
-  },
-  legendPct: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  // ── Spotlight overlay ────────────────────────────────────────────────────
-  overlay: {
-    position: 'absolute',
-  },
-  spotlightBorder: {
-    position: 'absolute',
-    borderWidth: 2,
-    borderColor: 'rgba(123,94,167,0.85)',
-  },
-  // ── Callout card ─────────────────────────────────────────────────────────
-  callout: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(123,94,167,0.3)',
-    gap: 10,
-  },
-  calloutHeadline: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  calloutBody: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    lineHeight: 19,
-  },
-  calloutActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 12,
-    marginTop: 4,
-  },
-  skipBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  skipText: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
-  nextBtn: {
-    backgroundColor: COLORS.accentPurple,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  nextText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-});

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Alert,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -95,41 +94,41 @@ export default function EditSubscriptionScreen() {
   // Not found fallback
   if (!sub) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
+      <SafeAreaView className="flex-1 bg-background">
+        <View className="h-14 flex-row items-center justify-between px-4 border-b border-white/[0.08]">
           <TouchableOpacity
             onPress={() => router.back()}
-            style={styles.headerButton}
+            className="p-1.5 min-w-[44px] items-center justify-center"
             testID="header-close-btn"
             accessibilityRole="button"
             accessibilityLabel="Close"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Text style={styles.closeIcon}>✕</Text>
+            <Text className="text-xl text-muted font-bold font-heading">✕</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Edit Subscription</Text>
-          <View style={styles.headerButton} />
+          <Text className="text-lg font-bold font-heading text-white">Edit Subscription</Text>
+          <View className="p-1.5 min-w-[44px]" />
         </View>
 
-        <View style={styles.notFoundContainer} testID="subscription-not-found">
+        <View className="flex-1 items-center justify-center px-8" testID="subscription-not-found">
           <MaterialCommunityIcons
             name="alert-circle-outline"
             size={56}
             color={COLORS.textSecondary}
             style={{ marginBottom: 16 }}
           />
-          <Text style={styles.notFoundTitle}>Subscription Not Found</Text>
-          <Text style={styles.notFoundText}>
+          <Text className="text-xl font-bold font-heading text-white mb-2 text-center">Subscription Not Found</Text>
+          <Text className="text-sm text-muted text-center leading-[22px] mb-6 font-body">
             The subscription you are trying to edit does not exist or has been deleted.
           </Text>
           <TouchableOpacity
-            style={styles.backButton}
+            className="bg-accent px-6 py-3 rounded-full"
             onPress={() => router.back()}
             testID="not-found-back-btn"
             accessibilityRole="button"
             accessibilityLabel="Go back"
           >
-            <Text style={styles.backButtonText}>Go Back</Text>
+            <Text className="text-[15px] font-bold font-heading text-white">Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -261,45 +260,45 @@ export default function EditSubscriptionScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView className="flex-1 bg-background">
       {/* Header */}
-      <View style={styles.header}>
+      <View className="h-14 flex-row items-center justify-between px-4 border-b border-white/[0.08]">
         <TouchableOpacity
           onPress={() => router.back()}
-          style={styles.headerButton}
+          className="p-1.5 min-w-[44px] items-center justify-center"
           testID="header-close-btn"
           accessibilityRole="button"
           accessibilityLabel="Close"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Text style={styles.closeIcon}>✕</Text>
+          <Text className="text-xl text-muted font-bold font-heading">✕</Text>
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Edit Subscription</Text>
+        <Text className="text-lg font-bold font-heading text-white">Edit Subscription</Text>
 
         <TouchableOpacity
           onPress={handleSave}
           disabled={isSaving}
-          style={styles.headerButton}
+          className="p-1.5 min-w-[44px] items-center justify-center"
           testID="header-save-btn"
           accessibilityRole="button"
           accessibilityLabel="Save"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Text style={styles.saveButtonText}>Save</Text>
+          <Text className="text-base font-bold font-heading text-purple-300">Save</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.formContainer}>
+        <View className="px-4 pt-4">
           {/* Subscription Name */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>SUBSCRIPTION NAME *</Text>
+          <View className="mb-[18px]">
+            <Text className="text-xs font-bold font-heading text-muted mb-2 tracking-wider">SUBSCRIPTION NAME *</Text>
             <TextInput
               testID="input-name"
               value={name}
@@ -311,15 +310,15 @@ export default function EditSubscriptionScreen() {
               }}
               placeholder="e.g. Netflix, Spotify, AWS"
               placeholderTextColor={COLORS.textSecondary}
-              style={styles.textInput}
+              className="bg-card rounded-xl px-3.5 py-3 text-[15px] font-body text-white border border-slate-400/[0.15]"
             />
           </View>
 
           {/* Amount */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>AMOUNT *</Text>
-            <View style={styles.amountInputRow}>
-              <Text style={styles.currencyPrefix}>{currencySymbol}</Text>
+          <View className="mb-[18px]">
+            <Text className="text-xs font-bold font-heading text-muted mb-2 tracking-wider">AMOUNT *</Text>
+            <View className="flex-row items-center bg-card rounded-xl px-3.5 py-1 border border-slate-400/[0.15]">
+              <Text className="text-lg font-bold font-heading text-purple-300 mr-2">{currencySymbol}</Text>
               <TextInput
                 testID="input-amount"
                 value={amount}
@@ -327,14 +326,14 @@ export default function EditSubscriptionScreen() {
                 placeholder="0.00"
                 placeholderTextColor={COLORS.textSecondary}
                 keyboardType="decimal-pad"
-                style={styles.amountInput}
+                className="flex-1 text-base font-semibold font-heading text-white py-2"
               />
             </View>
           </View>
 
           {/* Billing Cycle */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>BILLING CYCLE</Text>
+          <View className="mb-[18px]">
+            <Text className="text-xs font-bold font-heading text-muted mb-2 tracking-wider">BILLING CYCLE</Text>
             <BillingCyclePill
               value={billingCycle}
               onChange={handleBillingCycleChange}
@@ -352,12 +351,12 @@ export default function EditSubscriptionScreen() {
           />
 
           {/* Category */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>CATEGORY</Text>
+          <View className="mb-[18px]">
+            <Text className="text-xs font-bold font-heading text-muted mb-2 tracking-wider">CATEGORY</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryScroll}
+              contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
               testID="category-chips-scroll"
             >
               {CATEGORIES.map((cat) => (
@@ -367,7 +366,7 @@ export default function EditSubscriptionScreen() {
                   selected={selectedCategory === cat.key}
                   onPress={() => setSelectedCategory(cat.key)}
                   testID={`category-chip-${cat.key}`}
-                  style={styles.categoryChipItem}
+                  className="mr-2"
                 />
               ))}
             </ScrollView>
@@ -383,26 +382,27 @@ export default function EditSubscriptionScreen() {
           />
 
           {/* Free Trial Toggle Row */}
-          <View style={styles.toggleCard}>
-            <View style={styles.toggleInfo}>
-              <Text style={styles.toggleTitle}>Free Trial</Text>
-              <Text style={styles.toggleSubtitle}>
+          <View className="flex-row items-center justify-between bg-card rounded-xl px-3.5 py-3 mb-3.5 border border-slate-400/[0.15]">
+            <View className="flex-1 mr-3">
+              <Text className="text-[15px] font-semibold font-heading text-white mb-0.5">Free Trial</Text>
+              <Text className="text-xs text-muted font-body">
                 Is this subscription currently on a trial?
               </Text>
             </View>
             <TouchableOpacity
               testID="trial-toggle"
-              style={[styles.switchTrack, isTrial && styles.switchTrackActive]}
+              className={`w-12 h-7 rounded-full p-0.5 justify-center ${
+                isTrial ? 'bg-accent' : 'bg-surface'
+              }`}
               onPress={handleToggleTrial}
               activeOpacity={0.8}
               accessibilityRole="switch"
               accessibilityState={{ checked: isTrial }}
             >
               <View
-                style={[
-                  styles.switchThumb,
-                  isTrial ? styles.switchThumbActive : styles.switchThumbInactive,
-                ]}
+                className={`w-6 h-6 rounded-full bg-white ${
+                  isTrial ? 'self-end' : 'self-start'
+                }`}
               />
             </TouchableOpacity>
           </View>
@@ -419,21 +419,20 @@ export default function EditSubscriptionScreen() {
           ) : null}
 
           {/* Notification Stepper */}
-          <View style={styles.stepperCard}>
-            <View style={styles.stepperInfo}>
-              <Text style={styles.stepperTitle}>Reminder Alert</Text>
-              <Text style={styles.stepperSubtitle}>
+          <View className="flex-row items-center justify-between bg-card rounded-xl px-3.5 py-3 border border-slate-400/[0.15]">
+            <View className="flex-1 mr-3">
+              <Text className="text-[15px] font-semibold font-heading text-white mb-0.5">Reminder Alert</Text>
+              <Text className="text-xs text-muted font-body">
                 Notify me {notifyBeforeDays} day{notifyBeforeDays === 1 ? '' : 's'}{' '}
                 before renewal
               </Text>
             </View>
-            <View style={styles.stepperControls}>
+            <View className="flex-row items-center gap-2">
               <TouchableOpacity
                 testID="stepper-decrement"
-                style={[
-                  styles.stepperButton,
-                  notifyBeforeDays <= 1 && styles.stepperButtonDisabled,
-                ]}
+                className={`w-8 h-8 rounded-lg bg-surface items-center justify-center ${
+                  notifyBeforeDays <= 1 ? 'opacity-40' : ''
+                }`}
                 onPress={() =>
                   setNotifyBeforeDays((prev) => Math.max(1, prev - 1))
                 }
@@ -441,19 +440,18 @@ export default function EditSubscriptionScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Decrease notification days"
               >
-                <Text style={styles.stepperButtonText}>−</Text>
+                <Text className="text-lg font-bold font-heading text-white leading-5">−</Text>
               </TouchableOpacity>
 
-              <Text testID="stepper-value" style={styles.stepperValue}>
+              <Text testID="stepper-value" className="text-[15px] font-bold font-heading text-white min-w-[24px] text-center">
                 {notifyBeforeDays}
               </Text>
 
               <TouchableOpacity
                 testID="stepper-increment"
-                style={[
-                  styles.stepperButton,
-                  notifyBeforeDays >= 14 && styles.stepperButtonDisabled,
-                ]}
+                className={`w-8 h-8 rounded-lg bg-surface items-center justify-center ${
+                  notifyBeforeDays >= 14 ? 'opacity-40' : ''
+                }`}
                 onPress={() =>
                   setNotifyBeforeDays((prev) => Math.min(14, prev + 1))
                 }
@@ -461,7 +459,7 @@ export default function EditSubscriptionScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Increase notification days"
               >
-                <Text style={styles.stepperButtonText}>+</Text>
+                <Text className="text-lg font-bold font-heading text-white leading-5">+</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -470,7 +468,7 @@ export default function EditSubscriptionScreen() {
           {sub.status !== 'cancelled' && (
             <TouchableOpacity
               testID="cancel-subscription-btn"
-              style={styles.cancelButton}
+              className="flex-row items-center justify-center mt-7 py-3.5 rounded-xl border-[1.5px] border-amber-500 bg-amber-500/[0.08]"
               onPress={handleCancel}
               disabled={isCancelling}
               activeOpacity={0.8}
@@ -483,14 +481,14 @@ export default function EditSubscriptionScreen() {
                 color={COLORS.warning}
                 style={{ marginRight: 8 }}
               />
-              <Text style={styles.cancelButtonText}>Cancel Subscription</Text>
+              <Text className="text-base font-bold font-heading text-amber-500">Cancel Subscription</Text>
             </TouchableOpacity>
           )}
 
           {/* Delete Subscription Button */}
           <TouchableOpacity
             testID="delete-subscription-btn"
-            style={styles.deleteButton}
+            className="flex-row items-center justify-center mt-3 py-3.5 rounded-xl border-[1.5px] border-red-500 bg-red-500/[0.08]"
             onPress={handleDelete}
             disabled={isDeleting}
             activeOpacity={0.8}
@@ -503,277 +501,10 @@ export default function EditSubscriptionScreen() {
               color={COLORS.danger}
               style={{ marginRight: 8 }}
             />
-            <Text style={styles.deleteButtonText}>Delete Subscription</Text>
+            <Text className="text-base font-bold font-heading text-red-500">Delete Subscription</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.bgPrimary,
-  },
-  header: {
-    height: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  headerButton: {
-    padding: 6,
-    minWidth: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  closeIcon: {
-    fontSize: 20,
-    color: COLORS.textSecondary,
-    fontWeight: 'bold',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.accentPurpleLight,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  formContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  fieldGroup: {
-    marginBottom: 18,
-  },
-  fieldLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.textSecondary,
-    marginBottom: 8,
-    letterSpacing: 0.5,
-  },
-  textInput: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: COLORS.textPrimary,
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.15)',
-  },
-  amountInputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.15)',
-  },
-  currencyPrefix: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.accentPurpleLight,
-    marginRight: 8,
-  },
-  amountInput: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    paddingVertical: 8,
-  },
-  categoryScroll: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  categoryChipItem: {
-    marginRight: 8,
-  },
-  toggleCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.15)',
-  },
-  toggleInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  toggleTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    marginBottom: 2,
-  },
-  toggleSubtitle: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-  },
-  switchTrack: {
-    width: 48,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: COLORS.bgSurface,
-    padding: 2,
-    justifyContent: 'center',
-  },
-  switchTrackActive: {
-    backgroundColor: COLORS.accentPurple,
-  },
-  switchThumb: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-  },
-  switchThumbActive: {
-    alignSelf: 'flex-end',
-  },
-  switchThumbInactive: {
-    alignSelf: 'flex-start',
-  },
-  trialDateGroup: {
-    marginTop: -4,
-  },
-  stepperCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.15)',
-  },
-  stepperInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  stepperTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    marginBottom: 2,
-  },
-  stepperSubtitle: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-  },
-  stepperControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepperButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: COLORS.bgSurface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepperButtonDisabled: {
-    opacity: 0.4,
-  },
-  stepperButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    lineHeight: 20,
-  },
-  stepperValue: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    minWidth: 24,
-    textAlign: 'center',
-  },
-  cancelButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 28,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: COLORS.warning,
-    backgroundColor: 'rgba(245, 158, 11, 0.08)',
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.warning,
-  },
-  deleteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: COLORS.danger,
-    backgroundColor: 'rgba(239, 68, 68, 0.08)',
-  },
-  deleteButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.danger,
-  },
-  notFoundContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-  },
-  notFoundTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  notFoundText: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 24,
-  },
-  backButton: {
-    backgroundColor: COLORS.accentPurple,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 9999,
-  },
-  backButtonText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-});

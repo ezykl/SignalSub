@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -57,32 +56,32 @@ export default function CurrencyScreen() {
     return (
       <TouchableOpacity
         testID={`currency-option-${item.code}`}
-        style={[
-          styles.currencyItem,
-          isSelected ? styles.currencyItemSelected : styles.currencyItemUnselected,
-        ]}
+        className={`flex-row items-center justify-between py-3.5 px-4 my-1 rounded-[14px] border-[1.5px] ${
+          isSelected
+            ? 'border-primary bg-primary/20'
+            : 'border-transparent bg-card'
+        }`}
         onPress={() => setSelected(item.code)}
         activeOpacity={0.7}
         accessibilityRole="checkbox"
         accessibilityState={{ checked: isSelected }}
         accessibilityLabel={`${item.name} (${item.code})`}
       >
-        <View style={styles.currencyLeft}>
-          <Text style={styles.currencyFlag}>{item.flag}</Text>
-          <View style={styles.currencyInfo}>
-            <Text style={styles.currencyCode}>{item.code}</Text>
-            <Text style={styles.currencyName} numberOfLines={1}>
+        <View className="flex-row items-center flex-1 mr-3">
+          <Text className="text-2xl mr-3.5">{item.flag}</Text>
+          <View className="flex-1">
+            <Text className="text-base font-bold font-heading text-white mb-0.5">{item.code}</Text>
+            <Text className="text-[13px] text-muted font-body" numberOfLines={1}>
               {item.name}
             </Text>
           </View>
         </View>
 
-        <View style={styles.currencyRight}>
+        <View className="flex-row items-center gap-3">
           <Text
-            style={[
-              styles.currencySymbol,
-              isSelected && { color: COLORS.accentPurpleLight },
-            ]}
+            className={`text-[15px] font-semibold font-heading ${
+              isSelected ? 'text-purple-300' : 'text-muted'
+            }`}
           >
             {item.symbol}
           </Text>
@@ -93,7 +92,7 @@ export default function CurrencyScreen() {
               color={COLORS.accentPurpleLight}
             />
           ) : (
-            <View style={styles.unselectedRadio} />
+            <View className="w-5 h-5 rounded-full border-[1.5px] border-slate-400/30" />
           )}
         </View>
       </TouchableOpacity>
@@ -101,25 +100,25 @@ export default function CurrencyScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView className="flex-1 bg-background">
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>What currency do you use?</Text>
-        <Text style={styles.subtitle}>
+      <View className="px-5 pt-4 pb-3">
+        <Text className="text-2xl font-bold font-heading text-white mb-1.5">What currency do you use?</Text>
+        <Text className="text-sm text-muted leading-5 mb-4 font-body">
           Choose your primary currency for subscription tracking. You can change this anytime in Settings.
         </Text>
 
         {/* Search Bar */}
-        <View style={styles.searchBarContainer}>
+        <View className="flex-row items-center bg-card rounded-xl px-3.5 py-2.5 border border-slate-400/15">
           <MaterialIcons
             name="search"
             size={20}
             color={COLORS.textSecondary}
-            style={styles.searchIcon}
+            style={{ marginRight: 10 }}
           />
           <TextInput
             testID="currency-search-input"
-            style={styles.searchInput}
+            className="flex-1 text-[15px] font-body text-white p-0"
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="Search currency (e.g. USD, EUR, PHP)"
@@ -146,23 +145,23 @@ export default function CurrencyScreen() {
       </View>
 
       {/* Currencies List */}
-      <View style={styles.listContainer}>
+      <View className="flex-1 px-5">
         <FlatList
           data={filteredCurrencies}
           keyExtractor={(item) => item.code}
           renderItem={renderCurrencyItem}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={{ paddingBottom: 20 }}
           ListEmptyComponent={
-            <View style={styles.emptyStateContainer}>
+            <View className="items-center justify-center py-12 px-6">
               <MaterialCommunityIcons
                 name="currency-usd-off"
                 size={44}
                 color={COLORS.textSecondary}
                 style={{ opacity: 0.6, marginBottom: 8 }}
               />
-              <Text style={styles.emptyStateText}>
+              <Text className="text-sm text-muted text-center leading-5 font-body">
                 No currencies found matching &quot;{searchQuery}&quot;
               </Text>
             </View>
@@ -171,13 +170,12 @@ export default function CurrencyScreen() {
       </View>
 
       {/* Bottom CTA Button */}
-      <View style={styles.bottomContainer}>
+      <View className="px-5 pt-3 pb-6 bg-background">
         <TouchableOpacity
           testID="continue-button"
-          style={[
-            styles.continueButton,
-            isSubmitting && styles.continueButtonDisabled,
-          ]}
+          className={`bg-primary py-4 rounded-full items-center justify-center shadow-md shadow-purple-900/35 elevation-6 ${
+            isSubmitting ? 'opacity-60' : ''
+          }`}
           onPress={handleContinue}
           disabled={isSubmitting}
           activeOpacity={0.8}
@@ -187,7 +185,7 @@ export default function CurrencyScreen() {
           {isSubmitting ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Text style={styles.continueButtonText}>
+            <Text className="text-base font-bold font-heading text-white">
               Continue with {selected} →
             </Text>
           )}
@@ -196,149 +194,3 @@ export default function CurrencyScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.bgPrimary,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 6,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  searchBarContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.15)',
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    color: COLORS.textPrimary,
-    padding: 0,
-  },
-  listContainer: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  listContent: {
-    paddingBottom: 20,
-  },
-  currencyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    marginVertical: 4,
-    borderRadius: 14,
-    borderWidth: 1.5,
-  },
-  currencyItemSelected: {
-    borderColor: COLORS.accentPurple,
-    backgroundColor: `${COLORS.accentPurple}33`,
-  },
-  currencyItemUnselected: {
-    borderColor: 'transparent',
-    backgroundColor: COLORS.bgCard,
-  },
-  currencyLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginRight: 12,
-  },
-  currencyFlag: {
-    fontSize: 24,
-    marginRight: 14,
-  },
-  currencyInfo: {
-    flex: 1,
-  },
-  currencyCode: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginBottom: 2,
-  },
-  currencyName: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-  },
-  currencyRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  currencySymbol: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-  unselectedRadio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: 'rgba(148, 163, 184, 0.3)',
-  },
-  emptyStateContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 48,
-    paddingHorizontal: 24,
-  },
-  emptyStateText: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  bottomContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 24,
-    backgroundColor: COLORS.bgPrimary,
-  },
-  continueButton: {
-    backgroundColor: COLORS.accentPurple,
-    paddingVertical: 16,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: COLORS.accentPurple,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  continueButtonDisabled: {
-    opacity: 0.6,
-  },
-  continueButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-});

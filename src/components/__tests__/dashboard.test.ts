@@ -22,6 +22,7 @@ import { SubscriptionCard } from '../SubscriptionCard';
 import { SubscriptionRow } from '../SubscriptionRow';
 import { AlertBanner } from '../AlertBanner';
 import { FAB } from '../FAB';
+import { AppIcon } from '../AppIcon';
 
 // Helper to flatten React Native style array
 function flattenStyle(style: any): Record<string, any> {
@@ -51,7 +52,7 @@ function findByTestId(element: any, testID: string): any | null {
       const rendered = element.type(element.props);
       const found = findByTestId(rendered, testID);
       if (found) return found;
-    } catch {}
+    } catch { }
   }
   const children = getChildren(element);
   for (const child of children) {
@@ -78,15 +79,15 @@ function findAllByType(element: any, typeName: any): any[] {
 
 // Setup mock React hook dispatcher for direct function component invocation in tests
 const mockDispatcher = {
-  useState: (init: any) => [typeof init === 'function' ? init() : init, () => {}],
+  useState: (init: any) => [typeof init === 'function' ? init() : init, () => { }],
   useMemo: (fn: any) => fn(),
   useCallback: (fn: any) => fn,
-  useEffect: () => {},
-  useLayoutEffect: () => {},
+  useEffect: () => { },
+  useLayoutEffect: () => { },
   useRef: (init: any) => ({ current: init }),
   useContext: () => ({}),
   useSyncExternalStore: (_subscribe: any, getSnapshot: any) => getSnapshot(),
-  useDebugValue: () => {},
+  useDebugValue: () => { },
 };
 
 (React as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentDispatcher.current = mockDispatcher;
@@ -138,43 +139,25 @@ describe('Dashboard and Tabs Layout', () => {
   });
 
   describe('TabLayout (_layout.tsx)', () => {
-    it('configures 4 bottom tabs with correct titles, icons, and theme colors', () => {
+    it('configures CustomTabBar with Home, Subscription, Calendar, and Profile tabs', () => {
       const element = TabLayout();
       assert.equal(element.type, Tabs);
 
+      assert.ok(element.props.tabBar, 'TabLayout should configure a custom tabBar');
       const screenOptions = element.props.screenOptions;
       assert.equal(screenOptions.headerShown, false);
-      assert.equal(screenOptions.tabBarActiveTintColor, COLORS.accentPurple);
-      assert.equal(screenOptions.tabBarInactiveTintColor, COLORS.textSecondary);
-      assert.equal(screenOptions.tabBarStyle.backgroundColor, COLORS.bgCard);
-      assert.equal(screenOptions.tabBarStyle.borderTopColor, COLORS.bgSurface);
-      assert.equal(screenOptions.tabBarStyle.height, 60);
-      assert.equal(screenOptions.tabBarStyle.paddingBottom, 8);
 
       const screens = getChildren(element);
-      assert.equal(screens.length, 4);
+      assert.equal(screens.length, 5); // index, subscriptions, calendar, profile, analytics (hidden)
 
-      const expectedTabs = [
-        { name: 'index', title: 'Home', icon: 'home' },
-        { name: 'subscriptions', title: 'Subscriptions', icon: 'list' },
-        { name: 'calendar', title: 'Calendar', icon: 'calendar-today' },
-        { name: 'analytics', title: 'Analytics', icon: 'bar-chart' },
-      ];
+      const screenNames = screens.map((s: any) => s.props.name);
+      assert.deepEqual(screenNames, ['index', 'subscriptions', 'calendar', 'profile', 'analytics']);
 
-      for (let i = 0; i < expectedTabs.length; i++) {
-        const screen = screens[i];
-        const expected = expectedTabs[i];
-        assert.equal(screen.type, Tabs.Screen);
-        assert.equal(screen.props.name, expected.name);
-        assert.equal(screen.props.options.title, expected.title);
+      const profileScreen = screens.find((s: any) => s.props.name === 'profile');
+      assert.equal(profileScreen.props.options.title, 'Profile');
 
-
-        const iconEl = screen.props.options.tabBarIcon({ color: '#FFF' });
-        assert.equal(iconEl.type, 'MaterialIcons');
-        assert.equal(iconEl.props.name, expected.icon);
-        assert.equal(iconEl.props.size, 24);
-        assert.equal(iconEl.props.color, '#FFF');
-      }
+      const analyticsScreen = screens.find((s: any) => s.props.name === 'analytics');
+      assert.equal(analyticsScreen.props.options.href, null);
     });
   });
 

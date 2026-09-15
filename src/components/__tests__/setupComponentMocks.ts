@@ -224,6 +224,7 @@ export const mockRouter = {
   push: (_url: string) => {},
   replace: (_url: string) => {},
   back: () => {},
+  canGoBack: () => true,
 };
 
 const MockStack: any = Object.assign((props: any) => props, {
@@ -262,5 +263,24 @@ try {
 } catch {
   // ignore
 }
+
+// Mock expo-font
+try {
+  const efResolved = require.resolve('expo-font');
+  require.cache[efResolved] = {
+    id: efResolved,
+    filename: efResolved,
+    loaded: true,
+    exports: {
+      useFonts: () => [true, null],
+      loadAsync: async () => {},
+      isLoaded: () => true,
+      isLoading: () => false,
+    },
+  } as unknown as NodeModule;
+} catch {
+  // ignore
+}
+
 
 

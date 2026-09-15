@@ -4,6 +4,20 @@ import { LogBox, StatusBar } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Font from 'expo-font';
+import {
+  Montserrat_400Regular,
+  Montserrat_500Medium,
+  Montserrat_600SemiBold,
+  Montserrat_700Bold,
+  Montserrat_800ExtraBold,
+} from '@expo-google-fonts/montserrat';
+import {
+  Roboto_300Light,
+  Roboto_400Regular,
+  Roboto_500Medium,
+  Roboto_700Bold,
+} from '@expo-google-fonts/roboto';
 import { runMigrations } from '@/db/client';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
@@ -47,11 +61,32 @@ export default function RootLayout() {
   useEffect(() => {
     async function init() {
       try {
+        await Font.loadAsync({
+          Montserrat_400Regular,
+          Montserrat_500Medium,
+          Montserrat_600SemiBold,
+          Montserrat_700Bold,
+          Montserrat_800ExtraBold,
+          Roboto_300Light,
+          Roboto_400Regular,
+          Roboto_500Medium,
+          Roboto_700Bold,
+          // Aliases
+          Montserrat: Montserrat_400Regular,
+          'Montserrat-Medium': Montserrat_500Medium,
+          'Montserrat-SemiBold': Montserrat_600SemiBold,
+          'Montserrat-Bold': Montserrat_700Bold,
+          'Montserrat-ExtraBold': Montserrat_800ExtraBold,
+          Roboto: Roboto_400Regular,
+          'Roboto-Light': Roboto_300Light,
+          'Roboto-Medium': Roboto_500Medium,
+          'Roboto-Bold': Roboto_700Bold,
+        });
         await runMigrations();
         await loadSettings();
         await loadSubscriptions();
       } catch (error) {
-        console.error('Failed to initialize SignalSub database/stores:', error);
+        console.error('Failed to initialize SignalSub database/stores/fonts:', error);
       } finally {
         setIsReady(true);
         // Splash screen hides here — after DB + stores are ready
@@ -62,18 +97,28 @@ export default function RootLayout() {
     init();
   }, [loadSettings, loadSubscriptions]);
 
+  const [initialRouteResolved, setInitialRouteResolved] = useState(false);
+
   useEffect(() => {
     if (!isReady) return;
 
     const hasOnboarded = getSetting('has_onboarded') === 'true';
     const inOnboardingGroup = segments[0] === '(onboarding)';
 
+    // On initial app launch, route onboarded users to tabs
+    if (!initialRouteResolved) {
+      setInitialRouteResolved(true);
+      if (hasOnboarded && inOnboardingGroup) {
+        router.replace('/(tabs)');
+        return;
+      }
+    }
+
+    // Guard: Un-onboarded users cannot access screens outside onboarding
     if (!hasOnboarded && !inOnboardingGroup) {
       router.replace('/(onboarding)/welcome');
-    } else if (hasOnboarded && inOnboardingGroup) {
-      router.replace('/(tabs)');
     }
-  }, [isReady, segments, cache, getSetting, router]);
+  }, [isReady, segments, cache, getSetting, router, initialRouteResolved]);
 
   // Render the Stack immediately — the splash screen overlays it until hideAsync() is called
   return (

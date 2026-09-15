@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   StyleProp,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -13,10 +12,12 @@ import type { Subscription } from '../db/schema';
 import { daysUntil, formatRenewalLabel } from '../services/renewalService';
 import { BrandIcon } from './BrandIcon';
 import { getPaymentMethod } from '../constants/paymentMethods';
+import { cn } from '@/utils/cn';
 
 export interface UpcomingRenewalCardProps {
   subscription: Subscription;
   onPress?: () => void;
+  className?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
@@ -30,6 +31,7 @@ export interface UpcomingRenewalCardProps {
 export function UpcomingRenewalCard({
   subscription,
   onPress,
+  className,
   style,
   testID,
 }: UpcomingRenewalCardProps) {
@@ -48,13 +50,17 @@ export function UpcomingRenewalCard({
       activeOpacity={onPress ? 0.75 : 1}
       onPress={onPress}
       disabled={!onPress}
-      style={[styles.container, style]}
+      className={cn(
+        'w-40 min-h-[140px] bg-glass-bg rounded-2xl border border-glass-border p-3.5 mr-3 justify-between',
+        className
+      )}
+      style={style}
       testID={testID}
       accessibilityRole={onPress ? 'button' : 'none'}
       accessibilityLabel={`${subscription.name}, ${currency} ${amount}, ${renewalText}`}
     >
-      <View style={styles.topRow}>
-        <View style={styles.iconWrapper}>
+      <View className="flex-row justify-between items-start mb-2">
+        <View className="w-[38px] h-[38px] rounded-[10px] overflow-hidden justify-center items-center">
           <BrandIcon
             name={subscription.name}
             iconType={subscription.iconType}
@@ -67,33 +73,33 @@ export function UpcomingRenewalCard({
         </View>
 
         {paymentDef ? (
-          <View style={styles.paymentTag}>
-            <Text style={styles.paymentTagText} numberOfLines={1}>
+          <View className="bg-white/[0.08] px-[7px] py-[3px] rounded-md max-w-[75px]">
+            <Text className="text-[10px] font-body font-bold text-[#CCC4D1]" numberOfLines={1}>
               {paymentDef.name}
             </Text>
           </View>
         ) : null}
       </View>
 
-      <Text style={styles.name} numberOfLines={1}>
+      <Text className="text-[15px] font-heading font-bold text-white mb-0.5" numberOfLines={1}>
         {subscription.name}
       </Text>
 
-      <Text style={styles.price}>
+      <Text className="text-sm font-heading font-bold text-primary-light mb-2">
         {`${currency} ${amount}`}
       </Text>
 
-      <View style={styles.scheduleRow}>
+      <View className="flex-row items-center gap-1">
         <MaterialIcons
           name="schedule"
           size={13}
           color={isUrgent ? COLORS.amberWarning : COLORS.textSecondary}
         />
         <Text
-          style={[
-            styles.scheduleText,
-            isUrgent && { color: COLORS.amberWarning, fontWeight: '700' },
-          ]}
+          className={cn(
+            'text-[11px] font-body font-medium',
+            isUrgent ? 'text-warning font-bold' : 'text-muted'
+          )}
           numberOfLines={1}
         >
           {renewalText}
@@ -102,65 +108,3 @@ export function UpcomingRenewalCard({
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: 160,
-    minHeight: 140,
-    backgroundColor: COLORS.glassBg,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.glassBorder,
-    padding: 14,
-    marginRight: 12,
-    justifyContent: 'space-between',
-  },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  iconWrapper: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  paymentTag: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: 6,
-    maxWidth: 75,
-  },
-  paymentTagText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#CCC4D1',
-  },
-  name: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 2,
-  },
-  price: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.accentPurpleLight,
-    marginBottom: 8,
-  },
-  scheduleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  scheduleText: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
-  },
-});

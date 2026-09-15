@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Image,
+  LayoutChangeEvent,
   StyleProp,
-  StyleSheet,
   ViewStyle,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export interface NoiseOverlayProps {
   colors: readonly [string, string, ...string[]] | [string, string, ...string[]];
+  className?: string;
   style?: StyleProp<ViewStyle>;
   children?: React.ReactNode;
   borderRadius?: number;
@@ -24,51 +25,49 @@ try {
 
 export function NoiseOverlay({
   colors,
+  className,
   style,
   children,
   borderRadius,
   testID,
 }: NoiseOverlayProps) {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  const handleLayout = (e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    setSize({ width, height });
+  };
+
   return (
     <LinearGradient
       testID={testID}
       colors={colors}
+      className={className}
       style={[
-        styles.container,
         style,
         borderRadius !== undefined && { borderRadius },
         { overflow: 'hidden' },
       ]}
+      onLayout={handleLayout}
     >
-      {noiseAsset ? (
+      {noiseAsset && size.width > 0 && size.height > 0 ? (
         <Image
           source={noiseAsset}
+          resizeMode="repeat"
           style={[
-            StyleSheet.absoluteFill,
-            styles.noiseImage,
+            {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: size.width,
+              height: size.height,
+              opacity: 0.1,
+            },
             borderRadius !== undefined && { borderRadius },
           ]}
-          resizeMode="repeat"
         />
       ) : null}
       {children}
     </LinearGradient>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  noiseImage: {
-    opacity: 0.1,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
-  },
-});

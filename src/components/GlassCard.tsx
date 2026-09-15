@@ -1,16 +1,17 @@
 import React from 'react';
 import {
   StyleProp,
-  StyleSheet,
   TouchableOpacity,
   View,
   ViewStyle,
 } from 'react-native';
 import { COLORS } from '../constants/colors';
+import { cn } from '@/utils/cn';
 
 export interface GlassCardProps {
   children?: React.ReactNode;
   onPress?: () => void;
+  className?: string;
   style?: StyleProp<ViewStyle>;
   glow?: boolean;
   glowColor?: string;
@@ -28,6 +29,7 @@ export interface GlassCardProps {
 export function GlassCard({
   children,
   onPress,
+  className,
   style,
   glow = false,
   glowColor = COLORS.glassGlow,
@@ -35,22 +37,26 @@ export function GlassCard({
   accessibilityLabel,
   accessibilityRole,
 }: GlassCardProps) {
-  const containerStyle = [
-    styles.panel,
-    glow && {
-      shadowColor: glowColor,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.4,
-      shadowRadius: 16,
-      elevation: 6,
-    },
-    style,
-  ];
+  const glowStyle = glow
+    ? {
+        shadowColor: glowColor,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 16,
+        elevation: 6,
+      }
+    : undefined;
+
+  const cardClasses = cn(
+    'bg-glass-bg rounded-2xl border border-glass-border overflow-hidden',
+    className
+  );
 
   if (onPress) {
     return (
       <TouchableOpacity
-        style={containerStyle}
+        className={cardClasses}
+        style={[glowStyle, style]}
         onPress={onPress}
         activeOpacity={0.75}
         testID={testID}
@@ -63,18 +69,8 @@ export function GlassCard({
   }
 
   return (
-    <View style={containerStyle} testID={testID}>
+    <View className={cardClasses} style={[glowStyle, style]} testID={testID}>
       {children}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  panel: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.glassBorder,
-    overflow: 'hidden',
-  },
-});

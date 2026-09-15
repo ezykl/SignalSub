@@ -51,10 +51,7 @@ export const AVATAR_OPTIONS: AvatarOption[] = [
     label: 'Rex',
     image: require('../../assets/images/avatars/ninja.jpg'),
   },
-  { id: 'bolt', emoji: '⚡', label: 'Bolt' },
-  { id: 'coffee', emoji: '☕', label: 'Coffee' },
-  { id: 'gamer', emoji: '🎮', label: 'Gamer' },
-  { id: 'sparkles', emoji: '✨', label: 'Sparkles' },
+
 ];
 
 export function getAvatarById(idOrEmoji?: string | null): AvatarOption | undefined {

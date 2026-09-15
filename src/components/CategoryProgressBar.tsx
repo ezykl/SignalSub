@@ -1,12 +1,11 @@
 import React from 'react';
 import {
   StyleProp,
-  StyleSheet,
   Text,
   View,
   ViewStyle,
 } from 'react-native';
-import { COLORS } from '../constants/colors';
+import { cn } from '@/utils/cn';
 
 export interface CategoryProgressBarProps {
   category: string;
@@ -16,6 +15,7 @@ export interface CategoryProgressBarProps {
   color: string;
   currency?: string;
   count?: number;
+  className?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
@@ -34,6 +34,7 @@ export function CategoryProgressBar({
   color,
   currency = '$',
   count,
+  className,
   style,
   testID,
 }: CategoryProgressBarProps) {
@@ -42,105 +43,50 @@ export function CategoryProgressBar({
   const amountStr = `${currency} ${amount.toFixed(2)}`;
 
   return (
-    <View style={[styles.container, style]} testID={testID || `category-progress-${category}`}>
-      <View style={styles.headerRow}>
-        <View style={styles.leftInfo}>
-          <View style={[styles.indicatorDot, { backgroundColor: color }]} />
-          <Text style={styles.categoryTitle} numberOfLines={1}>
+    <View
+      className={cn('my-1.5 w-full', className)}
+      style={style}
+      testID={testID || `category-progress-${category}`}
+    >
+      <View className="flex-row items-center justify-between mb-1.5">
+        <View className="flex-row items-center flex-1 mr-2">
+          <View
+            className="w-2 h-2 rounded-full mr-2"
+            style={{ backgroundColor: color }}
+          />
+          <Text className="text-white text-sm font-heading font-semibold" numberOfLines={1}>
             {label}
           </Text>
           {count !== undefined && (
-            <Text style={styles.countText}>
+            <Text className="text-muted text-xs font-body ml-1">
               ({count})
             </Text>
           )}
         </View>
 
-        <View style={styles.rightInfo}>
-          <Text style={styles.amountText}>{amountStr}</Text>
-          <View style={[styles.badge, { backgroundColor: `${color}25` }]}>
-            <Text style={[styles.badgeText, { color }]}>{clampedPercent}%</Text>
+        <View className="flex-row items-center gap-2">
+          <Text className="text-white text-sm font-heading font-bold">{amountStr}</Text>
+          <View
+            className="px-1.5 py-0.5 rounded-md"
+            style={{ backgroundColor: `${color}25` }}
+          >
+            <Text className="text-[11px] font-heading font-bold" style={{ color }}>
+              {clampedPercent}%
+            </Text>
           </View>
         </View>
       </View>
 
       {/* Progress Track */}
-      <View style={styles.track}>
+      <View className="h-1.5 bg-white/[0.08] rounded-full overflow-hidden w-full">
         <View
-          style={[
-            styles.fill,
-            {
-              width: `${clampedPercent}%`,
-              backgroundColor: color,
-            },
-          ]}
+          className="h-full rounded-full"
+          style={{
+            width: `${clampedPercent}%`,
+            backgroundColor: color,
+          }}
         />
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 6,
-    width: '100%',
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  leftInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginRight: 8,
-  },
-  indicatorDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 8,
-  },
-  categoryTitle: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  countText: {
-    color: COLORS.textSecondary,
-    fontSize: 12,
-    marginLeft: 4,
-  },
-  rightInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  amountText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  badge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  track: {
-    height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 3,
-    overflow: 'hidden',
-    width: '100%',
-  },
-  fill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-});

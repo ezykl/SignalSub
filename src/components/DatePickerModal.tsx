@@ -4,7 +4,6 @@ import {
   Text,
   Modal,
   TouchableOpacity,
-  StyleSheet,
   Pressable,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -142,14 +141,20 @@ export function DatePickerModal({
       onRequestClose={onCancel}
       testID={testID}
     >
-      <Pressable style={styles.overlay} onPress={onCancel}>
-        <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
+      <Pressable
+        className="flex-1 bg-black/75 justify-center items-center p-5"
+        onPress={onCancel}
+      >
+        <Pressable
+          className="w-full max-w-[360px] bg-[#161626] rounded-[20px] p-5 border border-[#7B5EA7]/30"
+          onPress={(e) => e.stopPropagation()}
+        >
           {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>{title}</Text>
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-base font-heading font-bold text-white">{title}</Text>
             <TouchableOpacity
               onPress={onCancel}
-              style={styles.closeBtn}
+              className="p-1"
               testID={`${testID}-close`}
             >
               <MaterialCommunityIcons name="close" size={20} color="#94A3B8" />
@@ -157,42 +162,42 @@ export function DatePickerModal({
           </View>
 
           {/* Month Traversal Controls */}
-          <View style={styles.monthNav}>
+          <View className="flex-row justify-between items-center py-2 mb-2">
             <TouchableOpacity
               testID={`${testID}-prev-month`}
               onPress={handlePrevMonth}
-              style={styles.navArrow}
+              className="p-1.5 rounded-lg bg-white/5"
             >
               <MaterialCommunityIcons name="chevron-left" size={24} color="#FFFFFF" />
             </TouchableOpacity>
 
-            <Text style={styles.monthYearText}>
+            <Text className="text-[15px] font-heading font-bold text-white">
               {MONTH_NAMES[displayMonth]} {displayYear}
             </Text>
 
             <TouchableOpacity
               testID={`${testID}-next-month`}
               onPress={handleNextMonth}
-              style={styles.navArrow}
+              className="p-1.5 rounded-lg bg-white/5"
             >
               <MaterialCommunityIcons name="chevron-right" size={24} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
 
           {/* Weekday Labels */}
-          <View style={styles.weekdaysRow}>
+          <View className="flex-row justify-around mb-1.5">
             {WEEKDAYS.map((w) => (
-              <Text key={w} style={styles.weekdayText}>
+              <Text key={w} className="w-9 text-center text-xs font-body font-semibold text-slate-400">
                 {w}
               </Text>
             ))}
           </View>
 
           {/* Days Grid */}
-          <View style={styles.grid}>
+          <View className="flex-row flex-wrap justify-start">
             {calendarGrid.map((cell, idx) => {
               if (!cell.day) {
-                return <View key={`empty-${idx}`} style={styles.dayCell} />;
+                return <View key={`empty-${idx}`} className="w-[14.28%] h-10 my-0.5 rounded-full" />;
               }
 
               const isSelected = cell.dateStr === selectedDateStr;
@@ -202,20 +207,20 @@ export function DatePickerModal({
                 <TouchableOpacity
                   key={cell.dateStr}
                   testID={`date-cell-${cell.dateStr}`}
-                  style={[
-                    styles.dayCell,
-                    isSelected && styles.dayCellSelected,
-                    !isSelected && isToday && styles.dayCellToday,
-                  ]}
+                  className={`w-[14.28%] h-10 justify-center items-center my-0.5 rounded-full ${
+                    isSelected ? 'bg-primary' : isToday ? 'border border-primary' : ''
+                  }`}
                   onPress={() => handleSelectDay(cell.dateStr)}
                   activeOpacity={0.7}
                 >
                   <Text
-                    style={[
-                      styles.dayText,
-                      isSelected && styles.dayTextSelected,
-                      !isSelected && isToday && styles.dayTextToday,
-                    ]}
+                    className={`text-sm ${
+                      isSelected
+                        ? 'text-white font-heading font-bold'
+                        : isToday
+                        ? 'text-white font-heading font-semibold'
+                        : 'text-slate-200 font-body'
+                    }`}
                   >
                     {cell.day}
                   </Text>
@@ -225,29 +230,29 @@ export function DatePickerModal({
           </View>
 
           {/* Selected Date Summary */}
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Selected:</Text>
-            <Text style={styles.summaryValue}>
+          <View className="flex-row items-center justify-between bg-white/[0.04] rounded-[10px] px-3 py-2 mt-3 mb-4">
+            <Text className="text-xs font-body text-slate-400">Selected:</Text>
+            <Text className="text-[13px] font-heading font-bold text-white">
               {formatDateString(selectedDateStr)}
             </Text>
           </View>
 
           {/* Footer CTA Buttons */}
-          <View style={styles.footer}>
+          <View className="flex-row gap-2.5">
             <TouchableOpacity
               testID={`${testID}-cancel-btn`}
-              style={styles.cancelBtn}
+              className="flex-1 py-3 rounded-xl border border-white/10 items-center justify-center"
               onPress={onCancel}
             >
-              <Text style={styles.cancelBtnText}>Cancel</Text>
+              <Text className="text-sm font-heading font-semibold text-slate-400">Cancel</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               testID={`${testID}-confirm-btn`}
-              style={styles.confirmBtn}
+              className="flex-[1.5] py-3 rounded-xl bg-primary items-center justify-center"
               onPress={handleConfirm}
             >
-              <Text style={styles.confirmBtnText}>Confirm Date</Text>
+              <Text className="text-sm font-heading font-bold text-white">Confirm Date</Text>
             </TouchableOpacity>
           </View>
         </Pressable>
@@ -275,25 +280,25 @@ export function DatePickerField({
   const [modalVisible, setModalVisible] = useState(false);
 
   return (
-    <View style={styles.fieldContainer}>
-      <Text style={styles.fieldLabel}>{label}</Text>
+    <View className="mb-4">
+      <Text className="text-[11px] font-heading font-bold tracking-wider text-muted mb-2 uppercase">{label}</Text>
       <TouchableOpacity
         testID={testID}
         {...({ value, onChangeText: onChange } as any)}
-        style={styles.fieldButton}
+        className="flex-row justify-between items-center bg-[#161626] border border-white/[0.08] rounded-xl px-3.5 py-3"
         onPress={() => setModalVisible(true)}
         activeOpacity={0.8}
         accessibilityRole="button"
         accessibilityLabel={`${label}: ${formatDateString(value)}`}
       >
-        <View style={styles.fieldLeft}>
+        <View className="flex-row items-center">
           <MaterialCommunityIcons
             name="calendar-month-outline"
             size={20}
             color={COLORS.accentPurple}
             style={{ marginRight: 10 }}
           />
-          <Text style={[styles.fieldValueText, !value && styles.fieldValuePlaceholder]}>
+          <Text className={`text-sm font-body font-medium ${value ? 'text-white' : 'text-muted'}`}>
             {value ? formatDateString(value) : 'Select date'}
           </Text>
         </View>
@@ -314,182 +319,3 @@ export function DatePickerField({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  card: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: '#161626',
-    borderRadius: 20,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(123, 94, 167, 0.3)',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  closeBtn: {
-    padding: 4,
-  },
-  monthNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    marginBottom: 8,
-  },
-  navArrow: {
-    padding: 6,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  monthYearText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  weekdaysRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 6,
-  },
-  weekdayText: {
-    width: 36,
-    textAlign: 'center',
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#94A3B8',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-  },
-  dayCell: {
-    width: '14.28%',
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 2,
-    borderRadius: 20,
-  },
-  dayCellSelected: {
-    backgroundColor: COLORS.accentPurple,
-  },
-  dayCellToday: {
-    borderWidth: 1,
-    borderColor: COLORS.accentPurple,
-  },
-  dayText: {
-    fontSize: 14,
-    color: '#E2E8F0',
-  },
-  dayTextSelected: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-  },
-  dayTextToday: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginTop: 12,
-    marginBottom: 16,
-  },
-  summaryLabel: {
-    fontSize: 12,
-    color: '#94A3B8',
-  },
-  summaryValue: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  footer: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  cancelBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#94A3B8',
-  },
-  confirmBtn: {
-    flex: 1.5,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: COLORS.accentPurple,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  confirmBtnText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  // Field trigger styles
-  fieldContainer: {
-    marginBottom: 16,
-  },
-  fieldLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
-    color: COLORS.textSecondary,
-    marginBottom: 8,
-  },
-  fieldButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#161626',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  fieldLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  fieldValueText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#FFFFFF',
-  },
-  fieldValuePlaceholder: {
-    color: COLORS.textSecondary,
-  },
-});

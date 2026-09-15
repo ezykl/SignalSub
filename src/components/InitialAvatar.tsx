@@ -1,16 +1,17 @@
 import React from 'react';
 import {
   StyleProp,
-  StyleSheet,
   Text,
   View,
   ViewStyle,
 } from 'react-native';
+import { cn } from '@/utils/cn';
 
 export interface InitialAvatarProps {
   letter: string;
   color: string;
   size?: number;
+  className?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
@@ -19,6 +20,7 @@ export function InitialAvatar({
   letter,
   color,
   size = 40,
+  className,
   style,
   testID,
 }: InitialAvatarProps) {
@@ -29,8 +31,8 @@ export function InitialAvatar({
   return (
     <View
       testID={testID}
+      className={cn('items-center justify-center', className)}
       style={[
-        styles.container,
         {
           width: size,
           height: size,
@@ -40,20 +42,12 @@ export function InitialAvatar({
         style,
       ]}
     >
-      <Text style={[styles.text, { fontSize }]}>{displayChar}</Text>
+      <Text
+        className="text-white font-bold text-center"
+        style={{ fontSize, includeFontPadding: false }}
+      >
+        {displayChar}
+      </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    includeFontPadding: false,
-  },
-});

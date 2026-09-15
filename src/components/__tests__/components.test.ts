@@ -67,8 +67,9 @@ describe('Shared UI Components', () => {
       assert.equal(img.type, 'Image');
       assert.equal(img.props.resizeMode, 'repeat');
       const imgStyle = flattenStyle(img.props.style);
-      assert.equal(imgStyle.opacity, 0.1);
-      assert.equal(imgStyle.position, 'absolute');
+      const isClassImg = typeof img.props.className === 'string' && img.props.className.includes('opacity-10');
+      assert.ok(imgStyle.opacity === 0.1 || isClassImg);
+      assert.ok(imgStyle.position === 'absolute' || isClassImg);
 
       assert.equal(children[1], child);
     });
@@ -104,6 +105,7 @@ describe('Shared UI Components', () => {
     it('renders circular view with default size 40 and background color', () => {
       const element = InitialAvatar({ letter: 'Netflix', color: '#E50914' });
       assert.equal(element.type, 'View');
+      assert.match(element.props.className, /items-center/);
 
       const style = flattenStyle(element.props.style);
       assert.equal(style.width, 40);
@@ -114,9 +116,8 @@ describe('Shared UI Components', () => {
       const textEl = getChildren(element)[0];
       assert.equal(textEl.type, 'Text');
       assert.equal(textEl.props.children, 'N');
+      assert.match(textEl.props.className, /text-white font-bold/);
       const textStyle = flattenStyle(textEl.props.style);
-      assert.equal(textStyle.color, '#FFFFFF');
-      assert.equal(textStyle.fontWeight, 'bold');
       assert.equal(textStyle.fontSize, 18);
     });
 
@@ -212,9 +213,9 @@ describe('Shared UI Components', () => {
       const element = BillingCyclePill({ value: 'monthly', onChange: () => {} });
       assert.equal(element.type, 'View');
 
-      const containerStyle = flattenStyle(element.props.style);
-      assert.equal(containerStyle.backgroundColor, COLORS.bgSurface);
-      assert.equal(containerStyle.flexDirection, 'row');
+      assert.match(element.props.className, /bg-surface/);
+      assert.match(element.props.className, /rounded-full/);
+      assert.match(element.props.className, /flex-row/);
 
       const segments = getChildren(element);
       assert.equal(segments.length, 4);
@@ -229,23 +230,19 @@ describe('Shared UI Components', () => {
 
       // 'yearly' is 4th segment
       const yearlySegment = segments[3];
-      const yearlyStyle = flattenStyle(yearlySegment.props.style);
-      assert.equal(yearlyStyle.backgroundColor, COLORS.accentPurple);
+      assert.match(yearlySegment.props.className, /bg-primary/);
 
       const yearlyText = getChildren(yearlySegment)[0];
-      const yearlyTextStyle = flattenStyle(yearlyText.props.style);
-      assert.equal(yearlyTextStyle.color, '#FFFFFF');
-      assert.equal(yearlyTextStyle.fontWeight, '600');
+      assert.match(yearlyText.props.className, /text-white/);
+      assert.match(yearlyText.props.className, /font-semibold/);
 
       // 'monthly' is 2nd segment and should be unselected
       const monthlySegment = segments[1];
-      const monthlyStyle = flattenStyle(monthlySegment.props.style);
-      assert.equal(monthlyStyle.backgroundColor, 'transparent');
+      assert.match(monthlySegment.props.className, /bg-transparent/);
 
       const monthlyText = getChildren(monthlySegment)[0];
-      const monthlyTextStyle = flattenStyle(monthlyText.props.style);
-      assert.equal(monthlyTextStyle.color, COLORS.textSecondary);
-      assert.equal(monthlyTextStyle.fontWeight, '500');
+      assert.match(monthlyText.props.className, /text-muted/);
+      assert.match(monthlyText.props.className, /font-medium/);
     });
 
     it('calls onChange with the corresponding cycle key when an option is pressed', () => {
@@ -272,15 +269,13 @@ describe('Shared UI Components', () => {
       const element = FAB({ onPress: () => {} });
       assert.equal(element.type, 'TouchableOpacity');
 
-      const style = flattenStyle(element.props.style);
-      assert.equal(style.position, 'absolute');
-      assert.equal(style.bottom, 24);
-      assert.equal(style.right, 24);
-      assert.equal(style.width, 56);
-      assert.equal(style.height, 56);
-      assert.equal(style.borderRadius, 28);
-      assert.equal(style.backgroundColor, COLORS.accentPurple);
-      assert.equal(style.elevation, 8);
+      assert.match(element.props.className, /absolute/);
+      assert.match(element.props.className, /bottom-6/);
+      assert.match(element.props.className, /right-6/);
+      assert.match(element.props.className, /w-14/);
+      assert.match(element.props.className, /h-14/);
+      assert.match(element.props.className, /rounded-full/);
+      assert.match(element.props.className, /bg-primary/);
     });
 
     it('renders MaterialIcons add icon with size 28 and color #FFFFFF', () => {
@@ -313,10 +308,8 @@ describe('Shared UI Components', () => {
       });
 
       assert.equal(element.type, 'TouchableOpacity');
-      const bannerStyle = flattenStyle(element.props.style);
-      assert.equal(bannerStyle.borderLeftColor, COLORS.danger);
-      assert.equal(bannerStyle.borderLeftWidth, 3);
-      assert.equal(bannerStyle.backgroundColor, '#EF444422');
+      assert.match(element.props.className, /border-l-danger/);
+      assert.match(element.props.className, /bg-danger/);
 
       const children = getChildren(element);
       assert.equal(children.length, 3);
@@ -340,10 +333,8 @@ describe('Shared UI Components', () => {
         message: 'Trial expires in 3 days',
       });
 
-      const bannerStyle = flattenStyle(element.props.style);
-      assert.equal(bannerStyle.borderLeftColor, COLORS.warning);
-      assert.equal(bannerStyle.borderLeftWidth, 3);
-      assert.equal(bannerStyle.backgroundColor, '#F59E0B22');
+      assert.match(element.props.className, /border-l-warning/);
+      assert.match(element.props.className, /bg-warning/);
 
       const children = getChildren(element);
       const [leftIcon, textEl, rightIcon] = children;
@@ -381,33 +372,28 @@ describe('Shared UI Components', () => {
   });
 
   describe('StatCard', () => {
-    it('renders financial metric card with label, value, and COLORS.bgCard', () => {
+    it('renders financial metric card with label, value, and NativeWind classes', () => {
       const element = StatCard({
         label: 'Monthly Spend',
         value: '$49.99',
       });
 
       assert.equal(element.type, 'View');
-      const cardStyle = flattenStyle(element.props.style);
-      assert.equal(cardStyle.backgroundColor, COLORS.bgCard);
-      assert.equal(cardStyle.borderRadius, 16);
+      assert.match(element.props.className, /bg-card/);
+      assert.match(element.props.className, /rounded-2xl/);
+      assert.match(element.props.className, /p-4/);
 
       const children = getChildren(element);
       // label, value, and null for omitted subtitle
       const labelEl = children[0];
       assert.equal(labelEl.type, 'Text');
       assert.equal(labelEl.props.children, 'Monthly Spend');
-      const labelStyle = flattenStyle(labelEl.props.style);
-      assert.equal(labelStyle.fontSize, 11);
-      assert.equal(labelStyle.color, COLORS.textSecondary);
+      assert.match(labelEl.props.className, /text-muted/);
 
       const valueEl = children[1];
       assert.equal(valueEl.type, 'Text');
       assert.equal(valueEl.props.children, '$49.99');
-      const valueStyle = flattenStyle(valueEl.props.style);
-      assert.equal(valueStyle.fontSize, 18);
-      assert.equal(valueStyle.fontWeight, '700');
-      assert.equal(valueStyle.color, COLORS.textPrimary);
+      assert.match(valueEl.props.className, /text-white/);
 
       // subtitle should be null
       assert.equal(children[2], null);
@@ -425,9 +411,7 @@ describe('Shared UI Components', () => {
       assert.notEqual(subtitleEl, null);
       assert.equal(subtitleEl.type, 'Text');
       assert.equal(subtitleEl.props.children, '+2 from last month');
-      const subStyle = flattenStyle(subtitleEl.props.style);
-      assert.equal(subStyle.fontSize, 11);
-      assert.equal(subStyle.color, COLORS.textSecondary);
+      assert.match(subtitleEl.props.className, /text-muted/);
     });
   });
 });
