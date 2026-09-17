@@ -20,6 +20,28 @@ export interface TabConfig {
   icon: string;
 }
 
+// =============================================================================
+// NAVBAR CURVE & SCOOP CUSTOMIZATION CONSTANTS
+// Adjust these parameters to fine-tune the navbar curvature and scoop:
+// =============================================================================
+export const TAB_BAR_STYLE_CONFIG = {
+  // Radius of the top-left and top-right shoulders of the navbar (in px)
+  cornerTopRadius: 24,
+
+  // Radius / half-width of the center subtract scoop (in px).
+  // 46px = 92px total scoop cutout width.
+  // Increase to make the scoop wider; decrease to hug the center button closer.
+  scoopRadius: 46,
+
+  // Depth of the concave scoop dip (in px).
+  // Increase to make the scoop deeper; decrease for a shallower curve.
+  scoopDepth: 28,
+
+  // Curve smoothness tension for Bézier control points (0.5 to 0.7)
+  // Higher = gentler entrance slope; Lower = steeper drop
+  scoopSmoothness: 0.62,
+};
+
 const TAB_CONFIGS: TabConfig[] = [
   { name: "index", label: "Home", icon: "house" },
   { name: "subscriptions", label: "Subscription", icon: "layers" },
@@ -100,40 +122,117 @@ export function CustomTabBar({
     }).start();
   };
 
+  const {
+    cornerTopRadius,
+    scoopRadius,
+    scoopDepth,
+    scoopSmoothness,
+  } = TAB_BAR_STYLE_CONFIG;
+
   const colWidth = barWidth > 0 ? barWidth / 5 : 75;
   const bottomPadding = Math.max(insets.bottom, 10);
   const totalHeight = 62 + bottomPadding;
   const centerX = barWidth / 2;
-  const cornerTopRadius = 24;
-  const scoopHalfWidth = 44;
-  const scoopDepth = 28;
+
+  // Bézier control points for the concave subtract scoop
+  const cpX1 = centerX - scoopRadius * scoopSmoothness;
+  const cpX2 = centerX - scoopRadius * (1 - scoopSmoothness * 0.25);
+  const cpX3 = centerX + scoopRadius * (1 - scoopSmoothness * 0.25);
+  const cpX4 = centerX + scoopRadius * scoopSmoothness;
 
   // Background and border contours with center subtract scoop
-  const backgroundPath = `M 0 ${cornerTopRadius} Q 0 0 ${cornerTopRadius} 0 L ${centerX - scoopHalfWidth} 0 C ${centerX - scoopHalfWidth * 0.6} 0, ${centerX - scoopHalfWidth * 0.55} ${scoopDepth}, ${centerX} ${scoopDepth} C ${centerX + scoopHalfWidth * 0.55} ${scoopDepth}, ${centerX + scoopHalfWidth * 0.6} 0, ${centerX + scoopHalfWidth} 0 L ${barWidth - cornerTopRadius} 0 Q ${barWidth} 0 ${barWidth} ${cornerTopRadius} L ${barWidth} ${totalHeight} L 0 ${totalHeight} Z`.trim().replace(/\s+/g, " ");
+  const backgroundPath = `M 0 ${cornerTopRadius} Q 0 0 ${cornerTopRadius} 0 L ${centerX - scoopRadius} 0 C ${cpX1} 0, ${cpX2} ${scoopDepth}, ${centerX} ${scoopDepth} C ${cpX3} ${scoopDepth}, ${cpX4} 0, ${centerX + scoopRadius} 0 L ${barWidth - cornerTopRadius} 0 Q ${barWidth} 0 ${barWidth} ${cornerTopRadius} L ${barWidth} ${totalHeight} L 0 ${totalHeight} Z`.trim().replace(/\s+/g, " ");
 
-  const topRimPath = `M 0 ${cornerTopRadius} Q 0 0 ${cornerTopRadius} 0 L ${centerX - scoopHalfWidth} 0 C ${centerX - scoopHalfWidth * 0.6} 0, ${centerX - scoopHalfWidth * 0.55} ${scoopDepth}, ${centerX} ${scoopDepth} C ${centerX + scoopHalfWidth * 0.55} ${scoopDepth}, ${centerX + scoopHalfWidth * 0.6} 0, ${centerX + scoopHalfWidth} 0 L ${barWidth - cornerTopRadius} 0 Q ${barWidth} 0 ${barWidth} ${cornerTopRadius}`.trim().replace(/\s+/g, " ");
+  const topRimPath = `M 0 ${cornerTopRadius} Q 0 0 ${cornerTopRadius} 0 L ${centerX - scoopRadius} 0 C ${cpX1} 0, ${cpX2} ${scoopDepth}, ${centerX} ${scoopDepth} C ${cpX3} ${scoopDepth}, ${cpX4} 0, ${centerX + scoopRadius} 0 L ${barWidth - cornerTopRadius} 0 Q ${barWidth} 0 ${barWidth} ${cornerTopRadius}`.trim().replace(/\s+/g, " ");
 
-  const scoopRimPath = `M ${centerX - scoopHalfWidth} 0 C ${centerX - scoopHalfWidth * 0.6} 0, ${centerX - scoopHalfWidth * 0.55} ${scoopDepth}, ${centerX} ${scoopDepth} C ${centerX + scoopHalfWidth * 0.55} ${scoopDepth}, ${centerX + scoopHalfWidth * 0.6} 0, ${centerX + scoopHalfWidth} 0`.trim().replace(/\s+/g, " ");
+  const scoopRimPath = `M ${centerX - scoopRadius} 0 C ${cpX1} 0, ${cpX2} ${scoopDepth}, ${centerX} ${scoopDepth} C ${cpX3} ${scoopDepth}, ${cpX4} 0, ${centerX + scoopRadius} 0`.trim().replace(/\s+/g, " ");
 
-  // Curvy Indicator Trajectory (follows scoop dip when crossing center slot)
+  // Curvy Indicator Trajectory
+  // Dynamically calculated to enter, follow, and exit the scoop at the EXACT pixel boundaries
+  const scoopDelta = scoopRadius / colWidth;
+  const scoopStart = 2.0 - scoopDelta;
+  const scoopEnd = 2.0 + scoopDelta;
+
   const indicatorTranslateX = slideAnim.interpolate({
     inputRange: [0, 1, 2, 3, 4],
     outputRange: [0, colWidth, colWidth * 2, colWidth * 3, colWidth * 4],
   });
 
+  // Smooth harmonic dip that hugs the curve contour with 2px clearance for glow
   const indicatorTranslateY = slideAnim.interpolate({
-    inputRange: [0, 1, 1.35, 1.7, 2, 2.3, 2.65, 3, 4],
-    outputRange: [0, 0, 5, 18, 26, 18, 5, 0, 0],
+    inputRange: [
+      0,
+      1,
+      scoopStart,
+      scoopStart + scoopDelta * 0.25,
+      scoopStart + scoopDelta * 0.5,
+      scoopStart + scoopDelta * 0.75,
+      2.0,
+      scoopEnd - scoopDelta * 0.75,
+      scoopEnd - scoopDelta * 0.5,
+      scoopEnd - scoopDelta * 0.25,
+      scoopEnd,
+      3,
+      4,
+    ],
+    outputRange: [
+      0,
+      0,
+      0,
+      scoopDepth * 0.14,
+      scoopDepth * 0.5,
+      scoopDepth * 0.86,
+      scoopDepth - 2,
+      scoopDepth * 0.86,
+      scoopDepth * 0.5,
+      scoopDepth * 0.14,
+      0,
+      0,
+      0,
+    ],
+    extrapolate: "clamp",
   });
 
   const indicatorRotate = slideAnim.interpolate({
-    inputRange: [0, 1, 1.5, 2, 2.5, 3, 4],
-    outputRange: ["0deg", "0deg", "12deg", "0deg", "-12deg", "0deg", "0deg"],
+    inputRange: [
+      0,
+      1,
+      scoopStart,
+      scoopStart + scoopDelta * 0.45,
+      2.0,
+      scoopEnd - scoopDelta * 0.45,
+      scoopEnd,
+      3,
+      4,
+    ],
+    outputRange: [
+      "0deg",
+      "0deg",
+      "0deg",
+      "14deg",
+      "0deg",
+      "-14deg",
+      "0deg",
+      "0deg",
+      "0deg",
+    ],
+    extrapolate: "clamp",
   });
 
   const indicatorScale = slideAnim.interpolate({
-    inputRange: [0, 1, 1.6, 2, 2.4, 3, 4],
-    outputRange: [1, 1, 0.9, 0.85, 0.9, 1, 1],
+    inputRange: [
+      0,
+      1,
+      scoopStart,
+      scoopStart + scoopDelta * 0.5,
+      2.0,
+      scoopEnd - scoopDelta * 0.5,
+      scoopEnd,
+      3,
+      4,
+    ],
+    outputRange: [1, 1, 1, 0.92, 0.84, 0.92, 1, 1, 1],
+    extrapolate: "clamp",
   });
 
   const handleTabPress = (routeName: string) => {
