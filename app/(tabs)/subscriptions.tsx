@@ -15,7 +15,7 @@ import type { Subscription } from '@/db/schema';
 import { toMonthlyAmount } from '@/services/analyticsService';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
-import { FAB, SubscriptionRow } from '@/components';
+import { SubscriptionRow } from '@/components';
 
 export const FILTER_TABS = [
   'All',
@@ -249,11 +249,6 @@ export default function SubscriptionsScreen() {
         )}
       </ScrollView>
 
-      {/* Floating Action Button */}
-      <FAB
-        onPress={() => router.push('/subscription/new')}
-        testID="subscriptions-fab"
-      />
     </SafeAreaView>
   );
 }

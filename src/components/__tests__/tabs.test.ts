@@ -308,11 +308,9 @@ describe('Tabs Screens Logic and Components', () => {
         addBtn.props.onPress();
         assert.ok(pushedRoutes.includes('/subscription/new'));
 
-        // FAB navigates
+        // Verify FAB has been omitted from Subscriptions screen (elevated tab bar button handles this)
         const fab = findByTestId(element, 'subscriptions-fab');
-        assert.ok(fab);
-        fab.props.onPress();
-        assert.ok(pushedRoutes.includes('/subscription/new'));
+        assert.equal(fab, null, 'subscriptions-fab should not be rendered on the Subscriptions screen');
       });
 
       it('renders subscription rows and handles press, delete, and pause', () => {
