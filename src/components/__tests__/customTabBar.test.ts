@@ -134,6 +134,9 @@ describe('CustomTabBar Component', () => {
     assert.ok(profTab, 'Profile tab button should be rendered');
 
     assert.ok(!JSON.stringify(element).includes('border-red'), 'Center slot should not contain border-red debug style');
+
+    const indicator = findByTestId(element, 'tab-bar-sliding-indicator');
+    assert.ok(indicator, 'Sliding indicator should be rendered');
   });
 
   it('navigates to /subscription/new when center Add button is pressed', () => {
@@ -172,6 +175,51 @@ describe('CustomTabBar Component', () => {
     calTab.props.onPress();
 
     assert.equal(navigatedTo, 'calendar');
+  });
+
+  it('configures spring feedback handlers on center Add button', () => {
+    const element = CustomTabBar({
+      state: mockState as any,
+      descriptors: mockDescriptors as any,
+      navigation: mockNavigation as any,
+      insets: { top: 0, bottom: 20, left: 0, right: 0 } as any,
+    });
+
+    const addBtn = findByTestId(element, 'tab-bar-add-button');
+    assert.ok(addBtn);
+    assert.equal(typeof addBtn.props.onPressIn, 'function');
+    assert.equal(typeof addBtn.props.onPressOut, 'function');
+    // Calling them should execute cleanly without error
+    addBtn.props.onPressIn();
+    addBtn.props.onPressOut();
+  });
+
+  it('updates accessibility selected state for active tab when route changes', () => {
+    const activeCalState = {
+      index: 2,
+      routes: [
+        { key: 'index-key', name: 'index' },
+        { key: 'subs-key', name: 'subscriptions' },
+        { key: 'cal-key', name: 'calendar' },
+        { key: 'prof-key', name: 'profile' },
+      ],
+    };
+
+    const element = CustomTabBar({
+      state: activeCalState as any,
+      descriptors: mockDescriptors as any,
+      navigation: mockNavigation as any,
+      insets: { top: 0, bottom: 20, left: 0, right: 0 } as any,
+    });
+
+    const homeTab = findByTestId(element, 'tab-button-index');
+    assert.equal(homeTab.props.accessibilityState.selected, false);
+
+    const calTab = findByTestId(element, 'tab-button-calendar');
+    assert.equal(calTab.props.accessibilityState.selected, true);
+
+    const slidingIndicator = findByTestId(element, 'tab-bar-sliding-indicator');
+    assert.ok(slidingIndicator, 'Sliding indicator should exist for calendar route');
   });
 });
 

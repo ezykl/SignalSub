@@ -115,6 +115,40 @@ const mockReactNative = {
     set: () => {},
     addEventListener: () => ({ remove: () => {} }),
   },
+  Animated: {
+    Value: class AnimatedValue {
+      _value: number;
+      constructor(val: number) {
+        this._value = val;
+      }
+      setValue(val: number) {
+        this._value = val;
+      }
+      interpolate(config: any) {
+        return this._value;
+      }
+    },
+    View: 'Animated.View',
+    Text: 'Animated.Text',
+    spring: (anim: any, config: any) => ({
+      start: (cb?: any) => {
+        if (config && config.toValue !== undefined) {
+          anim.setValue?.(config.toValue);
+        }
+        cb && cb({ finished: true });
+      },
+      stop: () => {},
+    }),
+    timing: (anim: any, config: any) => ({
+      start: (cb?: any) => {
+        if (config && config.toValue !== undefined) {
+          anim.setValue?.(config.toValue);
+        }
+        cb && cb({ finished: true });
+      },
+      stop: () => {},
+    }),
+  },
 };
 
 const rnResolved = require.resolve('react-native');

@@ -1,5 +1,12 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  useWindowDimensions,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -20,6 +27,13 @@ const TAB_CONFIGS: TabConfig[] = [
   { name: "profile", label: "Profile", icon: "user" },
 ];
 
+const ROUTE_COLUMN_MAP: Record<string, number> = {
+  index: 0,
+  subscriptions: 1,
+  calendar: 3,
+  profile: 4,
+};
+
 export function CustomTabBar({
   state,
   descriptors,
@@ -27,10 +41,70 @@ export function CustomTabBar({
 }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { width: windowWidth } = useWindowDimensions();
+  const [barWidth, setBarWidth] = useState(windowWidth || 375);
 
   // Find active route
   const currentRoute = state.routes[state.index];
   const currentRouteName = currentRoute?.name;
+
+  // Active column index (0, 1, 3, or 4)
+  const activeColIndex = ROUTE_COLUMN_MAP[currentRouteName] ?? 0;
+  const slideAnim = useRef(new Animated.Value(activeColIndex)).current;
+
+  // Spring animation values for each tab (0 = inactive, 1 = active)
+  const tabAnims = useRef(
+    TAB_CONFIGS.map(
+      (t) => new Animated.Value(currentRouteName === t.name ? 1 : 0)
+    )
+  ).current;
+
+  // Spring animation on tab change
+  useEffect(() => {
+    Animated.spring(slideAnim, {
+      toValue: activeColIndex,
+      damping: 18,
+      stiffness: 190,
+      mass: 0.8,
+      useNativeDriver: true,
+    }).start();
+
+    TAB_CONFIGS.forEach((tab, i) => {
+      const isFocused = currentRouteName === tab.name;
+      Animated.spring(tabAnims[i], {
+        toValue: isFocused ? 1 : 0,
+        damping: 16,
+        stiffness: 180,
+        mass: 0.8,
+        useNativeDriver: true,
+      }).start();
+    });
+  }, [activeColIndex, currentRouteName, slideAnim, tabAnims]);
+
+  // Center button scale on press
+  const addBtnScale = useRef(new Animated.Value(1)).current;
+  const handleAddPressIn = () => {
+    Animated.spring(addBtnScale, {
+      toValue: 0.92,
+      speed: 25,
+      bounciness: 0,
+      useNativeDriver: true,
+    }).start();
+  };
+  const handleAddPressOut = () => {
+    Animated.spring(addBtnScale, {
+      toValue: 1,
+      friction: 5,
+      tension: 100,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const colWidth = barWidth / 5;
+  const indicatorTranslateX = slideAnim.interpolate({
+    inputRange: [0, 1, 2, 3, 4],
+    outputRange: [0, colWidth, colWidth * 2, colWidth * 3, colWidth * 4],
+  });
 
   const handleTabPress = (routeName: string) => {
     const route = state.routes.find((r) => r.name === routeName);
@@ -48,8 +122,16 @@ export function CustomTabBar({
     }
   };
 
-  const renderTabItem = (tab: TabConfig) => {
+  const renderTabItem = (tab: TabConfig, index: number) => {
     const isFocused = currentRouteName === tab.name;
+    const scale = tabAnims[index].interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 1.08],
+    });
+    const translateY = tabAnims[index].interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, -1.5],
+    });
 
     return (
       <TouchableOpacity
@@ -60,34 +142,30 @@ export function CustomTabBar({
         accessibilityState={{ selected: isFocused }}
         accessibilityLabel={tab.label}
         testID={`tab-button-${tab.name}`}
-        className="flex-1 items-center justify-start pt-0 h-full relative"
+        className="flex-1 items-center justify-center pt-2 h-full relative"
       >
-        {/* Top Active Indicator Pill */}
-        <View
-          className={`w-16 h-1 rounded-b-full mb-2 ${
-            isFocused ? "bg-[#A277FF]" : "bg-transparent"
-          }`}
-          style={isFocused ? styles.activeGlow : undefined}
-        />
-
-        {/* Tab Icon */}
-        <AppIcon
-          name={tab.icon}
-          size={24}
-          color={isFocused ? "#A277FF" : "#94A3B8"}
-        />
-
-        {/* Tab Label */}
-        <Text
-          className={`text-[10px] mt-1  ${
-            isFocused
-              ? "text-[#A277FF] font-semibold"
-              : "text-[#94A3B8] font-normal"
-          }`}
-          numberOfLines={1}
+        <Animated.View
+          style={{
+            alignItems: "center",
+            transform: [{ scale }, { translateY }],
+          }}
         >
-          {tab.label}
-        </Text>
+          <AppIcon
+            name={tab.icon}
+            size={24}
+            color={isFocused ? "#A277FF" : "#94A3B8"}
+          />
+          <Text
+            className={`text-[10px] mt-1 font-heading ${
+              isFocused
+                ? "text-[#A277FF] font-semibold"
+                : "text-[#94A3B8] font-normal"
+            }`}
+            numberOfLines={1}
+          >
+            {tab.label}
+          </Text>
+        </Animated.View>
       </TouchableOpacity>
     );
   };
@@ -97,6 +175,12 @@ export function CustomTabBar({
   return (
     <View
       className="bg-[#12111A] border-t border-[#232033]"
+      onLayout={(e) => {
+        const measuredWidth = e.nativeEvent.layout.width;
+        if (measuredWidth > 0 && measuredWidth !== barWidth) {
+          setBarWidth(measuredWidth);
+        }
+      }}
       style={[
         styles.container,
         {
@@ -107,38 +191,57 @@ export function CustomTabBar({
       testID="custom-tab-bar"
     >
       <View className="flex-row items-center justify-between w-full h-full relative">
+        {/* Animated Sliding Indicator Pill */}
+        <Animated.View
+          pointerEvents="none"
+          testID="tab-bar-sliding-indicator"
+          style={[
+            styles.slidingIndicatorContainer,
+            {
+              width: colWidth,
+              transform: [{ translateX: indicatorTranslateX }],
+            },
+          ]}
+        >
+          <View className="w-14 h-1 rounded-b-full bg-[#A277FF]" style={styles.activeGlow} />
+        </Animated.View>
+
         {/* Tab 1: Home */}
-        {renderTabItem(TAB_CONFIGS[0])}
+        {renderTabItem(TAB_CONFIGS[0], 0)}
 
         {/* Tab 2: Subscription */}
-        {renderTabItem(TAB_CONFIGS[1])}
+        {renderTabItem(TAB_CONFIGS[1], 1)}
 
-        {/* Center Slot: Elevated Add Button */}
+        {/* Center Slot: Elevated Add Button with Spring Feedback */}
         <View className="flex-1 items-center justify-center relative h-full">
-          <TouchableOpacity
-            onPress={() => router.push("/subscription/new")}
-            activeOpacity={0.85}
-            accessibilityRole="button"
-            accessibilityLabel="Add Subscription"
-            testID="tab-bar-add-button"
-            style={styles.addButton}
-          >
-            <LinearGradient
-              colors={["#A277FF", "#683ACB"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.gradient}
+          <Animated.View style={{ transform: [{ scale: addBtnScale }] }}>
+            <TouchableOpacity
+              onPress={() => router.push("/subscription/new")}
+              onPressIn={handleAddPressIn}
+              onPressOut={handleAddPressOut}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Add Subscription"
+              testID="tab-bar-add-button"
+              style={styles.addButton}
             >
-              <MaterialIcons name="add" size={30} color="#FFFFFF" />
-            </LinearGradient>
-          </TouchableOpacity>
+              <LinearGradient
+                colors={["#A277FF", "#683ACB"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.gradient}
+              >
+                <MaterialIcons name="add" size={30} color="#FFFFFF" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </Animated.View>
         </View>
 
         {/* Tab 3: Calendar */}
-        {renderTabItem(TAB_CONFIGS[2])}
+        {renderTabItem(TAB_CONFIGS[2], 2)}
 
         {/* Tab 4: Profile */}
-        {renderTabItem(TAB_CONFIGS[3])}
+        {renderTabItem(TAB_CONFIGS[3], 3)}
       </View>
     </View>
   );
@@ -152,6 +255,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 10,
+  },
+  slidingIndicatorContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    alignItems: "center",
+    zIndex: 10,
   },
   activeGlow: {
     shadowColor: "#A277FF",
