@@ -386,11 +386,9 @@ describe('Dashboard and Tabs Layout', () => {
       assert.equal(spendingCards[0].props.monthlyTotal, 0);
       assert.equal(spendingCards[0].props.yearlyTotal, 0);
 
-      // FAB present and routes to /subscription/new
+      // Verify FAB has been omitted from Dashboard screen (elevated tab bar button handles this)
       const fab = findByTestId(element, 'dashboard-fab');
-      assert.ok(fab);
-      fab.props.onPress();
-      assert.ok(pushedRoutes.includes('/subscription/new'));
+      assert.equal(fab, null, 'dashboard-fab should not be rendered on the Dashboard screen');
     });
 
     it('renders empty state card when subscriptions exist but all are inactive (isActive === 0)', () => {

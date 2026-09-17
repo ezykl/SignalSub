@@ -21,7 +21,6 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import {
   AlertBanner,
-  FAB,
   GlassCard,
   SpendingCard,
   SubscriptionCard,
@@ -448,11 +447,6 @@ export default function DashboardScreen({
         </View>
       </Modal>
 
-      {/* Floating Action Button */}
-      <FAB
-        onPress={() => router.push('/subscription/new')}
-        testID="dashboard-fab"
-      />
     </SafeAreaView>
   );
 }
