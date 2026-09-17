@@ -1,26 +1,26 @@
-import React from 'react';
-import { View, StyleProp, ViewStyle } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-import { getAppIcon } from '@/constants/appIcons';
-import { cn } from '@/utils/cn';
+import React from "react";
+import { View, StyleProp, ViewStyle } from "react-native";
+import Svg, { Path } from "react-native-svg";
+import { getAppIcon } from "@/constants/appIcons";
+import { cn } from "@/utils/cn";
 
 export type AppIconName =
-  | 'bell'
-  | 'notification'
-  | 'notifications'
-  | 'house'
-  | 'home'
-  | 'layers'
-  | 'subscription'
-  | 'subscriptions'
-  | 'calendar'
-  | 'timer'
-  | 'settings'
-  | 'save'
-  | 'user'
-  | 'plus'
-  | 'add'
-  | 'add-plus'
+  | "bell"
+  | "notification"
+  | "notifications"
+  | "house"
+  | "home"
+  | "layers"
+  | "subscription"
+  | "subscriptions"
+  | "calendar"
+  | "timer"
+  | "settings"
+  | "save"
+  | "user"
+  | "plus"
+  | "add"
+  | "add-plus"
   | (string & {});
 
 export interface AppIconProps {
@@ -37,9 +37,9 @@ export interface AppIconProps {
 export function AppIcon({
   name,
   size = 24,
-  color = '#FFFFFF',
+  color = "#FFFFFF",
   strokeWidth = 2,
-  fill = 'none',
+  fill = "none",
   className,
   style,
   testID,
@@ -51,7 +51,11 @@ export function AppIcon({
   }
 
   return (
-    <View className={cn('items-center justify-center', className)} style={style} testID={testID}>
+    <View
+      className={cn("items-center justify-center", className)}
+      style={style}
+      testID={testID}
+    >
       <Svg width={size} height={size} viewBox={iconData.viewBox}>
         {iconData.paths.map((d, index) => (
           <Path
