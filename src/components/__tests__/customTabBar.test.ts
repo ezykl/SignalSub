@@ -132,6 +132,8 @@ describe('CustomTabBar Component', () => {
 
     const profTab = findByTestId(element, 'tab-button-profile');
     assert.ok(profTab, 'Profile tab button should be rendered');
+
+    assert.ok(!JSON.stringify(element).includes('border-red'), 'Center slot should not contain border-red debug style');
   });
 
   it('navigates to /subscription/new when center Add button is pressed', () => {

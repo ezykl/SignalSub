@@ -28,13 +28,12 @@ export default function Step1Screen() {
     }
   };
 
-  // FAB position within the mock (absolute bottom-right)
-  const FAB_SIZE = 56;
-  const FAB_MARGIN = 24;
-  const spotTop = screenH - FAB_SIZE - FAB_MARGIN - 16;
-  const spotLeft = screenW - FAB_SIZE - FAB_MARGIN;
-  const spotW = FAB_SIZE;
-  const spotH = FAB_SIZE;
+  // Elevated tab bar Add button position within the mock (centered bottom)
+  const BTN_SIZE = 54;
+  const spotTop = screenH - BTN_SIZE - 28;
+  const spotLeft = (screenW - BTN_SIZE) / 2;
+  const spotW = BTN_SIZE;
+  const spotH = BTN_SIZE;
   const OVERLAY = 'rgba(0,0,0,0.78)';
 
   return (
@@ -80,8 +79,21 @@ export default function Step1Screen() {
           <Text className="text-[13px] text-slate-400/60 font-body">Tap + to add your first one</Text>
         </View>
 
-        {/* FAB */}
-        <View className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-primary items-center justify-center">
+        {/* Mock Center Elevated Tab Bar Add Button */}
+        <View
+          className="absolute items-center justify-center rounded-full bg-primary"
+          style={{
+            top: spotTop,
+            left: spotLeft,
+            width: spotW,
+            height: spotH,
+            shadowColor: '#8B5CF6',
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.5,
+            shadowRadius: 10,
+            elevation: 8,
+          }}
+        >
           <MaterialIcons name="add" size={28} color="#FFFFFF" />
         </View>
       </View>

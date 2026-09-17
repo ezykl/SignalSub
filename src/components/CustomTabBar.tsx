@@ -1,11 +1,11 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons } from '@expo/vector-icons';
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { AppIcon } from '@/components/AppIcon';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import { MaterialIcons } from "@expo/vector-icons";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { AppIcon } from "@/components/AppIcon";
 
 export interface TabConfig {
   name: string;
@@ -14,13 +14,17 @@ export interface TabConfig {
 }
 
 const TAB_CONFIGS: TabConfig[] = [
-  { name: 'index', label: 'Home', icon: 'house' },
-  { name: 'subscriptions', label: 'Subscription', icon: 'layers' },
-  { name: 'calendar', label: 'Calendar', icon: 'calendar' },
-  { name: 'profile', label: 'Profile', icon: 'user' },
+  { name: "index", label: "Home", icon: "house" },
+  { name: "subscriptions", label: "Subscription", icon: "layers" },
+  { name: "calendar", label: "Calendar", icon: "calendar" },
+  { name: "profile", label: "Profile", icon: "user" },
 ];
 
-export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+export function CustomTabBar({
+  state,
+  descriptors,
+  navigation,
+}: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -34,7 +38,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
 
     const isFocused = currentRouteName === routeName;
     const event = navigation.emit({
-      type: 'tabPress',
+      type: "tabPress",
       target: route.key,
       canPreventDefault: true,
     });
@@ -61,7 +65,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
         {/* Top Active Indicator Pill */}
         <View
           className={`w-16 h-1 rounded-b-full mb-2 ${
-            isFocused ? 'bg-[#A277FF]' : 'bg-transparent'
+            isFocused ? "bg-[#A277FF]" : "bg-transparent"
           }`}
           style={isFocused ? styles.activeGlow : undefined}
         />
@@ -70,15 +74,15 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
         <AppIcon
           name={tab.icon}
           size={24}
-          color={isFocused ? '#A277FF' : '#94A3B8'}
+          color={isFocused ? "#A277FF" : "#94A3B8"}
         />
 
         {/* Tab Label */}
         <Text
-          className={`text-[11px] mt-1 font-heading ${
+          className={`text-[10px] mt-1  ${
             isFocused
-              ? 'text-[#A277FF] font-bold'
-              : 'text-[#94A3B8] font-light'
+              ? "text-[#A277FF] font-semibold"
+              : "text-[#94A3B8] font-normal"
           }`}
           numberOfLines={1}
         >
@@ -110,9 +114,9 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
         {renderTabItem(TAB_CONFIGS[1])}
 
         {/* Center Slot: Elevated Add Button */}
-        <View className="flex-1 items-center justify-center relative h-full border-red">
+        <View className="flex-1 items-center justify-center relative h-full">
           <TouchableOpacity
-            onPress={() => router.push('/subscription/new')}
+            onPress={() => router.push("/subscription/new")}
             activeOpacity={0.85}
             accessibilityRole="button"
             accessibilityLabel="Add Subscription"
@@ -120,7 +124,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
             style={styles.addButton}
           >
             <LinearGradient
-              colors={['#A277FF', '#683ACB']}
+              colors={["#A277FF", "#683ACB"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.gradient}
@@ -142,27 +146,27 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
 
 const styles = StyleSheet.create({
   container: {
-    overflow: 'visible',
-    shadowColor: '#000',
+    overflow: "visible",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 10,
   },
   activeGlow: {
-    shadowColor: '#A277FF',
+    shadowColor: "#A277FF",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 4,
     elevation: 4,
   },
   addButton: {
-    position: 'absolute',
+    position: "absolute",
     top: -24,
     width: 54,
     height: 54,
     borderRadius: 27,
-    shadowColor: '#8B5CF6',
+    shadowColor: "#8B5CF6",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.5,
     shadowRadius: 10,
@@ -172,7 +176,7 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
