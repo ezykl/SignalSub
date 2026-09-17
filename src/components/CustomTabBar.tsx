@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import Svg, { Path } from "react-native-svg";
 import { AppIcon } from "@/components/AppIcon";
 
 export interface TabConfig {
@@ -99,10 +100,40 @@ export function CustomTabBar({
     }).start();
   };
 
-  const colWidth = barWidth / 5;
+  const colWidth = barWidth > 0 ? barWidth / 5 : 75;
+  const bottomPadding = Math.max(insets.bottom, 10);
+  const totalHeight = 62 + bottomPadding;
+  const centerX = barWidth / 2;
+  const cornerTopRadius = 24;
+  const scoopHalfWidth = 44;
+  const scoopDepth = 28;
+
+  // Background and border contours with center subtract scoop
+  const backgroundPath = `M 0 ${cornerTopRadius} Q 0 0 ${cornerTopRadius} 0 L ${centerX - scoopHalfWidth} 0 C ${centerX - scoopHalfWidth * 0.6} 0, ${centerX - scoopHalfWidth * 0.55} ${scoopDepth}, ${centerX} ${scoopDepth} C ${centerX + scoopHalfWidth * 0.55} ${scoopDepth}, ${centerX + scoopHalfWidth * 0.6} 0, ${centerX + scoopHalfWidth} 0 L ${barWidth - cornerTopRadius} 0 Q ${barWidth} 0 ${barWidth} ${cornerTopRadius} L ${barWidth} ${totalHeight} L 0 ${totalHeight} Z`.trim().replace(/\s+/g, " ");
+
+  const topRimPath = `M 0 ${cornerTopRadius} Q 0 0 ${cornerTopRadius} 0 L ${centerX - scoopHalfWidth} 0 C ${centerX - scoopHalfWidth * 0.6} 0, ${centerX - scoopHalfWidth * 0.55} ${scoopDepth}, ${centerX} ${scoopDepth} C ${centerX + scoopHalfWidth * 0.55} ${scoopDepth}, ${centerX + scoopHalfWidth * 0.6} 0, ${centerX + scoopHalfWidth} 0 L ${barWidth - cornerTopRadius} 0 Q ${barWidth} 0 ${barWidth} ${cornerTopRadius}`.trim().replace(/\s+/g, " ");
+
+  const scoopRimPath = `M ${centerX - scoopHalfWidth} 0 C ${centerX - scoopHalfWidth * 0.6} 0, ${centerX - scoopHalfWidth * 0.55} ${scoopDepth}, ${centerX} ${scoopDepth} C ${centerX + scoopHalfWidth * 0.55} ${scoopDepth}, ${centerX + scoopHalfWidth * 0.6} 0, ${centerX + scoopHalfWidth} 0`.trim().replace(/\s+/g, " ");
+
+  // Curvy Indicator Trajectory (follows scoop dip when crossing center slot)
   const indicatorTranslateX = slideAnim.interpolate({
     inputRange: [0, 1, 2, 3, 4],
     outputRange: [0, colWidth, colWidth * 2, colWidth * 3, colWidth * 4],
+  });
+
+  const indicatorTranslateY = slideAnim.interpolate({
+    inputRange: [0, 1, 1.35, 1.7, 2, 2.3, 2.65, 3, 4],
+    outputRange: [0, 0, 5, 18, 26, 18, 5, 0, 0],
+  });
+
+  const indicatorRotate = slideAnim.interpolate({
+    inputRange: [0, 1, 1.5, 2, 2.5, 3, 4],
+    outputRange: ["0deg", "0deg", "12deg", "0deg", "-12deg", "0deg", "0deg"],
+  });
+
+  const indicatorScale = slideAnim.interpolate({
+    inputRange: [0, 1, 1.6, 2, 2.4, 3, 4],
+    outputRange: [1, 1, 0.9, 0.85, 0.9, 1, 1],
   });
 
   const handleTabPress = (routeName: string) => {
@@ -169,11 +200,9 @@ export function CustomTabBar({
     );
   };
 
-  const bottomPadding = Math.max(insets.bottom, 10);
-
   return (
     <View
-      className="bg-[#12111A] border-t border-[#232033]"
+      className="bg-transparent"
       onLayout={(e) => {
         const measuredWidth = e.nativeEvent.layout.width;
         if (measuredWidth > 0 && measuredWidth !== barWidth) {
@@ -184,11 +213,27 @@ export function CustomTabBar({
         styles.container,
         {
           paddingBottom: bottomPadding,
-          height: 62 + bottomPadding,
+          height: totalHeight,
         },
       ]}
       testID="custom-tab-bar"
     >
+      <Svg
+        width={barWidth}
+        height={totalHeight}
+        style={StyleSheet.absoluteFillObject}
+        testID="tab-bar-curved-background"
+      >
+        <Path d={backgroundPath} fill="#12111A" />
+        <Path d={topRimPath} fill="none" stroke="#262338" strokeWidth={1.5} />
+        <Path
+          d={scoopRimPath}
+          fill="none"
+          stroke="rgba(255, 255, 255, 0.22)"
+          strokeWidth={1.5}
+        />
+      </Svg>
+
       <View className="flex-row items-center justify-between w-full h-full relative">
         {/* Animated Sliding Indicator Pill */}
         <Animated.View
@@ -198,7 +243,12 @@ export function CustomTabBar({
             styles.slidingIndicatorContainer,
             {
               width: colWidth,
-              transform: [{ translateX: indicatorTranslateX }],
+              transform: [
+                { translateX: indicatorTranslateX },
+                { translateY: indicatorTranslateY },
+                { rotate: indicatorRotate },
+                { scale: indicatorScale },
+              ],
             },
           ]}
         >
