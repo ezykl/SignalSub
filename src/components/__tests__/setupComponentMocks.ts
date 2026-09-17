@@ -125,15 +125,6 @@ const mockReactNative = {
         this._value = val;
       }
       interpolate(config: any) {
-        if (config && Array.isArray(config.outputRange)) {
-          if (Array.isArray(config.inputRange)) {
-            const idx = config.inputRange.indexOf(this._value);
-            if (idx !== -1 && idx < config.outputRange.length) {
-              return config.outputRange[idx];
-            }
-          }
-          return config.outputRange[0];
-        }
         return this._value;
       }
     },

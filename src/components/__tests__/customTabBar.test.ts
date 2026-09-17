@@ -221,36 +221,6 @@ describe('CustomTabBar Component', () => {
     const slidingIndicator = findByTestId(element, 'tab-bar-sliding-indicator');
     assert.ok(slidingIndicator, 'Sliding indicator should exist for calendar route');
   });
-
-  it('renders curved subtract SVG background with scoop cutout paths', () => {
-    const element = CustomTabBar({
-      state: mockState as any,
-      descriptors: mockDescriptors as any,
-      navigation: mockNavigation as any,
-      insets: { top: 0, bottom: 20, left: 0, right: 0 } as any,
-    });
-
-    const bgSvg = findByTestId(element, 'tab-bar-curved-background');
-    assert.ok(bgSvg, 'Curved background SVG should be rendered');
-    assert.ok(bgSvg.props.children, 'Curved background should have child path elements');
-  });
-
-  it('animates sliding indicator with curved scoop dip trajectory', () => {
-    const element = CustomTabBar({
-      state: mockState as any,
-      descriptors: mockDescriptors as any,
-      navigation: mockNavigation as any,
-      insets: { top: 0, bottom: 20, left: 0, right: 0 } as any,
-    });
-
-    const indicator = findByTestId(element, 'tab-bar-sliding-indicator');
-    assert.ok(indicator, 'Sliding indicator should be rendered');
-    const flatStyle = [indicator.props.style].flat(Infinity);
-    const transformObj = flatStyle.find((s: any) => s && s.transform);
-    assert.ok(transformObj, 'Indicator should have transform style');
-    const hasTranslateY = transformObj.transform.some((t: any) => 'translateY' in t);
-    assert.ok(hasTranslateY, 'Sliding indicator should have translateY for curvy scoop animation');
-  });
 });
 
 describe('ProfileScreen (app/(tabs)/profile.tsx)', () => {

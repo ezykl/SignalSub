@@ -11,7 +11,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import Svg, { Path } from "react-native-svg";
 import { AppIcon } from "@/components/AppIcon";
 
 export interface TabConfig {
@@ -19,28 +18,6 @@ export interface TabConfig {
   label: string;
   icon: string;
 }
-
-// =============================================================================
-// NAVBAR CURVE & SCOOP CUSTOMIZATION CONSTANTS
-// Adjust these parameters to fine-tune the navbar curvature and scoop:
-// =============================================================================
-export const TAB_BAR_STYLE_CONFIG = {
-  // Radius of the top-left and top-right shoulders of the navbar (in px)
-  cornerTopRadius: 24,
-
-  // Radius / half-width of the center subtract scoop (in px).
-  // 46px = 92px total scoop cutout width.
-  // Increase to make the scoop wider; decrease to hug the center button closer.
-  scoopRadius: 46,
-
-  // Depth of the concave scoop dip (in px).
-  // Increase to make the scoop deeper; decrease for a shallower curve.
-  scoopDepth: 28,
-
-  // Curve smoothness tension for Bézier control points (0.5 to 0.7)
-  // Higher = gentler entrance slope; Lower = steeper drop
-  scoopSmoothness: 0.62,
-};
 
 const TAB_CONFIGS: TabConfig[] = [
   { name: "index", label: "Home", icon: "house" },
@@ -122,117 +99,14 @@ export function CustomTabBar({
     }).start();
   };
 
-  const {
-    cornerTopRadius,
-    scoopRadius,
-    scoopDepth,
-    scoopSmoothness,
-  } = TAB_BAR_STYLE_CONFIG;
-
-  const colWidth = barWidth > 0 ? barWidth / 5 : 75;
-  const bottomPadding = Math.max(insets.bottom, 10);
-  const totalHeight = 62 + bottomPadding;
-  const centerX = barWidth / 2;
-
-  // Bézier control points for the concave subtract scoop
-  const cpX1 = centerX - scoopRadius * scoopSmoothness;
-  const cpX2 = centerX - scoopRadius * (1 - scoopSmoothness * 0.25);
-  const cpX3 = centerX + scoopRadius * (1 - scoopSmoothness * 0.25);
-  const cpX4 = centerX + scoopRadius * scoopSmoothness;
-
-  // Background and border contours with center subtract scoop
-  const backgroundPath = `M 0 ${cornerTopRadius} Q 0 0 ${cornerTopRadius} 0 L ${centerX - scoopRadius} 0 C ${cpX1} 0, ${cpX2} ${scoopDepth}, ${centerX} ${scoopDepth} C ${cpX3} ${scoopDepth}, ${cpX4} 0, ${centerX + scoopRadius} 0 L ${barWidth - cornerTopRadius} 0 Q ${barWidth} 0 ${barWidth} ${cornerTopRadius} L ${barWidth} ${totalHeight} L 0 ${totalHeight} Z`.trim().replace(/\s+/g, " ");
-
-  const topRimPath = `M 0 ${cornerTopRadius} Q 0 0 ${cornerTopRadius} 0 L ${centerX - scoopRadius} 0 C ${cpX1} 0, ${cpX2} ${scoopDepth}, ${centerX} ${scoopDepth} C ${cpX3} ${scoopDepth}, ${cpX4} 0, ${centerX + scoopRadius} 0 L ${barWidth - cornerTopRadius} 0 Q ${barWidth} 0 ${barWidth} ${cornerTopRadius}`.trim().replace(/\s+/g, " ");
-
-  const scoopRimPath = `M ${centerX - scoopRadius} 0 C ${cpX1} 0, ${cpX2} ${scoopDepth}, ${centerX} ${scoopDepth} C ${cpX3} ${scoopDepth}, ${cpX4} 0, ${centerX + scoopRadius} 0`.trim().replace(/\s+/g, " ");
-
-  // Curvy Indicator Trajectory
-  // Dynamically calculated to enter, follow, and exit the scoop at the EXACT pixel boundaries
-  const scoopDelta = scoopRadius / colWidth;
-  const scoopStart = 2.0 - scoopDelta;
-  const scoopEnd = 2.0 + scoopDelta;
-
+  const colWidth = barWidth / 5;
   const indicatorTranslateX = slideAnim.interpolate({
     inputRange: [0, 1, 2, 3, 4],
     outputRange: [0, colWidth, colWidth * 2, colWidth * 3, colWidth * 4],
   });
-
-  // Smooth harmonic dip that hugs the curve contour with 2px clearance for glow
-  const indicatorTranslateY = slideAnim.interpolate({
-    inputRange: [
-      0,
-      1,
-      scoopStart,
-      scoopStart + scoopDelta * 0.25,
-      scoopStart + scoopDelta * 0.5,
-      scoopStart + scoopDelta * 0.75,
-      2.0,
-      scoopEnd - scoopDelta * 0.75,
-      scoopEnd - scoopDelta * 0.5,
-      scoopEnd - scoopDelta * 0.25,
-      scoopEnd,
-      3,
-      4,
-    ],
-    outputRange: [
-      0,
-      0,
-      0,
-      scoopDepth * 0.14,
-      scoopDepth * 0.5,
-      scoopDepth * 0.86,
-      scoopDepth - 2,
-      scoopDepth * 0.86,
-      scoopDepth * 0.5,
-      scoopDepth * 0.14,
-      0,
-      0,
-      0,
-    ],
-    extrapolate: "clamp",
-  });
-
-  const indicatorRotate = slideAnim.interpolate({
-    inputRange: [
-      0,
-      1,
-      scoopStart,
-      scoopStart + scoopDelta * 0.45,
-      2.0,
-      scoopEnd - scoopDelta * 0.45,
-      scoopEnd,
-      3,
-      4,
-    ],
-    outputRange: [
-      "0deg",
-      "0deg",
-      "0deg",
-      "14deg",
-      "0deg",
-      "-14deg",
-      "0deg",
-      "0deg",
-      "0deg",
-    ],
-    extrapolate: "clamp",
-  });
-
-  const indicatorScale = slideAnim.interpolate({
-    inputRange: [
-      0,
-      1,
-      scoopStart,
-      scoopStart + scoopDelta * 0.5,
-      2.0,
-      scoopEnd - scoopDelta * 0.5,
-      scoopEnd,
-      3,
-      4,
-    ],
-    outputRange: [1, 1, 1, 0.92, 0.84, 0.92, 1, 1, 1],
-    extrapolate: "clamp",
+  const indicatorOpacity = slideAnim.interpolate({
+    inputRange: [0, 1, 1.5, 2, 2.5, 3, 4],
+    outputRange: [1, 1, 0, 0, 0, 1, 1],
   });
 
   const handleTabPress = (routeName: string) => {
@@ -285,7 +159,7 @@ export function CustomTabBar({
             color={isFocused ? "#A277FF" : "#94A3B8"}
           />
           <Text
-            className={`text-[10px] mt-1 font-heading ${
+            className={`text-[10px] mt-1 font-montserrat ${
               isFocused
                 ? "text-[#A277FF] font-semibold"
                 : "text-[#94A3B8] font-normal"
@@ -299,9 +173,11 @@ export function CustomTabBar({
     );
   };
 
+  const bottomPadding = Math.max(insets.bottom, 10);
+
   return (
     <View
-      className="bg-transparent"
+      className="bg-[#12111A] border-t border-[#232033]"
       onLayout={(e) => {
         const measuredWidth = e.nativeEvent.layout.width;
         if (measuredWidth > 0 && measuredWidth !== barWidth) {
@@ -312,27 +188,11 @@ export function CustomTabBar({
         styles.container,
         {
           paddingBottom: bottomPadding,
-          height: totalHeight,
+          height: 62 + bottomPadding,
         },
       ]}
       testID="custom-tab-bar"
     >
-      <Svg
-        width={barWidth}
-        height={totalHeight}
-        style={StyleSheet.absoluteFillObject}
-        testID="tab-bar-curved-background"
-      >
-        <Path d={backgroundPath} fill="#12111A" />
-        <Path d={topRimPath} fill="none" stroke="#262338" strokeWidth={1.5} />
-        <Path
-          d={scoopRimPath}
-          fill="none"
-          stroke="rgba(255, 255, 255, 0.22)"
-          strokeWidth={1.5}
-        />
-      </Svg>
-
       <View className="flex-row items-center justify-between w-full h-full relative">
         {/* Animated Sliding Indicator Pill */}
         <Animated.View
@@ -342,17 +202,13 @@ export function CustomTabBar({
             styles.slidingIndicatorContainer,
             {
               width: colWidth,
-              transform: [
-                { translateX: indicatorTranslateX },
-                { translateY: indicatorTranslateY },
-                { rotate: indicatorRotate },
-                { scale: indicatorScale },
-              ],
+              transform: [{ translateX: indicatorTranslateX }],
+              opacity: indicatorOpacity,
             },
           ]}
         >
           <View
-            className="w-14 h-1 rounded-b-full bg-[#A277FF]"
+            className="w-12 h-1 rounded-b-full bg-[#A277FF]"
             style={styles.activeGlow}
           />
         </Animated.View>
@@ -364,7 +220,10 @@ export function CustomTabBar({
         {renderTabItem(TAB_CONFIGS[1], 1)}
 
         {/* Center Slot: Elevated Add Button with Spring Feedback */}
-        <View className="flex-1 items-center justify-center relative h-full">
+        <View
+          className="flex-1 items-center justify-center relative h-full"
+          style={styles.centerSlot}
+        >
           <Animated.View style={{ transform: [{ scale: addBtnScale }] }}>
             <TouchableOpacity
               onPress={() => router.push("/subscription/new")}
@@ -382,7 +241,12 @@ export function CustomTabBar({
                 end={{ x: 1, y: 1 }}
                 style={styles.gradient}
               >
-                <AppIcon name="plus" size={26} color="#FFFFFF" strokeWidth={2.5} />
+                <AppIcon
+                  name="plus"
+                  size={26}
+                  color="#FFFFFF"
+                  strokeWidth={2.5}
+                />
               </LinearGradient>
             </TouchableOpacity>
           </Animated.View>
@@ -412,7 +276,11 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     alignItems: "center",
-    zIndex: 10,
+    zIndex: 1,
+  },
+  centerSlot: {
+    zIndex: 30,
+    elevation: 20,
   },
   activeGlow: {
     shadowColor: "#A277FF",
@@ -423,20 +291,23 @@ const styles = StyleSheet.create({
   },
   addButton: {
     marginTop: -24,
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: "#12111A",
+    borderWidth: 4,
+    borderColor: "#12111A",
     shadowColor: "#8B5CF6",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.5,
     shadowRadius: 10,
-    elevation: 8,
+    elevation: 20,
     zIndex: 99,
   },
   gradient: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: "100%",
+    height: "100%",
+    borderRadius: 25,
     alignItems: "center",
     justifyContent: "center",
   },
