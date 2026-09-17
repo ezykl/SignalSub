@@ -30,6 +30,7 @@ import {
   UserAvatar,
   AppIcon,
 } from '@/components';
+import { useAppTheme } from '@/constants/theme';
 
 export function getGreeting(date: Date = new Date(), userAlias?: string): string {
   const hour = date.getHours();
@@ -173,8 +174,10 @@ export default function DashboardScreen({
   const upcomingRenewals = getUpcomingRenewals(subscriptions, 30, now);
   const activeSubscriptions = subscriptions.filter((s) => s.isActive === 1);
 
+  const theme = useAppTheme();
+
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1" style={{ backgroundColor: theme.bgPrimary }}>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 96 }}
@@ -228,7 +231,7 @@ export default function DashboardScreen({
                 👋 Personalize your tracker: Set default payment method & alias
               </Text>
               <TouchableOpacity
-                className="flex-row items-center bg-primary px-3 py-2 rounded-full gap-1"
+                className="flex-row items-center bg-primary px-3.5 py-2 rounded-full gap-1.5 shrink-0"
                 onPress={() => router.push('/settings')}
                 activeOpacity={0.8}
                 accessibilityRole="button"
@@ -236,7 +239,7 @@ export default function DashboardScreen({
                 testID="setup-card-button"
               >
                 <Text className="text-xs font-heading font-bold text-white">Set Up Now</Text>
-                <MaterialIcons name="arrow-forward" size={14} color="#FFFFFF" />
+                <AppIcon name="arrow-forward" size={14} color="#FFFFFF" strokeWidth={2.5} />
               </TouchableOpacity>
             </View>
           </GlassCard>
@@ -320,10 +323,11 @@ export default function DashboardScreen({
           {activeSubscriptions.length === 0 ? (
             <View className="bg-card/75 rounded-2xl p-6 mx-4 items-center justify-center border border-white/[0.08]" testID="dashboard-empty-state">
               <View className="w-16 h-16 rounded-full bg-primary/15 items-center justify-center mb-4">
-                <MaterialIcons
+                <AppIcon
                   name="playlist-add"
-                  size={40}
+                  size={36}
                   color={COLORS.accentPurple}
+                  strokeWidth={2}
                 />
               </View>
               <Text className="text-base font-heading font-bold text-white mb-2 text-center">No active subscriptions</Text>
@@ -331,20 +335,20 @@ export default function DashboardScreen({
                 Track your subscriptions, upcoming renewals, and free trials in one place.
               </Text>
               <TouchableOpacity
-                className="flex-row items-center bg-primary py-2.5 px-4.5 rounded-full"
+                className="flex-row items-center justify-center bg-primary py-3.5 px-6 rounded-full shadow-lg shadow-purple-900/40 gap-2 mt-1"
                 onPress={() => router.push('/subscription/new')}
                 activeOpacity={0.8}
                 accessibilityRole="button"
                 accessibilityLabel="Add subscription"
                 testID="empty-state-add-button"
               >
-                <MaterialIcons
-                  name="add"
-                  size={20}
+                <AppIcon
+                  name="plus"
+                  size={18}
                   color="#FFFFFF"
-                  style={{ marginRight: 6 }}
+                  strokeWidth={2.5}
                 />
-                <Text className="text-sm font-heading font-semibold text-white">Add Subscription</Text>
+                <Text className="text-sm font-heading font-bold text-white">Add Subscription</Text>
               </TouchableOpacity>
             </View>
           ) : (

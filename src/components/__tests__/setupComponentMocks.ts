@@ -316,5 +316,16 @@ try {
   // ignore
 }
 
-
-
+import React from 'react';
+const ReactCurrentDispatcher =
+  (React as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.ReactCurrentDispatcher;
+if (ReactCurrentDispatcher && !ReactCurrentDispatcher.current) {
+  ReactCurrentDispatcher.current = {
+    useState: (init: any) => [typeof init === 'function' ? init() : init, () => {}],
+    useMemo: (fn: any) => fn(),
+    useCallback: (fn: any) => fn,
+    useEffect: () => {},
+    useLayoutEffect: () => {},
+    useRef: (init: any) => ({ current: init }),
+  };
+}

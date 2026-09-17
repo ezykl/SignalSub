@@ -1,58 +1,54 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import {
-  LogBox,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { MaterialIcons, Ionicons } from '@expo/vector-icons';
-import { VictoryPie } from 'victory-native';
+import React, { useCallback, useMemo, useState } from "react";
+import { LogBox, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect, useRouter } from "expo-router";
+import { VictoryPie } from "victory-native";
 
 LogBox.ignoreLogs([
-  'Support for defaultProps will be removed',
-  'VictoryPie: Support for defaultProps',
+  "Support for defaultProps will be removed",
+  "VictoryPie: Support for defaultProps",
 ]);
 
-import { COLORS } from '@/constants/colors';
-import { getCategoryByKey } from '@/constants/categories';
-import type { Subscription } from '@/db/schema';
+import { COLORS } from "@/constants/colors";
+import { useAppTheme } from "@/constants/theme";
+import { AppIcon } from "@/components/AppIcon";
+import { getCategoryByKey } from "@/constants/categories";
+import type { Subscription } from "@/db/schema";
 import {
   computeCategoryBreakdown,
   computeMonthlyTotal,
   computeYearlyTotal,
   toMonthlyAmount,
-} from '@/services/analyticsService';
-import { useSettingsStore } from '@/stores/settingsStore';
-import { useSubscriptionStore } from '@/stores/subscriptionStore';
-import { StatCard, CategoryProgressBar, UserAvatar } from '@/components';
+} from "@/services/analyticsService";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { useSubscriptionStore } from "@/stores/subscriptionStore";
+import { StatCard, CategoryProgressBar, UserAvatar } from "@/components";
 
-export type PeriodType = 'monthly' | 'quarterly' | 'yearly';
+export type PeriodType = "monthly" | "quarterly" | "yearly";
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const theme = useAppTheme();
   const subscriptions = useSubscriptionStore((state) => state.subscriptions);
   const loadSubscriptions = useSubscriptionStore(
-    (state) => state.loadSubscriptions
+    (state) => state.loadSubscriptions,
   );
   const getSetting = useSettingsStore((state) => state.getSetting);
   const loadSettings = useSettingsStore((state) => state.loadSettings);
   useSettingsStore((state) => state.cache);
 
-  const [period, setPeriod] = useState<PeriodType>('monthly');
+  const [period, setPeriod] = useState<PeriodType>("monthly");
 
   useFocusEffect(
     useCallback(() => {
       loadSubscriptions();
       loadSettings();
-    }, [loadSubscriptions, loadSettings])
+    }, [loadSubscriptions, loadSettings]),
   );
 
-  const currency = getSetting('default_currency', 'USD');
-  const userAvatar = getSetting('user_avatar', 'space');
-  const userName = getSetting('user_name', 'SignalSub Member');
+  const currency = getSetting("default_currency", "USD");
+  const userAvatar = getSetting("user_avatar", "space");
+  const userName = getSetting("user_name", "SignalSub Member");
 
   const activeSubs = useMemo(() => {
     return subscriptions.filter((s) => s.isActive === 1);
@@ -90,7 +86,8 @@ export default function ProfileScreen() {
     return computeCategoryBreakdown(activeSubs);
   }, [activeSubs]);
 
-  const periodMultiplier = period === 'quarterly' ? 3 : period === 'yearly' ? 12 : 1;
+  const periodMultiplier =
+    period === "quarterly" ? 3 : period === "yearly" ? 12 : 1;
   const periodTotal = stats.monthly * periodMultiplier;
 
   const pieData = useMemo(() => {
@@ -105,19 +102,24 @@ export default function ProfileScreen() {
   }, [breakdown]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView
+      className="flex-1"
+      style={{ backgroundColor: theme.bgPrimary }}
+    >
       {/* Header */}
       <View className="px-4 pt-3 pb-2 flex-row items-center justify-between">
-        <Text className="text-2xl font-bold font-heading text-white">Profile & Analytics</Text>
+        <Text className="text-2xl font-bold font-heading text-white">
+          Profile & Analytics
+        </Text>
         <TouchableOpacity
-          onPress={() => router.push('/settings')}
+          onPress={() => router.push("/settings")}
           className="w-10 h-10 rounded-full bg-card border border-surface items-center justify-center"
           activeOpacity={0.7}
           accessibilityRole="button"
           accessibilityLabel="Open Settings"
           testID="profile-settings-btn"
         >
-          <Ionicons name="settings-outline" size={20} color="#FFFFFF" />
+          <AppIcon name="settings" size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
@@ -131,43 +133,58 @@ export default function ProfileScreen() {
           <View className="flex-row items-center gap-3">
             <UserAvatar avatarId={userAvatar} size={52} />
             <View>
-              <Text className="text-base font-bold font-heading text-white">{userName}</Text>
+              <Text className="text-base font-bold font-heading text-white">
+                {userName}
+              </Text>
               <Text className="text-xs text-muted font-body mt-0.5">
-                {activeSubs.length} active {activeSubs.length === 1 ? 'subscription' : 'subscriptions'}
+                {activeSubs.length} active{" "}
+                {activeSubs.length === 1 ? "subscription" : "subscriptions"}
               </Text>
             </View>
           </View>
           <TouchableOpacity
-            onPress={() => router.push('/settings')}
+            onPress={() => router.push("/settings")}
             className="py-1.5 px-3 rounded-full bg-surface border border-[#A78BFA]/30 flex-row items-center gap-1"
             activeOpacity={0.7}
           >
-            <Text className="text-xs font-semibold text-[#A78BFA] font-heading">Settings</Text>
-            <MaterialIcons name="chevron-right" size={16} color="#A78BFA" />
+            <Text className="text-xs font-semibold text-[#A78BFA] font-heading">
+              Settings
+            </Text>
+            <AppIcon
+              name="chevron-right"
+              size={16}
+              color="#A78BFA"
+              strokeWidth={2.2}
+            />
           </TouchableOpacity>
         </View>
 
         {/* Analytics Section Header */}
         <View className="px-4 mt-2 mb-2">
-          <Text className="text-lg font-bold font-heading text-white">Spending Analytics</Text>
+          <Text className="text-lg font-bold font-heading text-white">
+            Spending Analytics
+          </Text>
         </View>
 
         {/* Period Selector */}
-        <View className="flex-row bg-card rounded-xl mx-4 mb-4 p-1 border border-surface" testID="period-selector">
-          {(['monthly', 'quarterly', 'yearly'] as const).map((p) => {
+        <View
+          className="flex-row bg-card rounded-xl mx-4 mb-4 p-1 border border-surface"
+          testID="period-selector"
+        >
+          {(["monthly", "quarterly", "yearly"] as const).map((p) => {
             const isSelected = period === p;
             const label =
-              p === 'monthly'
-                ? 'Monthly'
-                : p === 'quarterly'
-                  ? 'Quarterly'
-                  : 'Yearly';
+              p === "monthly"
+                ? "Monthly"
+                : p === "quarterly"
+                  ? "Quarterly"
+                  : "Yearly";
             return (
               <TouchableOpacity
                 key={p}
                 onPress={() => setPeriod(p)}
                 className={`flex-1 py-2 items-center justify-center rounded-lg ${
-                  isSelected ? 'bg-primary' : ''
+                  isSelected ? "bg-primary" : ""
                 }`}
                 activeOpacity={0.7}
                 accessibilityRole="button"
@@ -176,7 +193,7 @@ export default function ProfileScreen() {
               >
                 <Text
                   className={`text-[13px] font-semibold font-heading ${
-                    isSelected ? 'text-white' : 'text-muted'
+                    isSelected ? "text-white" : "text-muted"
                   }`}
                 >
                   {label}
@@ -187,31 +204,35 @@ export default function ProfileScreen() {
         </View>
 
         {activeSubs.length === 0 ? (
-          <View className="bg-card rounded-2xl p-6 mx-4 mt-2 items-center justify-center border border-surface" testID="analytics-empty-state">
+          <View
+            className="bg-card rounded-2xl p-6 mx-4 mt-2 items-center justify-center border border-surface"
+            testID="analytics-empty-state"
+          >
             <View className="w-16 h-16 rounded-full bg-primary/15 items-center justify-center mb-4">
-              <MaterialIcons
-                name="bar-chart"
-                size={40}
-                color={COLORS.accentPurple}
-              />
+              <AppIcon name="chart" size={38} color={COLORS.accentPurple} />
             </View>
-            <Text className="text-base font-bold font-heading text-white mb-2 text-center">No active subscriptions</Text>
+            <Text className="text-base font-bold font-heading text-white mb-2 text-center">
+              No active subscriptions
+            </Text>
             <Text className="text-[13px] text-muted text-center leading-[18px] max-w-[260px] mb-5 font-body">
-              Add active subscriptions to view your spending intelligence, category breakdown, and monthly trends.
+              Add active subscriptions to view your spending intelligence,
+              category breakdown, and monthly trends.
             </Text>
             <TouchableOpacity
-              className="flex-row items-center bg-primary py-2.5 px-4.5 rounded-full"
-              onPress={() => router.push('/subscription/new')}
+              className="flex-row items-center justify-center bg-primary py-3.5 px-6 rounded-full shadow-lg shadow-purple-900/40 gap-2 mt-1"
+              onPress={() => router.push("/subscription/new")}
               activeOpacity={0.8}
-              testID="analytics-empty-add-btn"
+              testID="empty-state-add-btn"
             >
-              <MaterialIcons
-                name="add"
-                size={20}
+              <AppIcon
+                name="plus"
+                size={18}
                 color="#FFFFFF"
-                style={{ marginRight: 6 }}
+                strokeWidth={2.5}
               />
-              <Text className="text-sm font-semibold font-heading text-white">Add Subscription</Text>
+              <Text className="text-sm font-heading font-bold text-white">
+                Add Subscription
+              </Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -220,15 +241,15 @@ export default function ProfileScreen() {
             <View className="flex-row gap-2 mb-5" testID="analytics-stats-row">
               <StatCard
                 label={
-                  period === 'monthly'
-                    ? 'Monthly Total'
-                    : period === 'quarterly'
-                      ? 'Quarterly Total'
-                      : 'Yearly Total'
+                  period === "monthly"
+                    ? "Monthly Total"
+                    : period === "quarterly"
+                      ? "Quarterly Total"
+                      : "Yearly Total"
                 }
                 value={`${currency} ${periodTotal.toFixed(2)}`}
                 subtitle={
-                  period !== 'monthly'
+                  period !== "monthly"
                     ? `${currency} ${stats.monthly.toFixed(2)}/mo`
                     : undefined
                 }
@@ -252,7 +273,9 @@ export default function ProfileScreen() {
 
             {/* Category Breakdown Section */}
             <View className="mb-6" testID="category-breakdown-section">
-              <Text className="text-base font-bold font-heading text-white mb-3">Spending by Category</Text>
+              <Text className="text-base font-bold font-heading text-white mb-3">
+                Spending by Category
+              </Text>
 
               {/* VictoryPie Donut Chart */}
               <View
@@ -298,31 +321,44 @@ export default function ProfileScreen() {
                   );
                 })}
               </View>
-
             </View>
 
             {/* Extremes (Highest & Lowest) */}
             {stats.mostExpensive && (
               <View className="mb-6">
-                <Text className="text-base font-bold font-heading text-white mb-3">Subscription Insights</Text>
+                <Text className="text-base font-bold font-heading text-white mb-3">
+                  Subscription Insights
+                </Text>
                 <View className="flex-row gap-3">
                   <View className="flex-1 bg-card rounded-2xl p-4 border border-surface">
-                    <Text className="text-xs text-muted font-body mb-1">Highest Cost</Text>
-                    <Text className="text-sm font-bold text-white font-heading" numberOfLines={1}>
+                    <Text className="text-xs text-muted font-body mb-1">
+                      Highest Cost
+                    </Text>
+                    <Text
+                      className="text-sm font-bold text-white font-heading"
+                      numberOfLines={1}
+                    >
                       {stats.mostExpensive.name}
                     </Text>
                     <Text className="text-sm font-semibold text-accentPurpleLight font-heading mt-1">
-                      {currency} {stats.mostExpensive.amount.toFixed(2)} / {stats.mostExpensive.billingCycle}
+                      {currency} {stats.mostExpensive.amount.toFixed(2)} /{" "}
+                      {stats.mostExpensive.billingCycle}
                     </Text>
                   </View>
                   {stats.cheapest && (
                     <View className="flex-1 bg-card rounded-2xl p-4 border border-surface">
-                      <Text className="text-xs text-muted font-body mb-1">Lowest Cost</Text>
-                      <Text className="text-sm font-bold text-white font-heading" numberOfLines={1}>
+                      <Text className="text-xs text-muted font-body mb-1">
+                        Lowest Cost
+                      </Text>
+                      <Text
+                        className="text-sm font-bold text-white font-heading"
+                        numberOfLines={1}
+                      >
                         {stats.cheapest.name}
                       </Text>
                       <Text className="text-sm font-semibold text-accentPurpleLight font-heading mt-1">
-                        {currency} {stats.cheapest.amount.toFixed(2)} / {stats.cheapest.billingCycle}
+                        {currency} {stats.cheapest.amount.toFixed(2)} /{" "}
+                        {stats.cheapest.billingCycle}
                       </Text>
                     </View>
                   )}
@@ -334,57 +370,100 @@ export default function ProfileScreen() {
 
         {/* Quick Settings Section */}
         <View className="px-4 mt-2">
-          <Text className="text-base font-bold font-heading text-white mb-3">Preferences & Controls</Text>
+          <Text className="text-base font-bold font-heading text-white mb-3">
+            Preferences & Controls
+          </Text>
           <View className="bg-card rounded-2xl border border-surface overflow-hidden">
             <TouchableOpacity
-              onPress={() => router.push('/settings')}
+              onPress={() => router.push("/settings")}
               className="flex-row items-center justify-between p-4 border-b border-surface"
               activeOpacity={0.7}
             >
               <View className="flex-row items-center gap-3">
                 <View className="w-8 h-8 rounded-full bg-primary/20 items-center justify-center">
-                  <MaterialIcons name="attach-money" size={18} color={COLORS.accentPurpleLight} />
+                  <AppIcon
+                    name="dollar"
+                    size={18}
+                    color={COLORS.accentPurpleLight}
+                    strokeWidth={2.5}
+                  />
                 </View>
                 <View>
-                  <Text className="text-sm font-semibold text-white font-heading">Default Currency</Text>
-                  <Text className="text-xs text-muted font-body">{currency}</Text>
+                  <Text className="text-sm font-semibold text-white font-heading">
+                    Default Currency
+                  </Text>
+                  <Text className="text-xs text-muted font-body">
+                    {currency}
+                  </Text>
                 </View>
               </View>
-              <MaterialIcons name="chevron-right" size={20} color="#94A3B8" />
+              <AppIcon
+                name="chevron-right"
+                size={18}
+                color="#94A3B8"
+                strokeWidth={2}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => router.push('/settings')}
+              onPress={() => router.push("/settings")}
               className="flex-row items-center justify-between p-4 border-b border-surface"
               activeOpacity={0.7}
             >
               <View className="flex-row items-center gap-3">
                 <View className="w-8 h-8 rounded-full bg-primary/20 items-center justify-center">
-                  <MaterialIcons name="notifications-none" size={18} color={COLORS.accentPurpleLight} />
+                  <AppIcon
+                    name="bell"
+                    size={18}
+                    color={COLORS.accentPurpleLight}
+                  />
                 </View>
                 <View>
-                  <Text className="text-sm font-semibold text-white font-heading">Notifications & Reminders</Text>
-                  <Text className="text-xs text-muted font-body">Manage renewal alerts</Text>
+                  <Text className="text-sm font-semibold text-white font-heading">
+                    Notifications & Reminders
+                  </Text>
+                  <Text className="text-xs text-muted font-body">
+                    Manage renewal alerts
+                  </Text>
                 </View>
               </View>
-              <MaterialIcons name="chevron-right" size={20} color="#94A3B8" />
+              <AppIcon
+                name="chevron-right"
+                size={18}
+                color="#94A3B8"
+                strokeWidth={2}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => router.push('/settings')}
+              onPress={() => router.push("/settings")}
               className="flex-row items-center justify-between p-4"
               activeOpacity={0.7}
             >
               <View className="flex-row items-center gap-3">
                 <View className="w-8 h-8 rounded-full bg-primary/20 items-center justify-center">
-                  <MaterialIcons name="tune" size={18} color={COLORS.accentPurpleLight} />
+                  <AppIcon
+                    name="slider"
+                    size={18}
+                    color={COLORS.accentPurpleLight}
+                    strokeWidth={2.2}
+                  />
                 </View>
                 <View>
-                  <Text className="text-sm font-semibold text-white font-heading">Theme & Personalization</Text>
-                  <Text className="text-xs text-muted font-body">Avatar, dark theme, OLED</Text>
+                  <Text className="text-sm font-semibold text-white font-heading">
+                    Theme & Personalization
+                  </Text>
+                  <Text className="text-xs text-muted font-body">
+                    Avatar, dark theme, OLED
+                  </Text>
                 </View>
               </View>
-              <MaterialIcons name="chevron-right" size={20} color="#94A3B8" />
+              <AppIcon
+                name="chevron-right"
+                size={18}
+                color="#94A3B8"
+                strokeWidth={2}
+              />
             </TouchableOpacity>
           </View>
         </View>

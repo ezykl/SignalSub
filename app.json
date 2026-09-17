@@ -1,8 +1,14 @@
 {
   "expo": {
     "name": "SignalSub",
-    "slug": "signalsub",
+    "slug": "signal-sub",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/68d67f32-82c9-490d-8ef1-4f5981c1b65c"
+    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "signalsub",
@@ -17,13 +23,14 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.signalsub.app",
       "infoPlist": {
-        "NSUserNotificationUsageDescription": "SignalSub sends renewal alerts before auto-charges hit."
+        "NSUserNotificationUsageDescription": "SignalSub sends renewal alerts before auto-charges hit.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "com.signalsub.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon.png",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0F0F1A"
       },
       "permissions": [
@@ -40,10 +47,32 @@
       "expo-sqlite",
       "expo-notifications",
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0F0F1A",
+          "image": "./assets/images/splash.png",
+          "dark": {
+            "backgroundColor": "#0F0F1A",
+            "image": "./assets/images/splash.png"
+          },
+          "imageWidth": 160,
+          "resizeMode": "contain"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "68d67f32-82c9-490d-8ef1-4f5981c1b65c"
+      }
+    },
+    "owner": "ghettodevs"
   }
 }

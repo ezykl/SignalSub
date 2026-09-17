@@ -8,6 +8,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { AppIcon } from '@/components/AppIcon';
+import { useAppTheme } from '@/constants/theme';
 import { COLORS } from '@/constants/colors';
 import type { Subscription } from '@/db/schema';
 import { parseDateParts } from '@/services/renewalService';
@@ -146,8 +148,10 @@ export default function CalendarScreen({ initialDate }: CalendarScreenProps = {}
     return groupRenewalsByDate(subscriptions, selectedYear, selectedMonth);
   }, [subscriptions, selectedYear, selectedMonth]);
 
+  const theme = useAppTheme();
+
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1" style={{ backgroundColor: theme.bgPrimary }}>
       <View className="px-4 pt-3 pb-1">
         <Text className="text-2xl font-bold font-heading text-white">Calendar</Text>
       </View>
@@ -162,10 +166,11 @@ export default function CalendarScreen({ initialDate }: CalendarScreenProps = {}
           accessibilityLabel="Previous month"
           testID="calendar-prev-month"
         >
-          <MaterialIcons
+          <AppIcon
             name="chevron-left"
-            size={28}
+            size={22}
             color={COLORS.textPrimary}
+            strokeWidth={2.5}
           />
         </TouchableOpacity>
 
@@ -187,10 +192,11 @@ export default function CalendarScreen({ initialDate }: CalendarScreenProps = {}
           accessibilityLabel="Next month"
           testID="calendar-next-month"
         >
-          <MaterialIcons
+          <AppIcon
             name="chevron-right"
-            size={28}
+            size={22}
             color={COLORS.textPrimary}
+            strokeWidth={2.5}
           />
         </TouchableOpacity>
       </View>
@@ -204,9 +210,9 @@ export default function CalendarScreen({ initialDate }: CalendarScreenProps = {}
         {groups.length === 0 ? (
           <View className="bg-[#1A1A2E]/75 rounded-2xl p-6 mx-4 mt-6 items-center justify-center border border-white/[0.08]" testID="calendar-empty-state">
             <View className="w-16 h-16 rounded-full bg-primary/15 items-center justify-center mb-4">
-              <MaterialIcons
-                name="event-available"
-                size={40}
+              <AppIcon
+                name="calendar"
+                size={36}
                 color={COLORS.accentPurple}
               />
             </View>

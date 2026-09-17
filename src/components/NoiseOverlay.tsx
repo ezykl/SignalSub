@@ -50,7 +50,7 @@ export function NoiseOverlay({
       ]}
       onLayout={handleLayout}
     >
-      {noiseAsset && size.width > 0 && size.height > 0 ? (
+      {noiseAsset ? (
         <Image
           source={noiseAsset}
           resizeMode="repeat"
@@ -59,8 +59,8 @@ export function NoiseOverlay({
               position: 'absolute',
               top: 0,
               left: 0,
-              width: size.width,
-              height: size.height,
+              width: size.width || '100%',
+              height: size.height || '100%',
               opacity: 0.1,
             },
             borderRadius !== undefined && { borderRadius },

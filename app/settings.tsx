@@ -12,8 +12,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
+import { useAppTheme } from '@/constants/theme';
+import { AppIcon } from '@/components/AppIcon';
 import { POPULAR_CURRENCIES, CurrencyInfo } from '@/constants/currencies';
 import { AVATAR_OPTIONS } from '@/constants/personalization';
 import {
@@ -35,6 +36,7 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const theme = useAppTheme();
 
   const getSetting = useSettingsStore((state) => state.getSetting);
   const setSetting = useSettingsStore((state) => state.setSetting);
@@ -48,7 +50,6 @@ export default function SettingsScreen() {
 
   const [isCurrencyModalVisible, setIsCurrencyModalVisible] = useState(false);
   const [currencySearch, setCurrencySearch] = useState('');
-  const [aliasInput, setAliasInput] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -60,13 +61,67 @@ export default function SettingsScreen() {
   const currentCurrency = getSetting('default_currency', 'USD');
   const isWeeklyDigestEnabled = getSetting('notify_weekly_digest', 'true') === 'true';
   const userAlias = getSetting('user_alias', '');
-  const userAvatar = getSetting('user_avatar', '🚀') || '🚀';
+  const userAvatar = getSetting('user_avatar', 'space') || 'space';
   const defaultPaymentMethod = getSetting('default_payment_method', 'card') || 'card';
   const defaultPaymentDetails = getSetting('default_payment_details', '');
   const appTheme = getSetting('app_theme', 'dark') || 'dark';
   const isGrainEnabled = getSetting('grain_enabled', 'false') === 'true';
 
-  const currentAliasDisplay = aliasInput !== null ? aliasInput : userAlias;
+  // Draft profile state - requires user confirmation to save
+  const [draftAlias, setDraftAlias] = useState<string | null>(null);
+  const [draftAvatar, setDraftAvatar] = useState<string | null>(null);
+  const [draftPaymentMethod, setDraftPaymentMethod] = useState<string | null>(null);
+  const [draftPaymentDetails, setDraftPaymentDetails] = useState<string | null>(null);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  const activeAlias = draftAlias !== null ? draftAlias : userAlias;
+  const activeAvatar = draftAvatar !== null ? draftAvatar : userAvatar;
+  const activePaymentMethod = draftPaymentMethod !== null ? draftPaymentMethod : defaultPaymentMethod;
+  const activePaymentDetails = draftPaymentDetails !== null ? draftPaymentDetails : defaultPaymentDetails;
+
+  const hasProfileChanges =
+    (draftAlias !== null && draftAlias !== userAlias) ||
+    (draftAvatar !== null && draftAvatar !== userAvatar) ||
+    (draftPaymentMethod !== null && draftPaymentMethod !== defaultPaymentMethod) ||
+    (draftPaymentDetails !== null && draftPaymentDetails !== defaultPaymentDetails);
+
+  const handleSaveProfile = async () => {
+    setIsSavingProfile(true);
+    try {
+      if (draftAlias !== null) await setSetting('user_alias', draftAlias.trim());
+      if (draftAvatar !== null) await setSetting('user_avatar', draftAvatar);
+      if (draftPaymentMethod !== null) await setSetting('default_payment_method', draftPaymentMethod);
+      if (draftPaymentDetails !== null) await setSetting('default_payment_details', draftPaymentDetails.trim());
+      setDraftAlias(null);
+      setDraftAvatar(null);
+      setDraftPaymentMethod(null);
+      setDraftPaymentDetails(null);
+      Alert.alert('Profile Saved', 'Your profile preferences have been updated.');
+    } catch {
+      Alert.alert('Error', 'Failed to save profile changes.');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handleBack = () => {
+    if (hasProfileChanges) {
+      Alert.alert(
+        'Unsaved Changes',
+        'You have unsaved changes in your profile. Discard them and leave?',
+        [
+          { text: 'Keep Editing', style: 'cancel' },
+          {
+            text: 'Discard & Leave',
+            style: 'destructive',
+            onPress: () => router.back(),
+          },
+        ]
+      );
+    } else {
+      router.back();
+    }
+  };
 
   const rawSavedMethods = getSetting('saved_payment_methods', '');
   const savedPaymentMethods: SavedPaymentMethod[] = useMemo(() => {
@@ -190,18 +245,18 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" testID="settings-screen">
+    <SafeAreaView className="flex-1" style={{ backgroundColor: theme.bgPrimary }} testID="settings-screen">
       {/* Header */}
       <View className="flex-row items-center px-4 pt-3 pb-4 border-b border-slate-400/[0.08]">
         <TouchableOpacity
           className="p-1.5 mr-2 rounded-lg"
-          onPress={() => router.back()}
+          onPress={handleBack}
           activeOpacity={0.7}
           accessibilityRole="button"
           accessibilityLabel="Go back"
           testID="settings-back-btn"
         >
-          <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />
+          <AppIcon name="arrow-back" size={24} color="#FFFFFF" strokeWidth={2.2} />
         </TouchableOpacity>
         <Text className="text-[22px] font-bold font-heading text-white">Settings</Text>
       </View>
@@ -213,18 +268,22 @@ export default function SettingsScreen() {
       >
         {/* Section: PROFILE & DEFAULTS */}
         <View className="mb-6" testID="section-profile">
-          <Text className="text-xs font-bold font-heading text-muted mb-2 ml-1 tracking-wider uppercase">PROFILE & DEFAULTS</Text>
+          <View className="flex-row items-center justify-between mb-2 ml-1">
+            <Text className="text-xs font-bold font-heading text-muted tracking-wider uppercase">PROFILE & DEFAULTS</Text>
+            {hasProfileChanges && (
+              <View className="bg-amber-500/20 border border-amber-500/40 rounded-full px-2 py-0.5">
+                <Text className="text-[10px] font-bold text-amber-400 font-heading uppercase">Unsaved Changes</Text>
+              </View>
+            )}
+          </View>
           <View className="bg-card rounded-2xl p-4 border border-white/[0.08]">
             {/* Nickname / Alias */}
             <View className="mb-4">
               <Text className="text-[11px] font-bold font-heading tracking-wider text-muted mb-2 uppercase">NICKNAME / ALIAS</Text>
               <TextInput
                 className="bg-[#161626] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-sm font-body text-white"
-                value={currentAliasDisplay}
-                onChangeText={async (text) => {
-                  setAliasInput(text);
-                  await setSetting('user_alias', text);
-                }}
+                value={activeAlias}
+                onChangeText={(text) => setDraftAlias(text)}
                 placeholder="e.g. Janre"
                 placeholderTextColor={COLORS.textSecondary}
                 autoCapitalize="words"
@@ -238,7 +297,7 @@ export default function SettingsScreen() {
               <Text className="text-[11px] font-bold font-heading tracking-wider text-muted mb-2 uppercase">AVATAR</Text>
               <View className="flex-row items-center justify-between gap-2" testID="settings-avatar-selector">
                 {AVATAR_OPTIONS.map((item) => {
-                  const isSelected = userAvatar === item.id || userAvatar === item.emoji;
+                  const isSelected = activeAvatar === item.id || activeAvatar === item.emoji;
                   return (
                     <TouchableOpacity
                       key={item.id}
@@ -247,8 +306,8 @@ export default function SettingsScreen() {
                           ? 'border-primary bg-primary/25'
                           : 'border-white/[0.08]'
                       }`}
-                      onPress={async () => {
-                        await setSetting('user_avatar', item.emoji);
+                      onPress={() => {
+                        setDraftAvatar(item.emoji);
                       }}
                       activeOpacity={0.7}
                       testID={`settings-avatar-${item.id}`}
@@ -264,19 +323,47 @@ export default function SettingsScreen() {
 
             {/* Default Payment Method */}
             <PaymentMethodSelector
-              value={defaultPaymentMethod}
-              details={defaultPaymentDetails}
-              onChangeMethod={async (method) => {
-                await setSetting('default_payment_method', method);
+              value={activePaymentMethod}
+              details={activePaymentDetails}
+              onChangeMethod={(method) => {
+                setDraftPaymentMethod(method);
               }}
-              onChangeDetails={async (note) => {
-                await setSetting('default_payment_details', note);
+              onChangeDetails={(note) => {
+                setDraftPaymentDetails(note);
               }}
               testID="settings-payment-selector"
             />
 
+            {/* Save Profile Changes Action Bar */}
+            {hasProfileChanges && (
+              <View className="mt-4 pt-3 border-t border-white/[0.08] flex-row items-center justify-between">
+                <TouchableOpacity
+                  className="px-3.5 py-2 rounded-xl bg-white/[0.06]"
+                  onPress={() => {
+                    setDraftAlias(null);
+                    setDraftAvatar(null);
+                    setDraftPaymentMethod(null);
+                    setDraftPaymentDetails(null);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text className="text-xs font-semibold font-heading text-muted">Discard</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="flex-row items-center bg-primary px-4 py-2.5 rounded-xl shadow-md shadow-primary/30"
+                  onPress={handleSaveProfile}
+                  activeOpacity={0.8}
+                  testID="settings-save-profile-btn"
+                  disabled={isSavingProfile}
+                >
+                  <AppIcon name="check" size={16} color="#FFFFFF" strokeWidth={2.5} style={{ marginRight: 6 }} />
+                  <Text className="text-xs font-bold font-heading text-white">Save Profile Changes</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
             {/* Saved Payment Methods */}
-            <View className="mb-4">
+            <View className="mt-4">
               <Text className="text-[11px] font-bold font-heading tracking-wider text-muted mb-2 uppercase">SAVED PAYMENT METHODS</Text>
               <Text className="text-xs text-muted mb-2.5 font-body">
                 Manage multiple wallets and bank cards you use. Tap one to set as default.
@@ -313,7 +400,7 @@ export default function SettingsScreen() {
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       accessibilityLabel={`Delete ${def.name}`}
                     >
-                      <MaterialIcons name="close" size={18} color={COLORS.textSecondary} />
+                      <AppIcon name="close" size={16} color={COLORS.textSecondary} strokeWidth={2.2} />
                     </TouchableOpacity>
                   </View>
                 );
@@ -326,7 +413,7 @@ export default function SettingsScreen() {
                   activeOpacity={0.7}
                   testID="settings-add-payment-btn"
                 >
-                  <MaterialIcons name="add" size={18} color={COLORS.accentPurpleLight} />
+                  <AppIcon name="plus" size={18} color={COLORS.accentPurpleLight} strokeWidth={2.2} />
                   <Text className="text-[13px] font-semibold font-heading text-purple-300">Add Another Payment Method</Text>
                 </TouchableOpacity>
               ) : (
@@ -379,10 +466,11 @@ export default function SettingsScreen() {
                 <Text className="text-[15px] font-semibold font-heading text-purple-300 mr-1" testID="settings-currency-value">
                   {currentCurrency}
                 </Text>
-                <MaterialIcons
+                <AppIcon
                   name="chevron-right"
-                  size={22}
+                  size={20}
                   color={COLORS.textSecondary}
+                  strokeWidth={2}
                 />
               </View>
             </View>
@@ -405,16 +493,15 @@ export default function SettingsScreen() {
               accessibilityRole="radio"
               accessibilityState={{ checked: appTheme === 'dark' }}
             >
-              <View className="flex-row mr-3 gap-1">
-                <View className="w-3.5 h-3.5 rounded-full border border-white/20 bg-[#7B5EA7]" />
-                <View className="w-3.5 h-3.5 rounded-full border border-white/20 bg-[#0F0F1A]" />
+              <View className="w-9 h-9 rounded-xl bg-primary/20 items-center justify-center mr-3">
+                <AppIcon name="moon" size={18} color="#A78BFA" />
               </View>
               <View className="flex-1">
                 <Text className="text-[15px] font-semibold font-heading text-white">SignalSub Dark</Text>
                 <Text className="text-xs text-muted mt-0.5 font-body">Default purple & dark slate</Text>
               </View>
               {appTheme === 'dark' && (
-                <MaterialIcons
+                <AppIcon
                   name="check-circle"
                   size={20}
                   color={COLORS.accentPurpleLight}
@@ -434,16 +521,15 @@ export default function SettingsScreen() {
               accessibilityRole="radio"
               accessibilityState={{ checked: appTheme === 'oled' }}
             >
-              <View className="flex-row mr-3 gap-1">
-                <View className="w-3.5 h-3.5 rounded-full border border-white/20 bg-black" />
-                <View className="w-3.5 h-3.5 rounded-full border border-white/20 bg-[#111111]" />
+              <View className="w-9 h-9 rounded-xl bg-black border border-white/20 items-center justify-center mr-3">
+                <AppIcon name="contrast" size={18} color="#A78BFA" />
               </View>
               <View className="flex-1">
                 <Text className="text-[15px] font-semibold font-heading text-white">Midnight OLED</Text>
                 <Text className="text-xs text-muted mt-0.5 font-body">Pitch black for OLED displays</Text>
               </View>
               {appTheme === 'oled' && (
-                <MaterialIcons
+                <AppIcon
                   name="check-circle"
                   size={20}
                   color={COLORS.accentPurpleLight}
@@ -522,8 +608,8 @@ export default function SettingsScreen() {
               <Text className="text-base font-semibold font-heading text-red-500">
                 Clear All Data
               </Text>
-              <MaterialIcons
-                name="delete-outline"
+              <AppIcon
+                name="trash"
                 size={22}
                 color={COLORS.danger}
               />
@@ -545,17 +631,18 @@ export default function SettingsScreen() {
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-3">
                 <View className="w-9 h-9 rounded-xl bg-primary/20 items-center justify-center">
-                  <MaterialIcons name="menu-book" size={20} color={COLORS.accentPurpleLight} />
+                  <AppIcon name="book" size={20} color={COLORS.accentPurpleLight} />
                 </View>
                 <View>
                   <Text className="text-base font-semibold font-heading text-white">Getting Started</Text>
                   <Text className="text-xs text-muted mt-0.5 font-body">Replay feature tour & onboarding</Text>
                 </View>
               </View>
-              <MaterialIcons
+              <AppIcon
                 name="chevron-right"
-                size={22}
+                size={20}
                 color={COLORS.textSecondary}
+                strokeWidth={2}
               />
             </View>
           </TouchableOpacity>
@@ -586,7 +673,7 @@ export default function SettingsScreen() {
         testID="currency-picker-modal"
       >
         <View className="flex-1 bg-black/65 justify-end">
-          <View className="bg-background rounded-t-3xl max-h-[80%] px-5 pt-5 pb-9 border border-surface" testID="currency-modal-container">
+          <View className="rounded-t-3xl max-h-[80%] px-5 pt-5 pb-9 border border-surface" style={{ backgroundColor: theme.bgPrimary }} testID="currency-modal-container">
             <View className="flex-row items-center justify-between mb-3">
               <Text className="text-lg font-bold font-heading text-white">Select Currency</Text>
               <TouchableOpacity
@@ -599,12 +686,12 @@ export default function SettingsScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Close currency modal"
               >
-                <MaterialIcons name="close" size={24} color={COLORS.textSecondary} />
+                <AppIcon name="close" size={24} color={COLORS.textSecondary} strokeWidth={2} />
               </TouchableOpacity>
             </View>
 
             <View className="flex-row items-center bg-card rounded-xl px-3 h-11 mb-3 border border-surface">
-              <MaterialIcons
+              <AppIcon
                 name="search"
                 size={20}
                 color={COLORS.textSecondary}
@@ -625,10 +712,11 @@ export default function SettingsScreen() {
                   onPress={() => setCurrencySearch('')}
                   testID="currency-search-clear-btn"
                 >
-                  <MaterialIcons
+                  <AppIcon
                     name="close"
                     size={18}
                     color={COLORS.textSecondary}
+                    strokeWidth={2}
                   />
                 </TouchableOpacity>
               )}
@@ -673,10 +761,11 @@ export default function SettingsScreen() {
                         {item.symbol}
                       </Text>
                       {isSelected && (
-                        <MaterialIcons
+                        <AppIcon
                           name="check"
                           size={20}
                           color={COLORS.accentPurpleLight}
+                          strokeWidth={2.5}
                           style={{ marginLeft: 8 }}
                         />
                       )}

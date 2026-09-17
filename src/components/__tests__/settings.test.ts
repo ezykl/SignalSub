@@ -628,7 +628,7 @@ describe('Settings Screen (app/settings.tsx)', () => {
   // 5. Section: PROFILE & DEFAULTS
   // =========================================================================
   describe('Section: PROFILE & DEFAULTS', () => {
-    it('renders profile section and updates user_alias on text input', async () => {
+    it('renders profile section and updates user_alias on text input with confirmation', async () => {
       useSettingsStore.setState({
         cache: {
           user_alias: 'Janre',
@@ -636,7 +636,7 @@ describe('Settings Screen (app/settings.tsx)', () => {
       });
 
       startRender();
-      const element = SettingsScreen();
+      let element = SettingsScreen();
 
       const profileSection = findByTestId(element, 'section-profile');
       assert.ok(profileSection);
@@ -645,14 +645,22 @@ describe('Settings Screen (app/settings.tsx)', () => {
       assert.ok(aliasInput);
       assert.equal(aliasInput.props.value, 'Janre');
 
-      // Update alias
+      // Update alias in draft
       await aliasInput.props.onChangeText('Janre Developer');
+
+      // Re-render and click Save Profile Changes
+      startRender();
+      element = SettingsScreen();
+      const saveBtn = findByTestId(element, 'settings-save-profile-btn');
+      assert.ok(saveBtn);
+      await saveBtn.props.onPress();
+
       assert.equal(useSettingsStore.getState().getSetting('user_alias'), 'Janre Developer');
     });
 
-    it('renders 6 avatar options and updates user_avatar when tapped', async () => {
+    it('renders avatar options and updates user_avatar when tapped and confirmed', async () => {
       startRender();
-      const element = SettingsScreen();
+      let element = SettingsScreen();
 
       const avatarSelector = findByTestId(element, 'settings-avatar-selector');
       assert.ok(avatarSelector);
@@ -661,20 +669,35 @@ describe('Settings Screen (app/settings.tsx)', () => {
       assert.ok(robotOption);
 
       await robotOption.props.onPress();
+
+      // Re-render and click Save Profile Changes
+      startRender();
+      element = SettingsScreen();
+      const saveBtn = findByTestId(element, 'settings-save-profile-btn');
+      assert.ok(saveBtn);
+      await saveBtn.props.onPress();
+
       assert.equal(useSettingsStore.getState().getSetting('user_avatar'), '🤖');
     });
 
-    it('renders default payment selector and updates default payment method and details', async () => {
+    it('renders default payment selector and updates default payment method and details upon confirmation', async () => {
       startRender();
-      const element = SettingsScreen();
+      let element = SettingsScreen();
 
       const paymentSelector = findByTestId(element, 'settings-payment-selector');
       assert.ok(paymentSelector);
 
       await paymentSelector.props.onChangeMethod('gcash');
-      assert.equal(useSettingsStore.getState().getSetting('default_payment_method'), 'gcash');
-
       await paymentSelector.props.onChangeDetails('0917 ••• 5678');
+
+      // Re-render and click Save Profile Changes
+      startRender();
+      element = SettingsScreen();
+      const saveBtn = findByTestId(element, 'settings-save-profile-btn');
+      assert.ok(saveBtn);
+      await saveBtn.props.onPress();
+
+      assert.equal(useSettingsStore.getState().getSetting('default_payment_method'), 'gcash');
       assert.equal(useSettingsStore.getState().getSetting('default_payment_details'), '0917 ••• 5678');
     });
   });

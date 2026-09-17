@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { AppIcon } from "@/components/AppIcon";
+import { useAppTheme } from "@/constants/theme";
 
 export interface TabConfig {
   name: string;
@@ -173,11 +174,11 @@ export function CustomTabBar({
     );
   };
 
+  const theme = useAppTheme();
   const bottomPadding = Math.max(insets.bottom, 10);
 
   return (
     <View
-      className="bg-[#12111A] border-t border-[#232033]"
       onLayout={(e) => {
         const measuredWidth = e.nativeEvent.layout.width;
         if (measuredWidth > 0 && measuredWidth !== barWidth) {
@@ -189,6 +190,9 @@ export function CustomTabBar({
         {
           paddingBottom: bottomPadding,
           height: 62 + bottomPadding,
+          backgroundColor: theme.tabBarBg,
+          borderTopColor: theme.isOled ? '#1A1A22' : '#232033',
+          borderTopWidth: 1,
         },
       ]}
       testID="custom-tab-bar"

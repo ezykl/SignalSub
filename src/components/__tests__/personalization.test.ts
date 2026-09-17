@@ -8,6 +8,7 @@ import PersonalizeScreen from '../../../app/(onboarding)/personalize';
 import CurrencyScreen from '../../../app/(onboarding)/currency';
 import DashboardScreen, { getGreeting } from '../../../app/(tabs)/index';
 import { useSettingsStore } from '../../stores/settingsStore';
+import { AVATAR_OPTIONS } from '../../constants/personalization';
 
 // Helper to extract children from React element
 function getChildren(element: any): any[] {
@@ -158,8 +159,8 @@ describe('Personalization & Onboarding Flow', () => {
       const avatarSelector = findByTestId(element, 'personalize-avatar-selector');
       assert.ok(avatarSelector);
 
-      // Check all 6 avatar chips
-      const avatarIds = ['space', 'robot', 'bolt', 'coffee', 'gamer', 'sparkles'];
+      // Check all avatar chips
+      const avatarIds = AVATAR_OPTIONS.map((a) => a.id);
       for (const id of avatarIds) {
         assert.ok(findByTestId(element, `avatar-option-${id}`));
       }

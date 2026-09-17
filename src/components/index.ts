@@ -19,5 +19,3 @@ export * from './TrialAlertCard';
 export * from './UpcomingRenewalCard';
 export * from './CategoryProgressBar';
 export * from './AppIcon';
-export * from './CustomTabBar';
-

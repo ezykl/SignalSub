@@ -18,10 +18,12 @@ import {
   Roboto_500Medium,
   Roboto_700Bold,
 } from '@expo-google-fonts/roboto';
+import { MaterialIcons, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { runMigrations } from '@/db/client';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { COLORS } from '@/constants/colors';
+import { useAppTheme } from '@/constants/theme';
 
 // Suppress known third-party React 18.3 defaultProps deprecation warnings (e.g. VictoryPie)
 LogBox.ignoreLogs([
@@ -60,8 +62,21 @@ export default function RootLayout() {
 
   useEffect(() => {
     async function init() {
+      // 1. Database & Store Initialization (Critical - must run so tables always exist)
+      try {
+        await runMigrations();
+        await loadSettings();
+        await loadSubscriptions();
+      } catch (dbError) {
+        console.error('Failed to initialize SignalSub database/stores:', dbError);
+      }
+
+      // 2. Custom Font Loading (Graceful fallback to system fonts if unavailable)
       try {
         await Font.loadAsync({
+          ...MaterialIcons.font,
+          ...Ionicons.font,
+          ...MaterialCommunityIcons.font,
           Montserrat_400Regular,
           Montserrat_500Medium,
           Montserrat_600SemiBold,
@@ -82,11 +97,8 @@ export default function RootLayout() {
           'Roboto-Medium': Roboto_500Medium,
           'Roboto-Bold': Roboto_700Bold,
         });
-        await runMigrations();
-        await loadSettings();
-        await loadSubscriptions();
-      } catch (error) {
-        console.error('Failed to initialize SignalSub database/stores/fonts:', error);
+      } catch (fontError) {
+        console.warn('Failed to load custom fonts, falling back to system fonts:', fontError);
       } finally {
         setIsReady(true);
         // Splash screen hides here — after DB + stores are ready
@@ -97,6 +109,7 @@ export default function RootLayout() {
     init();
   }, [loadSettings, loadSubscriptions]);
 
+  const theme = useAppTheme();
   const [initialRouteResolved, setInitialRouteResolved] = useState(false);
 
   useEffect(() => {
@@ -122,12 +135,12 @@ export default function RootLayout() {
 
   // Render the Stack immediately — the splash screen overlays it until hideAsync() is called
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: COLORS.bgPrimary }}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.bgPrimary} />
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.bgPrimary }}>
+      <StatusBar barStyle="light-content" backgroundColor={theme.bgPrimary} />
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: COLORS.bgPrimary },
+          contentStyle: { backgroundColor: theme.bgPrimary },
         }}
       />
     </GestureHandlerRootView>

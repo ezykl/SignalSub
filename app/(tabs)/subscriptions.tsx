@@ -9,6 +9,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { AppIcon } from '@/components/AppIcon';
+import { useAppTheme } from '@/constants/theme';
 import { COLORS } from '@/constants/colors';
 import { CATEGORIES } from '@/constants/categories';
 import type { Subscription } from '@/db/schema';
@@ -105,8 +107,10 @@ export default function SubscriptionsScreen() {
     return filterSubscriptions(subscriptions, searchQuery, selectedFilter);
   }, [subscriptions, searchQuery, selectedFilter]);
 
+  const theme = useAppTheme();
+
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1" style={{ backgroundColor: theme.bgPrimary }}>
       <View className="px-4 pt-3 pb-2">
         <Text className="text-2xl font-heading font-bold text-white">Subscriptions</Text>
         <Text className="text-[13px] font-body text-muted mt-1">
@@ -119,11 +123,11 @@ export default function SubscriptionsScreen() {
 
       {/* Search Bar */}
       <View className="flex-row items-center bg-[#1A1A2E]/75 rounded-[14px] mx-4 mt-2 mb-3 px-3.5 h-12 border border-white/[0.08]">
-        <MaterialIcons
+        <AppIcon
           name="search"
-          size={20}
+          size={18}
           color={COLORS.textSecondary}
-          style={{ marginRight: 8 }}
+          className="mr-2"
         />
         <TextInput
           className="flex-1 text-white font-body text-[15px] h-full p-0"
@@ -141,7 +145,7 @@ export default function SubscriptionsScreen() {
             className="p-1"
             testID="subscriptions-search-clear"
           >
-            <MaterialIcons
+            <AppIcon
               name="close"
               size={18}
               color={COLORS.textSecondary}
@@ -203,10 +207,11 @@ export default function SubscriptionsScreen() {
         {filteredSubscriptions.length === 0 ? (
           <View className="bg-[#1A1A2E]/75 rounded-2xl p-6 mx-4 mt-6 items-center justify-center border border-white/[0.08]" testID="subscriptions-empty-state">
             <View className="w-16 h-16 rounded-full bg-primary/15 items-center justify-center mb-4">
-              <MaterialIcons
+              <AppIcon
                 name="search-off"
-                size={40}
+                size={36}
                 color={COLORS.accentPurple}
+                strokeWidth={2}
               />
             </View>
             <Text className="text-base font-heading font-bold text-white mb-2 text-center">No subscriptions found</Text>
@@ -216,18 +221,18 @@ export default function SubscriptionsScreen() {
                 : 'You have not added any subscriptions yet.'}
             </Text>
             <TouchableOpacity
-              className="flex-row items-center bg-primary py-2.5 px-4.5 rounded-full"
+              className="flex-row items-center justify-center bg-primary py-3.5 px-6 rounded-full shadow-lg shadow-purple-900/40 gap-2 mt-1"
               onPress={() => router.push('/subscription/new')}
               activeOpacity={0.8}
               testID="empty-state-add-btn"
             >
-              <MaterialIcons
-                name="add"
-                size={20}
+              <AppIcon
+                name="plus"
+                size={18}
                 color="#FFFFFF"
-                style={{ marginRight: 6 }}
+                strokeWidth={2.5}
               />
-              <Text className="text-sm font-heading font-semibold text-white">Add Subscription</Text>
+              <Text className="text-sm font-heading font-bold text-white">Add Subscription</Text>
             </TouchableOpacity>
           </View>
         ) : (
