@@ -18,6 +18,9 @@ export type AppIconName =
   | 'settings'
   | 'save'
   | 'user'
+  | 'plus'
+  | 'add'
+  | 'add-plus'
   | (string & {});
 
 export interface AppIconProps {

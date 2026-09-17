@@ -10,7 +10,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { MaterialIcons } from "@expo/vector-icons";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { AppIcon } from "@/components/AppIcon";
 
@@ -55,8 +54,8 @@ export function CustomTabBar({
   // Spring animation values for each tab (0 = inactive, 1 = active)
   const tabAnims = useRef(
     TAB_CONFIGS.map(
-      (t) => new Animated.Value(currentRouteName === t.name ? 1 : 0)
-    )
+      (t) => new Animated.Value(currentRouteName === t.name ? 1 : 0),
+    ),
   ).current;
 
   // Spring animation on tab change
@@ -203,7 +202,10 @@ export function CustomTabBar({
             },
           ]}
         >
-          <View className="w-14 h-1 rounded-b-full bg-[#A277FF]" style={styles.activeGlow} />
+          <View
+            className="w-14 h-1 rounded-b-full bg-[#A277FF]"
+            style={styles.activeGlow}
+          />
         </Animated.View>
 
         {/* Tab 1: Home */}
@@ -231,7 +233,7 @@ export function CustomTabBar({
                 end={{ x: 1, y: 1 }}
                 style={styles.gradient}
               >
-                <MaterialIcons name="add" size={30} color="#FFFFFF" />
+                <AppIcon name="plus" size={26} color="#FFFFFF" strokeWidth={2.5} />
               </LinearGradient>
             </TouchableOpacity>
           </Animated.View>
@@ -271,8 +273,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   addButton: {
-    position: "absolute",
-    top: -24,
+    marginTop: -24,
     width: 54,
     height: 54,
     borderRadius: 27,
@@ -281,6 +282,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 10,
     elevation: 8,
+    zIndex: 99,
   },
   gradient: {
     width: 54,

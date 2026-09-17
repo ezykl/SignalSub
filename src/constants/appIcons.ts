@@ -36,6 +36,18 @@ export const APP_ICONS: Record<string, AppIconData> = {
   },
 
   // Edit
+  plus: {
+    viewBox: '0 0 24 24',
+    paths: ['M6 12H12M12 12H18M12 12V18M12 12V6'],
+  },
+  add: {
+    viewBox: '0 0 24 24',
+    paths: ['M6 12H12M12 12H18M12 12V18M12 12V6'],
+  },
+  'add-plus': {
+    viewBox: '0 0 24 24',
+    paths: ['M6 12H12M12 12H18M12 12V18M12 12V6'],
+  },
   layers: {
     viewBox: '0 0 24 24',
     paths: [

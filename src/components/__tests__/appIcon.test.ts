@@ -22,12 +22,19 @@ describe('AppIcon Component and Registry', () => {
       assert.ok(layers);
       assert.equal(layers?.viewBox, '0 0 24 24');
       assert.ok(layers?.paths.length > 0);
+
+      const plus = getAppIcon('plus');
+      assert.ok(plus);
+      assert.equal(plus?.viewBox, '0 0 24 24');
+      assert.ok(plus?.paths.length > 0);
     });
 
-    it('resolves aliases correctly (home, subscriptions, notification)', () => {
+    it('resolves aliases correctly (home, subscriptions, notification, plus)', () => {
       assert.deepEqual(getAppIcon('home'), getAppIcon('house'));
       assert.deepEqual(getAppIcon('subscriptions'), getAppIcon('layers'));
       assert.deepEqual(getAppIcon('notification'), getAppIcon('bell'));
+      assert.deepEqual(getAppIcon('add'), getAppIcon('plus'));
+      assert.deepEqual(getAppIcon('add-plus'), getAppIcon('plus'));
     });
 
     it('handles case insensitivity and whitespace', () => {
