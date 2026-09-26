@@ -11,7 +11,7 @@ export * from './SubscriptionRow';
 export * from './OnboardingStep';
 export * from './BrandIcon';
 export * from './OnboardingDots';
-export * from './PaymentMethodSelector';
+export * from './PaymentMethodSelector'; // exports PaymentMethodSelector + PaymentMethodLogo
 export * from './DatePickerModal';
 export * from './UserAvatar';
 export * from './GlassCard';

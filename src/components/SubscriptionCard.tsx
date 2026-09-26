@@ -10,6 +10,7 @@ import type { Subscription } from '../db/schema';
 import { daysUntil, formatRenewalLabel } from '../services/renewalService';
 import { BrandIcon } from './BrandIcon';
 import { NoiseOverlay } from './NoiseOverlay';
+import { PaymentMethodLogo } from './PaymentMethodSelector';
 import { cn } from '@/utils/cn';
 
 export interface SubscriptionCardProps {
@@ -81,12 +82,25 @@ export function SubscriptionCard({
         </View>
 
         <View className="justify-end">
-          <Text className="text-sm font-heading font-bold text-white" numberOfLines={1}>
-            {subscription.name}
-          </Text>
-          <Text className="text-[13px] font-heading font-semibold text-white/85 mt-0.5">
-            {`${currency} ${amount}`}
-          </Text>
+          <View className="flex-row items-end justify-between">
+            <View className="flex-1 mr-2">
+              <Text className="text-sm font-heading font-bold text-white" numberOfLines={1}>
+                {subscription.name}
+              </Text>
+              <Text className="text-[13px] font-heading font-semibold text-white/85 mt-0.5">
+                {`${currency} ${amount}`}
+              </Text>
+            </View>
+            {/* Payment method logo badge */}
+            {subscription.paymentMethod ? (
+              <PaymentMethodLogo
+                methodKey={subscription.paymentMethod}
+                shape="squircle"
+                size={26}
+                testID={`card-payment-logo-${subscription.id}`}
+              />
+            ) : null}
+          </View>
         </View>
       </NoiseOverlay>
     </TouchableOpacity>
