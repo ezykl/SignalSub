@@ -95,7 +95,7 @@ export function AppToast({
     ? 'bg-rose-500/20 border-rose-500/40'
     : 'bg-cyan-500/20 border-cyan-500/40';
 
-  const iconColor = isSuccess ? '#A78BFA' : isError ? '#F87171' : '#38BDF8';
+  const iconColor = isSuccess ? '#22C55E' : isError ? '#F87171' : '#38BDF8';
   const iconName = isSuccess ? 'check' : isError ? 'close' : 'bell';
   const borderColor = isSuccess ? 'border-primary/50' : isError ? 'border-rose-500/50' : 'border-cyan-500/50';
 

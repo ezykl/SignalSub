@@ -23,6 +23,7 @@ import {
 } from '@/components/PaymentMethodSelector';
 import { UserAvatar } from '@/components/UserAvatar';
 import { AppToast } from '@/components/AppToast';
+import { ConfirmModal } from '@/components/ConfirmModal';
 import {
   SavedPaymentMethod,
   parseSavedPaymentMethods,
@@ -53,6 +54,7 @@ export default function SettingsScreen() {
   const [isCurrencyModalVisible, setIsCurrencyModalVisible] = useState(false);
   const [currencySearch, setCurrencySearch] = useState('');
   const [isAvatarModalVisible, setIsAvatarModalVisible] = useState(false);
+  const [isDiscardModalVisible, setIsDiscardModalVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -131,21 +133,15 @@ export default function SettingsScreen() {
 
   const handleBack = () => {
     if (hasProfileChanges) {
-      Alert.alert(
-        'Unsaved Changes',
-        'You have unsaved changes in your profile. Discard them and leave?',
-        [
-          { text: 'Keep Editing', style: 'cancel' },
-          {
-            text: 'Discard & Leave',
-            style: 'destructive',
-            onPress: () => router.back(),
-          },
-        ]
-      );
+      setIsDiscardModalVisible(true);
     } else {
       router.back();
     }
+  };
+
+  const handleConfirmDiscard = () => {
+    setIsDiscardModalVisible(false);
+    router.back();
   };
 
   const handleUploadPhoto = async () => {
@@ -963,6 +959,19 @@ export default function SettingsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Custom Unsaved Changes Confirmation Modal */}
+      <ConfirmModal
+        visible={isDiscardModalVisible}
+        title="Unsaved Changes"
+        message="You have unsaved changes in your profile. Are you sure you want to discard them and leave?"
+        confirmText="Discard & Leave"
+        cancelText="Keep Editing"
+        type="warning"
+        onConfirm={handleConfirmDiscard}
+        onCancel={() => setIsDiscardModalVisible(false)}
+        testID="unsaved-changes-modal"
+      />
 
       {/* Cyberpunk Animated Feedback Toast */}
       <AppToast
