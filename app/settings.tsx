@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import { COLORS } from '@/constants/colors';
 import { useAppTheme } from '@/constants/theme';
 import { AppIcon } from '@/components/AppIcon';
@@ -63,6 +65,7 @@ export default function SettingsScreen() {
   const isWeeklyDigestEnabled = getSetting('notify_weekly_digest', 'true') === 'true';
   const userAlias = getSetting('user_alias', '');
   const userAvatar = getSetting('user_avatar', 'space') || 'space';
+  const userCustomPhoto = getSetting('user_custom_photo', '') || '';
   const defaultPaymentMethod = getSetting('default_payment_method', 'card') || 'card';
   const defaultPaymentDetails = getSetting('default_payment_details', '');
   const appTheme = getSetting('app_theme', 'dark') || 'dark';
@@ -71,18 +74,21 @@ export default function SettingsScreen() {
   // Draft profile state - requires user confirmation to save
   const [draftAlias, setDraftAlias] = useState<string | null>(null);
   const [draftAvatar, setDraftAvatar] = useState<string | null>(null);
+  const [draftCustomPhoto, setDraftCustomPhoto] = useState<string | null>(null);
   const [draftPaymentMethod, setDraftPaymentMethod] = useState<string | null>(null);
   const [draftPaymentDetails, setDraftPaymentDetails] = useState<string | null>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   const activeAlias = draftAlias !== null ? draftAlias : userAlias;
   const activeAvatar = draftAvatar !== null ? draftAvatar : userAvatar;
+  const activeCustomPhoto = draftCustomPhoto !== null ? draftCustomPhoto : userCustomPhoto;
   const activePaymentMethod = draftPaymentMethod !== null ? draftPaymentMethod : defaultPaymentMethod;
   const activePaymentDetails = draftPaymentDetails !== null ? draftPaymentDetails : defaultPaymentDetails;
 
   const hasProfileChanges =
     (draftAlias !== null && draftAlias !== userAlias) ||
     (draftAvatar !== null && draftAvatar !== userAvatar) ||
+    (draftCustomPhoto !== null && draftCustomPhoto !== userCustomPhoto) ||
     (draftPaymentMethod !== null && draftPaymentMethod !== defaultPaymentMethod) ||
     (draftPaymentDetails !== null && draftPaymentDetails !== defaultPaymentDetails);
 
@@ -91,10 +97,12 @@ export default function SettingsScreen() {
     try {
       if (draftAlias !== null) await setSetting('user_alias', draftAlias.trim());
       if (draftAvatar !== null) await setSetting('user_avatar', draftAvatar);
+      if (draftCustomPhoto !== null) await setSetting('user_custom_photo', draftCustomPhoto);
       if (draftPaymentMethod !== null) await setSetting('default_payment_method', draftPaymentMethod);
       if (draftPaymentDetails !== null) await setSetting('default_payment_details', draftPaymentDetails.trim());
       setDraftAlias(null);
       setDraftAvatar(null);
+      setDraftCustomPhoto(null);
       setDraftPaymentMethod(null);
       setDraftPaymentDetails(null);
       Alert.alert('Profile Saved', 'Your profile preferences have been updated.');
@@ -122,6 +130,30 @@ export default function SettingsScreen() {
     } else {
       router.back();
     }
+  };
+
+  const handleUploadPhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Required', 'Please allow access to your photo library to upload a profile photo.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.85,
+    });
+    if (result.canceled || !result.assets?.[0]?.uri) return;
+    // Copy to permanent app documents dir so URI stays valid
+    const src = result.assets[0].uri;
+    const ext = src.split('.').pop() ?? 'jpg';
+    const dest = `${FileSystem.documentDirectory}profile_photo.${ext}`;
+    await FileSystem.copyAsync({ from: src, to: dest });
+    setDraftCustomPhoto(dest);
+    // Clear preset avatar selection when using a custom photo
+    setDraftAvatar(null);
+    setIsAvatarModalVisible(false);
   };
 
   const rawSavedMethods = getSetting('saved_payment_methods', '');
@@ -298,27 +330,20 @@ export default function SettingsScreen() {
               <Text className="text-[11px] font-bold font-heading tracking-wider text-muted mb-2 uppercase">AVATAR</Text>
               <View className="flex-row items-center gap-3">
                 {/* Selected avatar — large rounded square */}
-                <View
-                  style={{
-                    width: 68,
-                    height: 68,
-                    borderRadius: 16,
-                    overflow: 'hidden',
-                    borderWidth: 2,
-                    borderColor: '#7B5EA7',
-                  }}
-                >
-                  <UserAvatar
-                    avatarId={activeAvatar}
-                    size={68}
-                    shape="square"
-                    testID="settings-avatar-selected"
-                  />
-                </View>
+                <UserAvatar
+                  avatarId={activeCustomPhoto ? undefined : activeAvatar}
+                  customUri={activeCustomPhoto || undefined}
+                  size={68}
+                  shape="square"
+                  testID="settings-avatar-selected"
+                />
 
                 <View className="flex-1">
                   <Text className="text-white font-heading font-semibold text-[15px] mb-0.5">
-                    {AVATAR_OPTIONS.find((a) => a.id === activeAvatar || a.emoji === activeAvatar)?.label ?? 'Avatar'}
+                    {activeCustomPhoto
+                      ? 'My Photo'
+                      : (AVATAR_OPTIONS.find((a) => a.id === activeAvatar || a.emoji === activeAvatar)?.label ?? 'Avatar')
+                    }
                   </Text>
                   <Text className="text-muted font-body text-xs mb-2">Your profile avatar</Text>
                   <TouchableOpacity
@@ -355,6 +380,7 @@ export default function SettingsScreen() {
                   onPress={() => {
                     setDraftAlias(null);
                     setDraftAvatar(null);
+                    setDraftCustomPhoto(null);
                     setDraftPaymentMethod(null);
                     setDraftPaymentDetails(null);
                   }}
@@ -692,7 +718,7 @@ export default function SettingsScreen() {
             <View className="flex-row items-center justify-between mb-5">
               <View>
                 <Text className="text-lg font-bold font-heading text-white">Choose Avatar</Text>
-                <Text className="text-xs text-muted font-body mt-0.5">Select your profile avatar</Text>
+                <Text className="text-xs text-muted font-body mt-0.5">Select a preset or upload your own</Text>
               </View>
               <TouchableOpacity
                 onPress={() => setIsAvatarModalVisible(false)}
@@ -705,7 +731,34 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Avatar grid — 3 per row */}
+            {/* Upload photo CTA */}
+            <TouchableOpacity
+              className="flex-row items-center gap-3 bg-primary/10 border border-primary/30 rounded-2xl px-4 py-3.5 mb-4"
+              onPress={handleUploadPhoto}
+              activeOpacity={0.75}
+              testID="avatar-upload-photo-btn"
+              accessibilityRole="button"
+              accessibilityLabel="Upload photo from library"
+            >
+              <View className="w-11 h-11 rounded-xl bg-primary/20 items-center justify-center">
+                {activeCustomPhoto ? (
+                  <UserAvatar customUri={activeCustomPhoto} size={44} shape="square" />
+                ) : (
+                  <AppIcon name="image" size={22} color="#A78BFA" strokeWidth={2} />
+                )}
+              </View>
+              <View className="flex-1">
+                <Text className="text-white font-heading font-semibold text-[14px]">
+                  {activeCustomPhoto ? 'Change Photo' : 'Upload from Library'}
+                </Text>
+                <Text className="text-muted font-body text-xs mt-0.5">
+                  {activeCustomPhoto ? 'Replace with a new photo' : 'Use a photo from your device'}
+                </Text>
+              </View>
+              <AppIcon name="chevron-right" size={18} color={COLORS.textSecondary} strokeWidth={2} />
+            </TouchableOpacity>
+
+            {/* Preset avatar grid — 3 per row */}
             <View className="flex-row flex-wrap" style={{ gap: 12 }}>
               {AVATAR_OPTIONS.map((item) => {
                 const isSelected = activeAvatar === item.id || activeAvatar === item.emoji;
@@ -714,6 +767,7 @@ export default function SettingsScreen() {
                     key={item.id}
                     onPress={() => {
                       setDraftAvatar(item.emoji);
+                      setDraftCustomPhoto(''); // clear custom photo when picking a preset
                       setIsAvatarModalVisible(false);
                     }}
                     activeOpacity={0.75}
