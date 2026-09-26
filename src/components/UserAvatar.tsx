@@ -6,6 +6,8 @@ import { cn } from '@/utils/cn';
 export interface UserAvatarProps {
   avatarId?: string | null;
   size?: number;
+  /** 'circle' (default) = fully round | 'square' = rounded rectangle */
+  shape?: 'circle' | 'square';
   className?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
@@ -14,15 +16,17 @@ export interface UserAvatarProps {
 export function UserAvatar({
   avatarId,
   size = 40,
+  shape = 'circle',
   className,
   style,
   testID,
 }: UserAvatarProps) {
   const avatar = avatarId ? getAvatarById(avatarId) : null;
+  const borderRadius = shape === 'square' ? Math.round(size * 0.28) : size / 2;
   const radiusStyle = {
     width: size,
     height: size,
-    borderRadius: size / 2,
+    borderRadius,
   };
 
   const containerClasses = cn(

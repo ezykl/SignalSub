@@ -50,6 +50,7 @@ export default function SettingsScreen() {
 
   const [isCurrencyModalVisible, setIsCurrencyModalVisible] = useState(false);
   const [currencySearch, setCurrencySearch] = useState('');
+  const [isAvatarModalVisible, setIsAvatarModalVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -295,29 +296,41 @@ export default function SettingsScreen() {
             {/* Avatar Selector */}
             <View className="mb-4">
               <Text className="text-[11px] font-bold font-heading tracking-wider text-muted mb-2 uppercase">AVATAR</Text>
-              <View className="flex-row items-center justify-between gap-2" testID="settings-avatar-selector">
-                {AVATAR_OPTIONS.map((item) => {
-                  const isSelected = activeAvatar === item.id || activeAvatar === item.emoji;
-                  return (
-                    <TouchableOpacity
-                      key={item.id}
-                      className={`flex-1 py-2.5 items-center justify-center bg-[#161626] rounded-xl border-[1.5px] ${
-                        isSelected
-                          ? 'border-primary bg-primary/25'
-                          : 'border-white/[0.08]'
-                      }`}
-                      onPress={() => {
-                        setDraftAvatar(item.emoji);
-                      }}
-                      activeOpacity={0.7}
-                      testID={`settings-avatar-${item.id}`}
-                      accessibilityRole="button"
-                      accessibilityLabel={`${item.label} avatar`}
-                    >
-                      <UserAvatar avatarId={item.id} size={42} />
-                    </TouchableOpacity>
-                  );
-                })}
+              <View className="flex-row items-center gap-3">
+                {/* Selected avatar — large rounded square */}
+                <View
+                  style={{
+                    width: 68,
+                    height: 68,
+                    borderRadius: 16,
+                    overflow: 'hidden',
+                    borderWidth: 2,
+                    borderColor: '#7B5EA7',
+                  }}
+                >
+                  <UserAvatar
+                    avatarId={activeAvatar}
+                    size={68}
+                    shape="square"
+                    testID="settings-avatar-selected"
+                  />
+                </View>
+
+                <View className="flex-1">
+                  <Text className="text-white font-heading font-semibold text-[15px] mb-0.5">
+                    {AVATAR_OPTIONS.find((a) => a.id === activeAvatar || a.emoji === activeAvatar)?.label ?? 'Avatar'}
+                  </Text>
+                  <Text className="text-muted font-body text-xs mb-2">Your profile avatar</Text>
+                  <TouchableOpacity
+                    className="flex-row items-center gap-1.5 bg-primary/15 border border-primary/40 rounded-lg px-3 py-1.5 self-start"
+                    onPress={() => setIsAvatarModalVisible(true)}
+                    activeOpacity={0.7}
+                    testID="settings-avatar-view-more"
+                  >
+                    <AppIcon name="grid" size={14} color="#A78BFA" strokeWidth={2} />
+                    <Text className="text-[13px] font-semibold font-heading text-purple-300">View More</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
 
@@ -660,6 +673,89 @@ export default function SettingsScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Avatar Selection Modal */}
+      <Modal
+        visible={isAvatarModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsAvatarModalVisible(false)}
+        testID="avatar-picker-modal"
+      >
+        <View className="flex-1 bg-black/65 justify-end">
+          <View
+            className="rounded-t-3xl px-5 pt-5 pb-10 border border-surface"
+            style={{ backgroundColor: theme.bgPrimary }}
+            testID="avatar-modal-container"
+          >
+            {/* Modal header */}
+            <View className="flex-row items-center justify-between mb-5">
+              <View>
+                <Text className="text-lg font-bold font-heading text-white">Choose Avatar</Text>
+                <Text className="text-xs text-muted font-body mt-0.5">Select your profile avatar</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setIsAvatarModalVisible(false)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                testID="avatar-modal-close-btn"
+                accessibilityRole="button"
+                accessibilityLabel="Close avatar modal"
+              >
+                <AppIcon name="close" size={24} color={COLORS.textSecondary} strokeWidth={2} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Avatar grid — 3 per row */}
+            <View className="flex-row flex-wrap" style={{ gap: 12 }}>
+              {AVATAR_OPTIONS.map((item) => {
+                const isSelected = activeAvatar === item.id || activeAvatar === item.emoji;
+                return (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => {
+                      setDraftAvatar(item.emoji);
+                      setIsAvatarModalVisible(false);
+                    }}
+                    activeOpacity={0.75}
+                    testID={`avatar-option-${item.id}`}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${item.label} avatar`}
+                    accessibilityState={{ selected: isSelected }}
+                    style={{
+                      width: '30%',
+                      alignItems: 'center',
+                      borderRadius: 16,
+                      padding: 10,
+                      borderWidth: 2,
+                      borderColor: isSelected ? '#7B5EA7' : 'rgba(255,255,255,0.08)',
+                      backgroundColor: isSelected ? 'rgba(123,94,167,0.18)' : 'rgba(255,255,255,0.03)',
+                    }}
+                  >
+                    <UserAvatar
+                      avatarId={item.id}
+                      size={72}
+                      shape="square"
+                    />
+                    <Text
+                      className="text-[13px] font-heading font-semibold mt-2"
+                      style={{ color: isSelected ? '#A78BFA' : '#94A3B8' }}
+                    >
+                      {item.label}
+                    </Text>
+                    {isSelected && (
+                      <View
+                        className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary items-center justify-center"
+                      >
+                        <AppIcon name="check" size={11} color="#FFFFFF" strokeWidth={3} />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Currency Selection Modal */}
       <Modal
