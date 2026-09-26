@@ -22,6 +22,7 @@ import {
   PaymentMethodSelector,
 } from '@/components/PaymentMethodSelector';
 import { UserAvatar } from '@/components/UserAvatar';
+import { AppToast } from '@/components/AppToast';
 import {
   SavedPaymentMethod,
   parseSavedPaymentMethods,
@@ -91,6 +92,22 @@ export default function SettingsScreen() {
     (draftPaymentMethod !== null && draftPaymentMethod !== defaultPaymentMethod) ||
     (draftPaymentDetails !== null && draftPaymentDetails !== defaultPaymentDetails);
 
+  const [toast, setToast] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error' | 'info';
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'success',
+  });
+
+  const showToast = (title: string, message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ visible: true, title, message, type });
+  };
+
   const handleSaveProfile = async () => {
     setIsSavingProfile(true);
     try {
@@ -104,9 +121,9 @@ export default function SettingsScreen() {
       setDraftCustomPhoto(null);
       setDraftPaymentMethod(null);
       setDraftPaymentDetails(null);
-      Alert.alert('Profile Saved', 'Your profile preferences have been updated.');
+      showToast('Profile Saved', 'Your profile preferences have been updated.');
     } catch {
-      Alert.alert('Error', 'Failed to save profile changes.');
+      showToast('Save Failed', 'Failed to save profile changes.', 'error');
     } finally {
       setIsSavingProfile(false);
     }
@@ -209,6 +226,7 @@ export default function SettingsScreen() {
     }
     setIsAddingPaymentMethod(false);
     setNewMethodDetails('');
+    showToast('Payment Method Added', 'New payment option saved to your profile.');
   };
 
   const handleSetDefaultPaymentMethod = async (id: string) => {
@@ -221,6 +239,7 @@ export default function SettingsScreen() {
     if (defaultOne) {
       await setSetting('default_payment_method', defaultOne.methodKey);
       await setSetting('default_payment_details', defaultOne.details);
+      showToast('Default Updated', 'Default payment method has been set.');
     }
   };
 
@@ -944,6 +963,15 @@ export default function SettingsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Cyberpunk Animated Feedback Toast */}
+      <AppToast
+        visible={toast.visible}
+        title={toast.title}
+        message={toast.message}
+        type={toast.type}
+        onDismiss={() => setToast((prev) => ({ ...prev, visible: false }))}
+      />
     </SafeAreaView>
   );
 }
