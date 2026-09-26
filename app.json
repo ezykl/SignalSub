@@ -49,6 +49,12 @@
       "expo-asset",
       "expo-font",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "SignalSub accesses your photos to let you choose a custom profile avatar."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#0F0F1A",

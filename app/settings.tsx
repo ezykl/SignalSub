@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { COLORS } from '@/constants/colors';
 import { useAppTheme } from '@/constants/theme';
@@ -133,27 +132,45 @@ export default function SettingsScreen() {
   };
 
   const handleUploadPhoto = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please allow access to your photo library to upload a profile photo.');
-      return;
+    try {
+      const ImagePicker = require('expo-image-picker');
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please allow access to your photo library to upload a profile photo.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.85,
+      });
+      if (result.canceled || !result.assets?.[0]?.uri) return;
+      const src = result.assets[0].uri;
+
+      let finalUri = src;
+      try {
+        if (FileSystem.documentDirectory) {
+          const ext = src.split('.').pop() ?? 'jpg';
+          const dest = `${FileSystem.documentDirectory}profile_photo.${ext}`;
+          await FileSystem.copyAsync({ from: src, to: dest });
+          finalUri = dest;
+        }
+      } catch {
+        // Fallback to direct picked URI if local file copying fails
+      }
+
+      setDraftCustomPhoto(finalUri);
+      // Clear preset avatar selection when using a custom photo
+      setDraftAvatar(null);
+      setIsAvatarModalVisible(false);
+    } catch (err: any) {
+      console.warn('Error launching image picker:', err);
+      Alert.alert(
+        'Dev Build Rebuild Required',
+        'Custom photo picking requires the new native module (expo-image-picker).\n\nPlease rebuild your development build (npx expo run:android or eas build) to use device photos.'
+      );
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.85,
-    });
-    if (result.canceled || !result.assets?.[0]?.uri) return;
-    // Copy to permanent app documents dir so URI stays valid
-    const src = result.assets[0].uri;
-    const ext = src.split('.').pop() ?? 'jpg';
-    const dest = `${FileSystem.documentDirectory}profile_photo.${ext}`;
-    await FileSystem.copyAsync({ from: src, to: dest });
-    setDraftCustomPhoto(dest);
-    // Clear preset avatar selection when using a custom photo
-    setDraftAvatar(null);
-    setIsAvatarModalVisible(false);
   };
 
   const rawSavedMethods = getSetting('saved_payment_methods', '');
